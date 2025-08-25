@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TarotVision - 塔羅視界</title>
+    
+    <!-- Favicon - 使用 SVG icon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23d4af37;stop-opacity:1' /><stop offset='100%' style='stop-color:%238b0000;stop-opacity:1' /></linearGradient></defs><rect width='60' height='85' x='20' y='7' rx='8' fill='url(%23grad)' stroke='%23d4af37' stroke-width='2'/><circle cx='50' cy='30' r='8' fill='none' stroke='%23ffffff' stroke-width='2'/><path d='M35 45 L50 60 L65 45' fill='none' stroke='%23ffffff' stroke-width='2'/><circle cx='50' cy='75' r='4' fill='%23ffffff'/></svg>">
+    
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="magic-particles" id="particles"></div>
+    
+    <!-- 固定導航列 -->
+    <nav class="navbar-fixed">
+        <div class="navbar-container">
+            <div class="navbar-brand" onclick="goToHome()">
+                <div class="navbar-logo">
+                    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#d4af37;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#8b0000;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <rect width="60" height="85" x="20" y="7" rx="8" fill="url(#logoGrad)" stroke="#d4af37" stroke-width="2"/>
+                        <circle cx="50" cy="30" r="8" fill="none" stroke="#ffffff" stroke-width="2"/>
+                        <path d="M35 45 L50 60 L65 45" fill="none" stroke="#ffffff" stroke-width="2"/>
+                        <circle cx="50" cy="75" r="4" fill="#ffffff"/>
+                    </svg>
+                </div>
+                <div class="navbar-title">
+                    <span class="navbar-name">TarotVision</span>
+                    <span class="navbar-subtitle" data-zh="塔羅視界" data-en="Mystical Insights">塔羅視界</span>
+                </div>
+            </div>
+            
+            <!-- 語言切換按鈕 (單一按鈕) -->
+            <button class="lang-toggle-btn" onclick="toggleLanguage()" title="切換語言 / Switch Language">
+                <span class="lang-icon">🌐</span>
+                <span class="lang-text" data-current="zh">中文</span>
+            </button>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <header class="header">
+            <h1 class="title" data-zh="TarotVision" data-en="TarotVision">TarotVision</h1>
+            <p class="subtitle" data-zh="探索命運的奧秘，窺視靈魂的真相" data-en="Explore the mysteries of destiny and glimpse into the truth of your soul">探索命運的奧秘，窺視靈魂的真相</p>
+            <div class="ornament">✦ ◊ ✧ ◊ ✦</div>
+        </header>
+
+        <!-- 步驟1: 歡迎頁 -->
+        <div id="step1" class="step active">
+            <div style="text-align: center;">
+                <div class="ornament">☽ ✦ ☾</div>
+                <h2 style="margin: 40px 0; font-size: 2.2rem; font-family: 'Philosopher', serif;" 
+                    data-zh="歡迎來到神秘的塔羅世界" 
+                    data-en="Welcome to the Mystical World of Tarot">歡迎來到神秘的塔羅世界</h2>
+                <p style="margin: 30px 0; font-size: 1.3rem; opacity: 0.9; line-height: 1.6;"
+                   data-zh="在這裡，時間的界限模糊不清<br>讓古老的智慧為你指引方向"
+                   data-en="Here, the boundaries of time blur<br>Let ancient wisdom guide your path">
+                    在這裡，時間的界限模糊不清<br>
+                    讓古老的智慧為你指引方向
+                </p>
+                <div class="ornament">◊ ✧ ◊</div>
+                <br><br>
+                <button class="btn" onclick="startDivination()" 
+                        data-zh="開始神秘之旅" 
+                        data-en="Begin Mystical Journey">開始神秘之旅</button>
+            </div>
+        </div>
+
+        <!-- 步驟2: 牌陣選擇頁 -->
+        <div id="step2" class="step">
+            <div class="spread-selection">
+                <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
+                    data-zh="選擇你的命運牌陣" 
+                    data-en="Choose Your Destiny Spread">選擇你的命運牌陣</h2>
+                <p style="text-align: center; margin-bottom: 50px; font-size: 1.2rem; opacity: 0.9; line-height: 1.6;"
+                   data-zh="每種牌陣都有其獨特的力量與智慧<br>請選擇最能觸動你內心的占卜方式"
+                   data-en="Each spread has its unique power and wisdom<br>Choose the divination method that resonates with your heart">
+                    每種牌陣都有其獨特的力量與智慧<br>
+                    請選擇最能觸動你內心的占卜方式
+                </p>
+                
+                <div class="spread-options">
+                    <div class="spread-card" data-mode="single">
+                        <div class="spread-icon">🌟</div>
+                        <h3 data-zh="單張指引" data-en="Single Guidance">單張指引</h3>
+                        <p data-zh="當你需要簡潔明確的指引時，讓一張神諭之牌為你點亮前路。適合日常決策、當下困惑或尋求靈感時使用。"
+                           data-en="When you need clear and concise guidance, let a divine oracle card illuminate your path. Perfect for daily decisions, current confusion, or seeking inspiration.">當你需要簡潔明確的指引時，讓一張神諭之牌為你點亮前路。適合日常決策、當下困惑或尋求靈感時使用。</p>
+                        <div class="spread-detail" data-zh="抽取1張牌" data-en="Draw 1 Card">抽取1張牌</div>
+                    </div>
+                    
+                    <div class="spread-card active" data-mode="three">
+                        <div class="spread-icon">⏳</div>
+                        <h3 data-zh="三張牌占卜" data-en="Three Card Reading">三張牌占卜</h3>
+                        <p data-zh="經典的時間流占卜法，揭示過去的影響、現在的狀況與未來的可能。最適合了解事情的整體發展脈絡。"
+                           data-en="Classic timeline divination revealing past influences, present situation, and future possibilities. Best for understanding the overall development context.">經典的時間流占卜法，揭示過去的影響、現在的狀況與未來的可能。最適合了解事情的整體發展脈絡。</p>
+                        <div class="spread-detail" data-zh="過去 - 現在 - 未來" data-en="Past - Present - Future">過去 - 現在 - 未來</div>
+                    </div>
+                    
+                    <div class="spread-card" data-mode="core">
+                        <div class="spread-icon">🎯</div>
+                        <h3 data-zh="四張直指核心" data-en="Four Core Focus">四張直指核心</h3>
+                        <p data-zh="深度剖析問題本質的占卜法，直指核心、找出障礙、提供對策、發現優勢。適合複雜問題的全面分析。"
+                           data-en="Deep analysis divination targeting the essence of problems, revealing core issues, obstacles, solutions, and advantages. Ideal for comprehensive analysis of complex matters.">深度剖析問題本質的占卜法，直指核心、找出障礙、提供對策、發現優勢。適合複雜問題的全面分析。</p>
+                        <div class="spread-detail" data-zh="核心 - 障礙 - 對策 - 優勢" data-en="Core - Obstacle - Solution - Advantage">核心 - 障礙 - 對策 - 優勢</div>
+                    </div>
+                    
+                    <div class="spread-card" data-mode="choice">
+                        <div class="spread-icon">⚖️</div>
+                        <h3 data-zh="二選一抉擇" data-en="Two Choice Decision">二選一抉擇</h3>
+                        <p data-zh="當你面臨重要抉擇時，這個牌陣將幫你深入了解兩個選項的狀況與可能結果，協助你做出最佳決定。"
+                           data-en="When facing important decisions, this spread helps you deeply understand both options' situations and potential outcomes, assisting you in making the best choice.">當你面臨重要抉擇時，這個牌陣將幫你深入了解兩個選項的狀況與可能結果，協助你做出最佳決定。</p>
+                        <div class="spread-detail" data-zh="選項A - 選項B - 結果A - 結果B - 你的狀態" data-en="Option A - Option B - Result A - Result B - Your State">選項A - 選項B - 結果A - 結果B - 你的狀態</div>
+                    </div>
+                    
+                    <div class="spread-card" data-mode="love">
+                        <div class="spread-icon">💕</div>
+                        <h3 data-zh="感情萬用" data-en="Love Universal">感情萬用</h3>
+                        <p data-zh="專為感情問題設計的牌陣，深入探索你與對方的內心世界、相互態度，以及關係的可能發展。"
+                           data-en="Specially designed for relationship matters, exploring deep into your and your partner's inner worlds, mutual attitudes, and potential relationship development.">專為感情問題設計的牌陣，深入探索你與對方的內心世界、相互態度，以及關係的可能發展。</p>
+                        <div class="spread-detail" data-zh="我的狀態 - 我對對方 - 對方狀態 - 對方對我 - 可能結果" data-en="My State - My Feelings - Their State - Their Feelings - Potential Outcome">我的狀態 - 我對對方 - 對方狀態 - 對方對我 - 可能結果</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <div class="ornament">✧</div>
+                    <button class="btn" onclick="confirmSpreadSelection()" 
+                            data-zh="確認選擇" 
+                            data-en="Confirm Selection">確認選擇</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步驟3: 問題輸入頁 -->
+        <div id="step3" class="step">
+            <div class="question-form">
+                <h2 style="margin-bottom: 25px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
+                    data-zh="傾訴你心中的疑問" 
+                    data-en="Share Your Heart's Question">傾訴你心中的疑問</h2>
+                <div id="spreadDescription" style="background: rgba(0,0,0,0.6); padding: 20px; border-radius: 10px; margin-bottom: 30px; border: 1px solid var(--primary-gold);">
+                    <h3 style="color: var(--primary-gold); margin-bottom: 15px;" 
+                        data-zh="你選擇的牌陣：三張牌占卜" 
+                        data-en="Your Chosen Spread: Three Card Reading">你選擇的牌陣：三張牌占卜</h3>
+                    <p style="opacity: 0.9; line-height: 1.6;" 
+                       data-zh="這個牌陣將為你展現過去的影響、現在的狀況與未來的可能發展..."
+                       data-en="This spread will reveal past influences, current situation, and future possibilities...">這個牌陣將為你展現過去的影響、現在的狀況與未來的可能發展...</p>
+                </div>
+                
+                <p style="margin-bottom: 35px; opacity: 0.9; line-height: 1.6;"
+                   data-zh="閉上雙眼，感受內心的聲音<br>讓你最深層的問題浮現心頭..."
+                   data-en="Close your eyes, feel your inner voice<br>Let your deepest questions surface...">
+                    閉上雙眼，感受內心的聲音<br>
+                    讓你最深層的問題浮現心頭...
+                </p>
+                <input type="text" id="questionInput" class="question-input" 
+                    data-zh-placeholder="在此輸入你最想了解的問題..."
+                    data-en-placeholder="Enter the question you most want to understand..."
+                    placeholder="在此輸入你最想了解的問題..." maxlength="150">
+                
+                <div id="choiceInputs" style="display: none;">
+                    <input type="text" id="choice1Input" class="question-input" 
+                        data-zh-placeholder="請描述選項一..."
+                        data-en-placeholder="Please describe option one..."
+                        placeholder="請描述選項一..." maxlength="100">
+                    <input type="text" id="choice2Input" class="question-input" 
+                        data-zh-placeholder="請描述選項二..."
+                        data-en-placeholder="Please describe option two..."
+                        placeholder="請描述選項二..." maxlength="100">
+                </div>
+                
+                <div class="ornament" style="font-size: 1.5rem;">✧</div>
+                <button class="btn" onclick="submitQuestion()" 
+                        data-zh="召喚神諭" 
+                        data-en="Summon Oracle">召喚神諭</button>
+            </div>
+        </div>
+
+        <!-- 步驟4: 選牌頁 -->
+        <div id="step4" class="step">
+            <h2 style="text-align: center; margin-bottom: 25px; font-size: 2.2rem; font-family: 'Philosopher', serif;" id="selectionTitle"
+                data-zh="請選擇三張命運之牌" 
+                data-en="Please Choose Three Destiny Cards">請選擇三張命運之牌</h2>
+            <div class="progress" id="progress">
+                <div><span data-zh="已選擇" data-en="Selected">已選擇</span> <span id="selectedCount">0</span> / <span id="totalCards">3</span> <span data-zh="張牌" data-en="cards">張牌</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="scroll-hint" 
+                 data-zh="← 滑動探索完整的78張韋特塔羅牌 →"
+                 data-en="← Swipe to explore all 78 Rider-Waite Tarot Cards →">
+                ← 滑動探索完整的78張韋特塔羅牌 →
+            </div>
+            <div class="cards-container">
+                <div class="cards-scroll-wrapper">
+                    <div class="cards-fan" id="cardsFan">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步驟5: 洗牌頁 -->
+        <div id="step5" class="step">
+            <div class="shuffle-animation">
+                <h2 style="margin-bottom: 50px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
+                    data-zh="正在為你洗牌..." 
+                    data-en="Shuffling cards for you...">正在為你洗牌...</h2>
+                <div class="card-stack">
+                    <div class="shuffling-card"></div>
+                    <div class="shuffling-card"></div>
+                    <div class="shuffling-card"></div>
+                </div>
+                <p class="mystical-loading" 
+                   data-zh="命運的牌卡正在為你的問題重新排列...<br><span style='font-size: 0.9rem; opacity: 0.7;'>即將為你展現神秘的選擇</span>"
+                   data-en="The cards of destiny are rearranging for your question...<br><span style='font-size: 0.9rem; opacity: 0.7;'>About to reveal mystical choices for you</span>">
+                    命運的牌卡正在為你的問題重新排列...<br>
+                    <span style="font-size: 0.9rem; opacity: 0.7;">即將為你展現神秘的選擇</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- 步驟6: 結果頁 -->
+        <div id="step6" class="step">
+            <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
+                data-zh="命運的神諭已降臨" 
+                data-en="The Divine Oracle Has Descended">命運的神諭已降臨</h2>
+            <div id="userQuestion" style="text-align: center; margin-bottom: 50px; font-size: 1.4rem; 
+                                         background: rgba(0,0,0,0.7); padding: 30px; border-radius: 15px; 
+                                         border: 1px solid var(--primary-gold); backdrop-filter: blur(10px);"></div>
+            
+            <div class="selected-cards" id="resultsContainer">
+            </div>
+
+            <div style="text-align: center; margin-top: 50px;">
+                <div class="ornament">✦ ◊ ✦</div>
+                <button class="btn" onclick="restartDivination()" 
+                        data-zh="重新探索命運" 
+                        data-en="Explore Destiny Again">重新探索命運</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
