@@ -37,11 +37,21 @@
                 </div>
             </div>
             
-            <!-- 語言切換按鈕 (單一按鈕) -->
-            <button class="lang-toggle-btn" onclick="toggleLanguage()" title="切換語言 / Switch Language">
-                <span class="lang-icon">🌐</span>
-                <span class="lang-text" data-current="zh">中文</span>
-            </button>
+            <!-- 導航功能區 -->
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <!-- 🆕 歷史記錄按鈕 -->
+                <button class="nav-history-btn" onclick="showHistoryPage()" title="查看占卜記錄">
+                    <span class="history-icon">📚</span>
+                    <span class="history-text" data-zh="記錄" data-en="History">記錄</span>
+                    <span class="history-badge" id="recordsBadge" style="display: none;">0</span>
+                </button>
+                
+                <!-- 語言切換按鈕 -->
+                <button class="lang-toggle-btn" onclick="toggleLanguage()" title="切換語言 / Switch Language">
+                    <span class="lang-icon">🌐</span>
+                    <span class="lang-text" data-current="zh">中文</span>
+                </button>
+            </div>
         </div>
     </nav>
     
@@ -255,6 +265,122 @@
                 <button class="btn" onclick="restartDivination()" 
                         data-zh="重新探索命運" 
                         data-en="Explore Destiny Again">重新探索命運</button>
+            </div>
+        </div>
+
+        <!-- 步驟7: 歷史記錄頁面 -->
+        <div id="step7" class="step">
+            <div class="history-container">
+                <!-- 頁面標題 -->
+                <div class="history-header">
+                    <h1 style="font-family: 'Philosopher', serif; color: var(--primary-gold); margin-bottom: 10px;">
+                        <span data-zh="占卜記錄" data-en="Divination Records">占卜記錄</span>
+                    </h1>
+                    <p style="color: rgba(212, 175, 55, 0.8);">
+                        <span data-zh="回顧你的神秘旅程" data-en="Review your mystical journey">回顧你的神秘旅程</span>
+                    </p>
+                </div>
+
+                <!-- 控制區域 -->
+                <div class="history-controls">
+                    <!-- 搜索框 -->
+                    <div class="search-box">
+                        <input type="text" class="search-input" id="searchInput" 
+                            data-zh-placeholder="搜索問題、解讀內容或標籤..."
+                            data-en-placeholder="Search questions, interpretations, or tags..."
+                            placeholder="搜索問題、解讀內容或標籤...">
+                        <button class="search-btn" onclick="searchRecords()">🔍</button>
+                    </div>
+
+                    <!-- 過濾器 -->
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <select class="filter-dropdown" id="modeFilter">
+                            <option value="" data-zh="所有模式" data-en="All Modes">所有模式</option>
+                            <option value="single" data-zh="單張指引" data-en="Single Guidance">單張指引</option>
+                            <option value="three" data-zh="三張牌占卜" data-en="Three Cards">三張牌占卜</option>
+                            <option value="core" data-zh="四張核心" data-en="Four Core">四張核心</option>
+                            <option value="choice" data-zh="二選一" data-en="Two Choice">二選一</option>
+                            <option value="love" data-zh="感情萬用" data-en="Love Universal">感情萬用</option>
+                        </select>
+
+                        <select class="filter-dropdown" id="typeFilter">
+                            <option value="" data-zh="所有類型" data-en="All Types">所有類型</option>
+                            <option value="love" data-zh="愛情" data-en="Love">愛情</option>
+                            <option value="career" data-zh="事業" data-en="Career">事業</option>
+                            <option value="health" data-zh="健康" data-en="Health">健康</option>
+                            <option value="choice" data-zh="選擇" data-en="Choice">選擇</option>
+                            <option value="general" data-zh="一般" data-en="General">一般</option>
+                        </select>
+
+                        <select class="filter-dropdown" id="favFilter">
+                            <option value="" data-zh="全部記錄" data-en="All Records">全部記錄</option>
+                            <option value="favorites" data-zh="僅收藏" data-en="Favorites Only">僅收藏</option>
+                        </select>
+                    </div>
+
+                    <!-- 視圖切換 -->
+                    <div class="view-toggle">
+                        <button class="view-btn active" id="gridViewBtn" onclick="switchView('grid')">
+                            📱 <span data-zh="卡片" data-en="Grid">卡片</span>
+                        </button>
+                        <button class="view-btn" id="listViewBtn" onclick="switchView('list')">
+                            📋 <span data-zh="列表" data-en="List">列表</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 統計摘要 -->
+                <div id="recordsStats" style="text-align: center; margin-bottom: 30px; padding: 15px; background: rgba(0,0,0,0.6); border-radius: 10px;">
+                    <span style="color: rgba(212, 175, 55, 0.9);">
+                        <span data-zh="共找到" data-en="Found">共找到</span> 
+                        <strong id="totalCount">0</strong> 
+                        <span data-zh="條記錄，其中" data-en="records,">條記錄，其中</span>
+                        <strong id="favoriteCount">0</strong> 
+                        <span data-zh="條收藏" data-en="favorites">條收藏</span>
+                    </span>
+                </div>
+
+                <!-- 記錄網格視圖 -->
+                <div class="records-grid" id="recordsGrid">
+                    <!-- 動態生成記錄卡片 -->
+                </div>
+
+                <!-- 記錄列表視圖 -->
+                <div class="records-list" id="recordsList">
+                    <!-- 動態生成記錄列表 -->
+                </div>
+
+                <!-- 空狀態 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-state-icon">🔮</div>
+                    <h3 data-zh="還沒有占卜記錄" data-en="No Divination Records Yet">還沒有占卜記錄</h3>
+                    <p data-zh="開始你的第一次占卜吧！" data-en="Start your first divination!">開始你的第一次占卜吧！</p>
+                    <button class="btn" onclick="goToHome()" style="margin-top: 20px;">
+                        <span data-zh="開始占卜" data-en="Start Divination">開始占卜</span>
+                    </button>
+                </div>
+
+                <!-- 分頁 -->
+                <div class="pagination" id="pagination">
+                    <!-- 動態生成分頁按鈕 -->
+                </div>
+                
+                <!-- 返回按鈕 -->
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn" onclick="goToHome()">
+                        <span data-zh="返回首頁" data-en="Back to Home">返回首頁</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 記錄詳情模態框 -->
+        <div id="recordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; overflow-y: auto;">
+            <div style="max-width: 800px; margin: 50px auto; background: linear-gradient(135deg, var(--deep-purple), var(--mystic-blue)); border: 2px solid var(--primary-gold); border-radius: 20px; position: relative;">
+                <button onclick="closeRecordModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: var(--primary-gold); font-size: 2rem; cursor: pointer;">×</button>
+                <div id="modalContent" style="padding: 40px;">
+                    <!-- 動態填充詳情內容 -->
+                </div>
             </div>
         </div>
     </div>

@@ -1091,6 +1091,15 @@ async function showLoadingAndGetResults() {
         
         clearLoadingAnimation();
         displayFinalResults(interpretation);
+
+        // 🆕 保存占卜記錄
+        const recordData = {
+            question: currentQuestion,
+            mode: currentMode,
+            cards: selectedCards,
+            interpretation: interpretation
+        };
+        divinationManager.saveRecord(recordData);
         
     } catch (error) {
         console.error('API 調用錯誤:', error);
@@ -1249,6 +1258,9 @@ async function displayFinalResults(interpretation) {
     }
 
     container.appendChild(cardsDisplay);
+    // 🆕 自動保存占卜記錄
+    saveCurrentDivination(interpretation);
+
 }
 
 // 顯示 API 錯誤
@@ -1483,3 +1495,1325 @@ class PerformanceMonitor {
 
 // 創建性能監控器實例
 const performanceMonitor = new PerformanceMonitor();
+
+// ===== 占卜記錄管理器類 =====
+
+class DivinationManager {
+    constructor() {
+        this.storageKeys = {
+            RECORDS: 'tarot_divination_records',
+            FAVORITES: 'tarot_favorite_records', 
+            USER_STATS: 'tarot_user_statistics',
+            SETTINGS: 'tarot_user_settings',
+            TAGS: 'tarot_user_tags'
+        };
+        
+        this.maxRecords = 200;  // 最大記錄數
+        this.maxFavorites = 50; // 最大收藏數
+        
+        // 初始化時檢查存儲
+        this.initializeStorage();
+    }
+
+    // ===== 核心CRUD操作 =====
+    
+    /**
+     * 保存新的占卜記錄
+     * @param {Object} divinationData - 占卜數據
+     * @returns {Object} 保存的記錄
+     */
+    saveRecord(divinationData) {
+        try {
+            const records = this.getAllRecords();
+            
+            // 創建新記錄
+            const newRecord = {
+                id: this.generateId(),
+                timestamp: new Date().toISOString(),
+                language: currentLanguage,
+                question: divinationData.question,
+                questionType: this.classifyQuestion(divinationData.question),
+                mode: divinationData.mode,
+                cards: divinationData.cards.map(card => ({
+                    name: card.name,
+                    orientation: card.orientation,
+                    position: this.getCardPosition(card, divinationData.mode),
+                    symbol: card.symbol,
+                    imagePath: getTarotImagePath(card.name)
+                })),
+                interpretation: divinationData.interpretation,
+                interpretationSummary: this.generateSummary(divinationData.interpretation),
+                isFavorite: false,
+                userRating: null,
+                userNotes: "",
+                tags: [],
+                readCount: 1,
+                lastViewed: new Date().toISOString(),
+                isArchived: false
+            };
+
+            // 添加到記錄數組開頭（最新的在前）
+            records.unshift(newRecord);
+            
+            // 限制記錄數量（但保留收藏）
+            this.limitRecords(records);
+            
+            // 保存記錄
+            localStorage.setItem(this.storageKeys.RECORDS, JSON.stringify(records));
+            
+            // 更新統計
+            this.updateStatistics('save', newRecord);
+            
+            console.log(`💾 占卜記錄已保存: ${newRecord.id}`);
+            return newRecord;
+            
+        } catch (error) {
+            console.error('保存占卜記錄失敗:', error);
+            this.showNotification('記錄保存失敗', 'error');
+            return null;
+        }
+    }
+
+    /**
+     * 獲取所有記錄
+     * @param {Object} filters - 過濾條件
+     * @returns {Array} 記錄數組
+     */
+    getAllRecords(filters = {}) {
+        try {
+            const data = localStorage.getItem(this.storageKeys.RECORDS);
+            let records = data ? JSON.parse(data) : [];
+            
+            // 應用過濾條件
+            if (Object.keys(filters).length > 0) {
+                records = this.applyFilters(records, filters);
+            }
+            
+            return records;
+            
+        } catch (error) {
+            console.error('讀取記錄失敗:', error);
+            return [];
+        }
+    }
+
+    /**
+     * 根據ID獲取記錄
+     * @param {string} recordId - 記錄ID
+     * @returns {Object|null} 記錄對象
+     */
+    getRecordById(recordId) {
+        const records = this.getAllRecords();
+        const record = records.find(r => r.id === recordId);
+        
+        if (record) {
+            // 更新查看統計
+            record.readCount++;
+            record.lastViewed = new Date().toISOString();
+            this.updateRecord(record);
+        }
+        
+        return record || null;
+    }
+
+    /**
+     * 更新記錄
+     * @param {Object} updatedRecord - 更新後的記錄
+     * @returns {boolean} 更新是否成功
+     */
+    updateRecord(updatedRecord) {
+        try {
+            const records = this.getAllRecords();
+            const index = records.findIndex(r => r.id === updatedRecord.id);
+            
+            if (index !== -1) {
+                records[index] = { ...records[index], ...updatedRecord };
+                localStorage.setItem(this.storageKeys.RECORDS, JSON.stringify(records));
+                
+                // 更新統計
+                this.updateStatistics('update', updatedRecord);
+                
+                return true;
+            }
+            return false;
+            
+        } catch (error) {
+            console.error('更新記錄失敗:', error);
+            return false;
+        }
+    }
+
+    /**
+     * 刪除記錄
+     * @param {string} recordId - 記錄ID
+     * @returns {boolean} 刪除是否成功
+     */
+    deleteRecord(recordId) {
+        try {
+            const records = this.getAllRecords();
+            const recordIndex = records.findIndex(r => r.id === recordId);
+            
+            if (recordIndex !== -1) {
+                const deletedRecord = records[recordIndex];
+                records.splice(recordIndex, 1);
+                
+                localStorage.setItem(this.storageKeys.RECORDS, JSON.stringify(records));
+                
+                // 更新統計
+                this.updateStatistics('delete', deletedRecord);
+                
+                console.log(`🗑️ 記錄已刪除: ${recordId}`);
+                return true;
+            }
+            
+            return false;
+            
+        } catch (error) {
+            console.error('刪除記錄失敗:', error);
+            return false;
+        }
+    }
+
+    // ===== 收藏功能 =====
+    
+    /**
+     * 切換收藏狀態
+     * @param {string} recordId - 記錄ID
+     * @returns {boolean} 新的收藏狀態
+     */
+    toggleFavorite(recordId) {
+        const record = this.getRecordById(recordId);
+        if (!record) return false;
+        
+        const newFavoriteStatus = !record.isFavorite;
+        
+        // 檢查收藏數量限制
+        if (newFavoriteStatus && this.getFavorites().length >= this.maxFavorites) {
+            this.showNotification('收藏數量已達上限', 'warning');
+            return false;
+        }
+        
+        record.isFavorite = newFavoriteStatus;
+        this.updateRecord(record);
+        
+        // 更新收藏索引（性能優化）
+        this.updateFavoritesIndex();
+        
+        console.log(`${newFavoriteStatus ? '⭐' : '☆'} 收藏狀態已更新: ${recordId}`);
+        return newFavoriteStatus;
+    }
+
+    /**
+     * 獲取收藏記錄
+     * @returns {Array} 收藏記錄數組
+     */
+    getFavorites() {
+        return this.getAllRecords().filter(record => record.isFavorite);
+    }
+
+    // ===== 搜索和過濾 =====
+    
+    /**
+     * 搜索記錄
+     * @param {string} keyword - 關鍵字
+     * @param {Object} filters - 過濾條件
+     * @returns {Array} 匹配的記錄
+     */
+    searchRecords(keyword = '', filters = {}) {
+        let records = this.getAllRecords();
+        
+        // 關鍵字搜索
+        if (keyword.trim()) {
+            const lowerKeyword = keyword.toLowerCase();
+            records = records.filter(record => 
+                record.question.toLowerCase().includes(lowerKeyword) ||
+                record.interpretation.toLowerCase().includes(lowerKeyword) ||
+                record.userNotes.toLowerCase().includes(lowerKeyword) ||
+                record.tags.some(tag => tag.toLowerCase().includes(lowerKeyword)) ||
+                record.cards.some(card => card.name.toLowerCase().includes(lowerKeyword))
+            );
+        }
+        
+        // 應用過濾條件
+        records = this.applyFilters(records, filters);
+        
+        return records;
+    }
+
+    /**
+     * 應用過濾條件
+     * @private
+     */
+    applyFilters(records, filters) {
+        return records.filter(record => {
+            // 占卜模式過濾
+            if (filters.mode && record.mode !== filters.mode) return false;
+            
+            // 問題類型過濾
+            if (filters.questionType && record.questionType !== filters.questionType) return false;
+            
+            // 收藏狀態過濾
+            if (filters.favoritesOnly && !record.isFavorite) return false;
+            
+            // 評分過濾
+            if (filters.minRating && (!record.userRating || record.userRating < filters.minRating)) return false;
+            
+            // 時間範圍過濾
+            if (filters.dateRange) {
+                const recordDate = new Date(record.timestamp);
+                if (filters.dateRange.start && recordDate < new Date(filters.dateRange.start)) return false;
+                if (filters.dateRange.end && recordDate > new Date(filters.dateRange.end)) return false;
+            }
+            
+            // 標籤過濾
+            if (filters.tags && filters.tags.length > 0) {
+                const hasMatchingTag = filters.tags.some(tag => record.tags.includes(tag));
+                if (!hasMatchingTag) return false;
+            }
+            
+            return true;
+        });
+    }
+
+    // ===== 輔助方法 =====
+    
+    /**
+     * 生成唯一ID
+     * @private
+     */
+    generateId() {
+        return `div_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    /**
+     * 問題分類
+     * @private
+     */
+    classifyQuestion(question) {
+        const lowerQ = question.toLowerCase();
+        
+        // 愛情關鍵字
+        if (lowerQ.includes('愛情') || lowerQ.includes('戀愛') || lowerQ.includes('感情') || 
+            lowerQ.includes('love') || lowerQ.includes('relationship') || lowerQ.includes('romance')) {
+            return 'love';
+        }
+        
+        // 事業關鍵字
+        if (lowerQ.includes('工作') || lowerQ.includes('事業') || lowerQ.includes('職業') ||
+            lowerQ.includes('career') || lowerQ.includes('work') || lowerQ.includes('job')) {
+            return 'career';
+        }
+        
+        // 健康關鍵字
+        if (lowerQ.includes('健康') || lowerQ.includes('身體') || 
+            lowerQ.includes('health') || lowerQ.includes('wellness')) {
+            return 'health';
+        }
+        
+        // 選擇關鍵字
+        if (lowerQ.includes('選擇') || lowerQ.includes('決定') || lowerQ.includes('抉擇') ||
+            lowerQ.includes('choice') || lowerQ.includes('decision') || lowerQ.includes('should')) {
+            return 'choice';
+        }
+        
+        return 'general';
+    }
+
+    /**
+     * 生成解讀摘要
+     * @private
+     */
+    generateSummary(interpretation, maxLength = 100) {
+        if (!interpretation) return '';
+        
+        // 移除HTML標籤和多餘空白
+        const cleanText = interpretation.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        
+        if (cleanText.length <= maxLength) return cleanText;
+        
+        // 在句號處截斷，避免截斷句子
+        const truncated = cleanText.substr(0, maxLength);
+        const lastPeriod = truncated.lastIndexOf('。');
+        const lastPeriodEn = truncated.lastIndexOf('.');
+        
+        const cutPoint = Math.max(lastPeriod, lastPeriodEn);
+        if (cutPoint > maxLength * 0.7) { // 如果截斷點不會太短
+            return cleanText.substr(0, cutPoint + 1);
+        }
+        
+        return truncated + '...';
+    }
+
+    /**
+     * 獲取卡牌在牌陣中的位置
+     * @private
+     */
+    getCardPosition(card, mode) {
+        const positions = spreadInfo[mode]?.positions[currentLanguage] || [];
+        const cardIndex = selectedCards.findIndex(c => c.name === card.name);
+        return positions[cardIndex] || `位置${cardIndex + 1}`;
+    }
+
+    /**
+     * 限制記錄數量
+     * @private
+     */
+    limitRecords(records) {
+        if (records.length <= this.maxRecords) return;
+        
+        // 分離收藏和非收藏記錄
+        const favorites = records.filter(r => r.isFavorite);
+        const nonFavorites = records.filter(r => !r.isFavorite);
+        
+        // 如果收藏記錄太多，保留最新的
+        if (favorites.length > this.maxFavorites) {
+            favorites.splice(this.maxFavorites);
+        }
+        
+        // 計算可保留的非收藏記錄數
+        const maxNonFavorites = this.maxRecords - favorites.length;
+        if (nonFavorites.length > maxNonFavorites) {
+            nonFavorites.splice(maxNonFavorites);
+        }
+        
+        // 重新組合（收藏記錄和非收藏記錄按時間排序）
+        records.length = 0;
+        records.push(...[...favorites, ...nonFavorites].sort((a, b) => 
+            new Date(b.timestamp) - new Date(a.timestamp)
+        ));
+    }
+
+    /**
+     * 初始化存儲
+     * @private
+     */
+    initializeStorage() {
+        // 檢查並修復數據結構
+        const records = this.getAllRecords();
+        let needsUpdate = false;
+        
+        records.forEach(record => {
+            // 添加缺失的字段
+            if (!record.interpretationSummary && record.interpretation) {
+                record.interpretationSummary = this.generateSummary(record.interpretation);
+                needsUpdate = true;
+            }
+            if (!record.questionType) {
+                record.questionType = this.classifyQuestion(record.question);
+                needsUpdate = true;
+            }
+            if (record.readCount === undefined) {
+                record.readCount = 1;
+                needsUpdate = true;
+            }
+        });
+        
+        if (needsUpdate) {
+            localStorage.setItem(this.storageKeys.RECORDS, JSON.stringify(records));
+            console.log('📊 數據結構已更新');
+        }
+    }
+
+    /**
+     * 顯示通知
+     * @private
+     */
+    showNotification(message, type = 'info') {
+        // 複用現有的 showNotification 函數
+        if (typeof showNotification === 'function') {
+            showNotification(message, type);
+        } else {
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+    }
+}
+
+// 創建全局實例
+const divinationManager = new DivinationManager();
+
+// ===== 歷史記錄功能實現 =====
+
+// 歷史記錄界面管理器
+class HistoryUI {
+    constructor() {
+        this.currentView = 'grid'; // grid 或 list
+        this.currentPage = 1;
+        this.recordsPerPage = 12;
+        this.currentFilters = {};
+        this.searchKeyword = '';
+        
+        // 綁定事件監聽器
+        this.bindEventListeners();
+    }
+
+    /**
+     * 綁定事件監聽器
+     */
+    bindEventListeners() {
+        // 搜索框事件
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            // 防抖搜索
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    this.searchKeyword = e.target.value;
+                    this.loadRecords();
+                }, 500);
+            });
+        }
+
+        // 過濾器事件
+        ['modeFilter', 'typeFilter', 'favFilter'].forEach(filterId => {
+            const filterElement = document.getElementById(filterId);
+            if (filterElement) {
+                filterElement.addEventListener('change', () => {
+                    this.updateFilters();
+                    this.loadRecords();
+                });
+            }
+        });
+    }
+
+    /**
+     * 更新過濾條件
+     */
+    updateFilters() {
+        this.currentFilters = {
+            mode: document.getElementById('modeFilter')?.value || '',
+            questionType: document.getElementById('typeFilter')?.value || '',
+            favoritesOnly: document.getElementById('favFilter')?.value === 'favorites'
+        };
+        this.currentPage = 1; // 重置到第一頁
+    }
+
+    /**
+     * 加載記錄
+     */
+    async loadRecords() {
+        try {
+            // 獲取過濾後的記錄
+            const allRecords = divinationManager.searchRecords(this.searchKeyword, this.currentFilters);
+            
+            // 更新統計
+            this.updateStats(allRecords);
+            
+            // 處理空狀態
+            if (allRecords.length === 0) {
+                this.showEmptyState();
+                return;
+            }
+            
+            // 分頁處理
+            const totalPages = Math.ceil(allRecords.length / this.recordsPerPage);
+            const startIndex = (this.currentPage - 1) * this.recordsPerPage;
+            const endIndex = startIndex + this.recordsPerPage;
+            const pageRecords = allRecords.slice(startIndex, endIndex);
+            
+            // 渲染記錄
+            if (this.currentView === 'grid') {
+                this.renderGridView(pageRecords);
+            } else {
+                this.renderListView(pageRecords);
+            }
+            
+            // 渲染分頁
+            this.renderPagination(totalPages);
+            
+            // 隱藏空狀態
+            this.hideEmptyState();
+            
+        } catch (error) {
+            console.error('加載記錄失敗:', error);
+            showNotification('加載記錄失敗', 'error');
+        }
+    }
+
+    /**
+     * 渲染網格視圖
+     */
+    renderGridView(records) {
+        const container = document.getElementById('recordsGrid');
+        if (!container) return;
+        
+        container.style.display = 'grid';
+        document.getElementById('recordsList').style.display = 'none';
+        
+        container.innerHTML = records.map(record => this.createRecordCard(record)).join('');
+        
+        // 更新視圖按鈕狀態
+        this.updateViewButtons('grid');
+    }
+
+    /**
+     * 渲染列表視圖
+     */
+    renderListView(records) {
+        const container = document.getElementById('recordsList');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        document.getElementById('recordsGrid').style.display = 'none';
+        
+        container.innerHTML = `
+            <div style="background: rgba(0,0,0,0.8); border-radius: 15px; overflow: hidden;">
+                ${records.map(record => this.createRecordListItem(record)).join('')}
+            </div>
+        `;
+        
+        // 更新視圖按鈕狀態
+        this.updateViewButtons('list');
+    }
+
+    /**
+     * 創建記錄卡片
+     */
+    createRecordCard(record) {
+        const date = new Date(record.timestamp);
+        const formattedDate = `${date.getMonth() + 1}/${date.getDate()}`;
+        const formattedTime = date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+        
+        return `
+            <div class="record-card" onclick="openRecordModal('${record.id}')">
+                <!-- 卡片頭部 -->
+                <div class="record-header">
+                    <div class="record-date">${formattedDate} ${formattedTime}</div>
+                    <div class="record-actions" onclick="event.stopPropagation();">
+                        <button class="action-btn favorite-btn ${record.isFavorite ? 'active' : ''}" 
+                                onclick="toggleFavorite('${record.id}')" 
+                                title="${record.isFavorite ? '取消收藏' : '加入收藏'}">
+                            ${record.isFavorite ? '⭐' : '☆'}
+                        </button>
+                        <button class="action-btn" onclick="shareRecord('${record.id}')" title="分享">📤</button>
+                        <button class="action-btn" onclick="deleteRecord('${record.id}')" title="刪除">🗑️</button>
+                    </div>
+                </div>
+                
+                <!-- 問題標題 -->
+                <div class="record-question">${this.truncateText(record.question, 80)}</div>
+                
+                <!-- 卡牌預覽 -->
+                <div class="record-cards-preview">
+                    ${record.cards.slice(0, 5).map(card => `
+                        <div class="card-mini ${card.orientation === 'reversed' ? 'reversed' : ''}" 
+                             title="${card.name} (${card.orientation})">
+                            ${card.symbol}
+                        </div>
+                    `).join('')}
+                    ${record.cards.length > 5 ? '<span style="color: rgba(212, 175, 55, 0.7);">...</span>' : ''}
+                </div>
+                
+                <!-- 解讀摘要 -->
+                <div class="record-summary">${record.interpretationSummary}</div>
+                
+                <!-- 標籤 -->
+                ${record.tags.length > 0 ? `
+                    <div class="record-tags">
+                        ${record.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        ${record.tags.length > 3 ? '<span class="tag">...</span>' : ''}
+                    </div>
+                ` : ''}
+                
+                <!-- 元數據 -->
+                <div class="record-meta">
+                    <div class="record-stats">
+                        <div class="stat-item">
+                            <span>👁️</span>
+                            <span>${record.readCount}</span>
+                        </div>
+                        ${record.userRating ? `
+                            <div class="stat-item">
+                                <span>⭐</span>
+                                <span>${record.userRating}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div style="color: rgba(212, 175, 55, 0.6); font-size: 0.7rem;">
+                        ${this.getModeDisplayName(record.mode)} · ${this.getTypeDisplayName(record.questionType)}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * 創建列表項
+     */
+    createRecordListItem(record) {
+        const date = new Date(record.timestamp);
+        const formattedDate = date.toLocaleDateString('zh-TW');
+        
+        return `
+            <div style="display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer;" 
+                 onclick="openRecordModal('${record.id}')">
+                
+                <!-- 日期 -->
+                <div style="min-width: 100px; color: rgba(212, 175, 55, 0.8); font-size: 0.9rem;">
+                    ${formattedDate}
+                </div>
+                
+                <!-- 問題和模式 -->
+                <div style="flex: 1; margin: 0 20px;">
+                    <div style="color: var(--primary-gold); font-weight: 600; margin-bottom: 5px;">
+                        ${this.truncateText(record.question, 100)}
+                    </div>
+                    <div style="color: rgba(212, 175, 55, 0.7); font-size: 0.8rem;">
+                        ${this.getModeDisplayName(record.mode)} · ${this.getTypeDisplayName(record.questionType)}
+                        ${record.tags.length > 0 ? ` · ${record.tags.slice(0, 2).join(', ')}` : ''}
+                    </div>
+                </div>
+                
+                <!-- 統計 -->
+                <div style="display: flex; align-items: center; gap: 15px; color: rgba(212, 175, 55, 0.7); font-size: 0.8rem;">
+                    <span>👁️ ${record.readCount}</span>
+                    ${record.userRating ? `<span>⭐ ${record.userRating}</span>` : ''}
+                    ${record.isFavorite ? '<span style="color: #ffd700;">⭐</span>' : ''}
+                </div>
+                
+                <!-- 操作按鈕 -->
+                <div style="margin-left: 20px;" onclick="event.stopPropagation();">
+                    <button class="action-btn" onclick="toggleFavorite('${record.id}')" 
+                            title="${record.isFavorite ? '取消收藏' : '加入收藏'}">
+                        ${record.isFavorite ? '⭐' : '☆'}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * 渲染分頁
+     */
+    renderPagination(totalPages) {
+        const container = document.getElementById('pagination');
+        if (!container || totalPages <= 1) {
+            container.innerHTML = '';
+            return;
+        }
+
+        const pages = [];
+        
+        // 上一頁
+        if (this.currentPage > 1) {
+            pages.push(`<button class="page-btn" onclick="historyUI.goToPage(${this.currentPage - 1})">‹</button>`);
+        }
+        
+        // 頁碼
+        const startPage = Math.max(1, this.currentPage - 2);
+        const endPage = Math.min(totalPages, this.currentPage + 2);
+        
+        if (startPage > 1) {
+            pages.push(`<button class="page-btn" onclick="historyUI.goToPage(1)">1</button>`);
+            if (startPage > 2) pages.push('<span style="color: var(--primary-gold);">...</span>');
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(`<button class="page-btn ${i === this.currentPage ? 'active' : ''}" onclick="historyUI.goToPage(${i})">${i}</button>`);
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) pages.push('<span style="color: var(--primary-gold);">...</span>');
+            pages.push(`<button class="page-btn" onclick="historyUI.goToPage(${totalPages})">${totalPages}</button>`);
+        }
+        
+        // 下一頁
+        if (this.currentPage < totalPages) {
+            pages.push(`<button class="page-btn" onclick="historyUI.goToPage(${this.currentPage + 1})">›</button>`);
+        }
+
+        container.innerHTML = pages.join('');
+    }
+
+    /**
+     * 跳轉到指定頁面
+     */
+    goToPage(page) {
+        this.currentPage = page;
+        this.loadRecords();
+        
+        // 滾動到頂部
+        document.querySelector('.history-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    /**
+     * 更新統計信息
+     */
+    updateStats(records) {
+        const totalElement = document.getElementById('totalCount');
+        const favoriteElement = document.getElementById('favoriteCount');
+        
+        if (totalElement) totalElement.textContent = records.length;
+        if (favoriteElement) {
+            const favoriteCount = records.filter(r => r.isFavorite).length;
+            favoriteElement.textContent = favoriteCount;
+        }
+    }
+
+    /**
+     * 顯示空狀態
+     */
+    showEmptyState() {
+        document.getElementById('recordsGrid').style.display = 'none';
+        document.getElementById('recordsList').style.display = 'none';
+        document.getElementById('pagination').innerHTML = '';
+        document.getElementById('emptyState').style.display = 'block';
+    }
+
+    /**
+     * 隱藏空狀態
+     */
+    hideEmptyState() {
+        document.getElementById('emptyState').style.display = 'none';
+    }
+
+    /**
+     * 更新視圖按鈕狀態
+     */
+    updateViewButtons(activeView) {
+        document.getElementById('gridViewBtn').classList.toggle('active', activeView === 'grid');
+        document.getElementById('listViewBtn').classList.toggle('active', activeView === 'list');
+    }
+
+    /**
+     * 輔助方法：截斷文本
+     */
+    truncateText(text, maxLength) {
+        if (text.length <= maxLength) return text;
+        return text.substr(0, maxLength) + '...';
+    }
+
+    /**
+     * 輔助方法：獲取模式顯示名稱
+     */
+    getModeDisplayName(mode) {
+        const modeNames = {
+            single: currentLanguage === 'zh' ? '單張' : 'Single',
+            three: currentLanguage === 'zh' ? '三張' : 'Three',
+            core: currentLanguage === 'zh' ? '核心' : 'Core',
+            choice: currentLanguage === 'zh' ? '選擇' : 'Choice',
+            love: currentLanguage === 'zh' ? '感情' : 'Love'
+        };
+        return modeNames[mode] || mode;
+    }
+
+    /**
+     * 輔助方法：獲取類型顯示名稱
+     */
+    getTypeDisplayName(type) {
+        const typeNames = {
+            love: currentLanguage === 'zh' ? '愛情' : 'Love',
+            career: currentLanguage === 'zh' ? '事業' : 'Career',
+            health: currentLanguage === 'zh' ? '健康' : 'Health',
+            choice: currentLanguage === 'zh' ? '選擇' : 'Choice',
+            general: currentLanguage === 'zh' ? '一般' : 'General'
+        };
+        return typeNames[type] || type;
+    }
+}
+
+// 全局函數
+let historyUI = null;
+
+/**
+ * 初始化歷史記錄頁面
+ */
+function initHistoryPage() {
+    if (!historyUI) {
+        historyUI = new HistoryUI();
+    }
+    historyUI.loadRecords();
+}
+
+/**
+ * 切換視圖模式
+ */
+function switchView(viewType) {
+    if (historyUI) {
+        historyUI.currentView = viewType;
+        historyUI.loadRecords();
+    }
+}
+
+/**
+ * 搜索記錄
+ */
+function searchRecords() {
+    if (historyUI) {
+        const searchInput = document.getElementById('searchInput');
+        historyUI.searchKeyword = searchInput?.value || '';
+        historyUI.currentPage = 1;
+        historyUI.loadRecords();
+    }
+}
+
+/**
+ * 切換收藏狀態
+ */
+function toggleFavorite(recordId) {
+    const newStatus = divinationManager.toggleFavorite(recordId);
+    
+    // 更新UI
+    const favoriteBtn = document.querySelector(`[onclick="toggleFavorite('${recordId}')"]`);
+    if (favoriteBtn) {
+        favoriteBtn.textContent = newStatus ? '⭐' : '☆';
+        favoriteBtn.classList.toggle('active', newStatus);
+        favoriteBtn.title = newStatus ? '取消收藏' : '加入收藏';
+    }
+    
+    // 如果當前是只顯示收藏的過濾狀態，刷新列表
+    if (historyUI && historyUI.currentFilters.favoritesOnly && !newStatus) {
+        historyUI.loadRecords();
+    }
+    
+    showNotification(newStatus ? '已加入收藏' : '已取消收藏', 'success');
+}
+
+/**
+ * 刪除記錄
+ */
+function deleteRecord(recordId) {
+    if (confirm(currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?')) {
+        const success = divinationManager.deleteRecord(recordId);
+        if (success) {
+            showNotification(currentLanguage === 'zh' ? '記錄已刪除' : 'Record deleted', 'success');
+            if (historyUI) {
+                historyUI.loadRecords();
+            }
+        }
+    }
+}
+
+/**
+ * 分享記錄
+ */
+function shareRecord(recordId) {
+    // 這個功能將在下一階段實現
+    showNotification(currentLanguage === 'zh' ? '分享功能即將推出' : 'Share feature coming soon', 'info');
+}
+
+// ===== 歷史記錄整合功能 =====
+
+/**
+ * 顯示歷史記錄頁面
+ */
+function showHistoryPage() {
+    // 添加點擊動畫
+    const btn = document.querySelector('.nav-history-btn');
+    if (btn) {
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            btn.style.transform = '';
+        }, 150);
+    }
+    
+    // 切換到歷史記錄頁面
+    showStep(7);
+    
+    // 初始化歷史記錄頁面
+    setTimeout(() => {
+        initHistoryPage();
+        updateLanguageElements(); // 確保語言正確
+    }, 100);
+}
+
+/**
+ * 打開記錄詳情模態框
+ */
+function openRecordModal(recordId) {
+    const record = divinationManager.getRecordById(recordId);
+    if (!record) {
+        showNotification('記錄不存在', 'error');
+        return;
+    }
+
+    const modal = document.getElementById('recordModal');
+    const content = document.getElementById('modalContent');
+    
+    if (!modal || !content) return;
+
+    // 格式化日期
+    const date = new Date(record.timestamp);
+    const formattedDate = date.toLocaleDateString(currentLanguage === 'zh' ? 'zh-TW' : 'en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    // 生成卡牌展示
+    const cardsDisplay = record.cards.map((card, index) => `
+        <div style="text-align: center; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 15px; border: 2px solid var(--primary-gold); max-width: 200px;">
+            <div style="position: relative; margin-bottom: 15px;">
+                <div style="
+                    width: 120px; 
+                    height: 200px; 
+                    background: linear-gradient(135deg, var(--dark-red), #4a0000);
+                    border: 2px solid var(--primary-gold);
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 3rem;
+                    color: var(--primary-gold);
+                    margin: 0 auto;
+                    ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
+                ">${card.symbol}</div>
+                ${card.orientation === 'reversed' ? `
+                    <div style="
+                        position: absolute; 
+                        top: -8px; 
+                        right: 10px; 
+                        background: linear-gradient(45deg, #ffa500, #ff8c00); 
+                        color: white; 
+                        padding: 4px 8px; 
+                        border-radius: 8px; 
+                        font-size: 0.7rem; 
+                        font-weight: bold;
+                    ">${t('reversed')}</div>
+                ` : ''}
+            </div>
+            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 8px; font-size: 0.9rem;">
+                ${card.position}
+            </div>
+            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 5px;">
+                ${card.name}
+            </div>
+            <div style="font-size: 0.8rem; color: ${card.orientation === 'upright' ? '#90ee90' : '#ffa500'};">
+                (${card.orientation === 'upright' ? t('upright') : t('reversed')})
+            </div>
+        </div>
+    `).join('');
+
+    // 填充模態框內容
+    content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="color: var(--primary-gold); font-family: 'Philosopher', serif; margin-bottom: 10px;">
+                ${currentLanguage === 'zh' ? '占卜記錄詳情' : 'Divination Record Details'}
+            </h2>
+            <p style="color: rgba(212, 175, 55, 0.8); font-size: 0.9rem;">${formattedDate}</p>
+        </div>
+
+        <!-- 問題 -->
+        <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 15px; font-family: 'Philosopher', serif;">
+                ${t('question-label')}
+            </h3>
+            <p style="font-size: 1.2rem; line-height: 1.6; color: rgba(212, 175, 55, 0.9);">
+                "${record.question}"
+            </p>
+        </div>
+
+        <!-- 卡牌展示 -->
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; text-align: center; font-family: 'Philosopher', serif;">
+                ${currentLanguage === 'zh' ? '抽到的牌' : 'Cards Drawn'}
+            </h3>
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                ${cardsDisplay}
+            </div>
+        </div>
+
+        <!-- 解讀內容 -->
+        <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
+                ${t('oracle-reading')}
+            </h3>
+            <div style="line-height: 1.8; color: rgba(212, 175, 55, 0.9); white-space: pre-line;">
+                ${record.interpretation.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--primary-gold);">$1</strong>')}
+            </div>
+        </div>
+
+        <!-- 用戶筆記和評分 -->
+        <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
+                ${currentLanguage === 'zh' ? '個人筆記與評價' : 'Personal Notes & Rating'}
+            </h3>
+            
+            <!-- 評分 -->
+            <div style="margin-bottom: 20px;">
+                <label style="color: var(--primary-gold); margin-bottom: 10px; display: block;">
+                    ${currentLanguage === 'zh' ? '準確度評分：' : 'Accuracy Rating:'}
+                </label>
+                <div class="rating-stars" style="display: flex; gap: 5px; margin-bottom: 15px;">
+                    ${[1,2,3,4,5].map(star => `
+                        <span class="rating-star ${record.userRating >= star ? 'active' : ''}" 
+                              onclick="updateRating('${record.id}', ${star})"
+                              style="cursor: pointer; font-size: 1.5rem; color: ${record.userRating >= star ? '#ffd700' : 'rgba(212, 175, 55, 0.3)'}; transition: all 0.3s ease;">
+                            ⭐
+                        </span>
+                    `).join('')}
+                </div>
+            </div>
+
+            <!-- 筆記 -->
+            <div>
+                <label style="color: var(--primary-gold); margin-bottom: 10px; display: block;">
+                    ${currentLanguage === 'zh' ? '個人筆記：' : 'Personal Notes:'}
+                </label>
+                <textarea id="recordNotes_${record.id}" 
+                          style="width: 100%; height: 100px; background: rgba(0,0,0,0.8); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 10px; padding: 15px; font-family: 'Cinzel', serif; font-size: 0.9rem; resize: vertical;"
+                          placeholder="${currentLanguage === 'zh' ? '在此記錄你的想法、感受或後續發展...' : 'Record your thoughts, feelings, or follow-up developments...'}"
+                          onchange="updateNotes('${record.id}', this.value)">${record.userNotes || ''}</textarea>
+            </div>
+        </div>
+
+        <!-- 標籤管理 -->
+        <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
+                ${currentLanguage === 'zh' ? '標籤管理' : 'Tag Management'}
+            </h3>
+            <div id="currentTags_${record.id}" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                ${record.tags.map(tag => `
+                    <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
+                        ${tag}
+                        <span onclick="removeTag('${record.id}', '${tag}')" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
+                    </span>
+                `).join('')}
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="newTag_${record.id}" 
+                       style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 8px; font-family: 'Cinzel', serif;"
+                       placeholder="${currentLanguage === 'zh' ? '新增標籤...' : 'Add tag...'}"
+                       onkeypress="if(event.key==='Enter') addTag('${record.id}')">
+                <button onclick="addTag('${record.id}')" 
+                        style="background: var(--primary-gold); color: var(--dark-red); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cinzel', serif;">
+                    ${currentLanguage === 'zh' ? '添加' : 'Add'}
+                </button>
+            </div>
+        </div>
+
+        <!-- 統計信息 -->
+        <div style="display: flex; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <div style="text-align: center;">
+                <div style="color: var(--primary-gold); font-size: 1.2rem; font-weight: bold;">👁️</div>
+                <div style="color: rgba(212, 175, 55, 0.8); font-size: 0.8rem; margin-top: 5px;">
+                    ${currentLanguage === 'zh' ? '查看次數' : 'View Count'}<br>
+                    <strong>${record.readCount}</strong>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div style="color: var(--primary-gold); font-size: 1.2rem; font-weight: bold;">📅</div>
+                <div style="color: rgba(212, 175, 55, 0.8); font-size: 0.8rem; margin-top: 5px;">
+                    ${currentLanguage === 'zh' ? '占卜模式' : 'Mode'}<br>
+                    <strong>${divinationManager ? historyUI?.getModeDisplayName(record.mode) : record.mode}</strong>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <div style="color: var(--primary-gold); font-size: 1.2rem; font-weight: bold;">🏷️</div>
+                <div style="color: rgba(212, 175, 55, 0.8); font-size: 0.8rem; margin-top: 5px;">
+                    ${currentLanguage === 'zh' ? '問題類型' : 'Type'}<br>
+                    <strong>${divinationManager ? historyUI?.getTypeDisplayName(record.questionType) : record.questionType}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按鈕 -->
+        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <button onclick="toggleFavorite('${record.id}'); updateModalFavoriteButton('${record.id}')" 
+                    id="modalFavoriteBtn_${record.id}"
+                    style="background: ${record.isFavorite ? 'var(--primary-gold)' : 'transparent'}; color: ${record.isFavorite ? 'var(--dark-red)' : 'var(--primary-gold)'}; border: 2px solid var(--primary-gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
+                ${record.isFavorite ? '⭐ ' : '☆ '}${record.isFavorite ? (currentLanguage === 'zh' ? '已收藏' : 'Favorited') : (currentLanguage === 'zh' ? '加入收藏' : 'Add to Favorites')}
+            </button>
+            <button onclick="shareRecord('${record.id}')" 
+                    style="background: transparent; color: var(--primary-gold); border: 2px solid var(--primary-gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
+                📤 ${currentLanguage === 'zh' ? '分享' : 'Share'}
+            </button>
+            <button onclick="if(confirm('${currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?'}')) { deleteRecord('${record.id}'); closeRecordModal(); }" 
+                    style="background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
+                🗑️ ${currentLanguage === 'zh' ? '刪除' : 'Delete'}
+            </button>
+        </div>
+    `;
+
+    // 顯示模態框
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden'; // 防止背景滾動
+}
+
+/**
+ * 關閉記錄詳情模態框
+ */
+function closeRecordModal() {
+    const modal = document.getElementById('recordModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // 恢復背景滾動
+    }
+}
+
+/**
+ * 更新評分
+ */
+function updateRating(recordId, rating) {
+    const record = divinationManager.getRecordById(recordId);
+    if (record) {
+        record.userRating = rating;
+        divinationManager.updateRecord(record);
+        
+        // 更新星星顯示
+        const stars = document.querySelectorAll(`#recordModal .rating-star`);
+        stars.forEach((star, index) => {
+            const starRating = index + 1;
+            star.style.color = starRating <= rating ? '#ffd700' : 'rgba(212, 175, 55, 0.3)';
+            star.classList.toggle('active', starRating <= rating);
+        });
+        
+        showNotification(`${currentLanguage === 'zh' ? '評分已更新' : 'Rating updated'}: ${rating}/5`, 'success');
+    }
+}
+
+/**
+ * 更新筆記
+ */
+function updateNotes(recordId, notes) {
+    const record = divinationManager.getRecordById(recordId);
+    if (record) {
+        record.userNotes = notes;
+        divinationManager.updateRecord(record);
+        console.log(`📝 筆記已更新: ${recordId}`);
+    }
+}
+
+/**
+ * 添加標籤
+ */
+function addTag(recordId) {
+    const input = document.getElementById(`newTag_${recordId}`);
+    const tag = input.value.trim();
+    
+    if (!tag) return;
+    
+    const record = divinationManager.getRecordById(recordId);
+    if (record && !record.tags.includes(tag)) {
+        record.tags.push(tag);
+        divinationManager.updateRecord(record);
+        
+        // 更新標籤顯示
+        const tagsContainer = document.getElementById(`currentTags_${recordId}`);
+        if (tagsContainer) {
+            tagsContainer.innerHTML = record.tags.map(t => `
+                <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
+                    ${t}
+                    <span onclick="removeTag('${recordId}', '${t}')" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
+                </span>
+            `).join('');
+        }
+        
+        input.value = '';
+        showNotification(currentLanguage === 'zh' ? '標籤已添加' : 'Tag added', 'success');
+    }
+}
+
+/**
+ * 移除標籤
+ */
+function removeTag(recordId, tagToRemove) {
+    const record = divinationManager.getRecordById(recordId);
+    if (record) {
+        record.tags = record.tags.filter(tag => tag !== tagToRemove);
+        divinationManager.updateRecord(record);
+        
+        // 更新標籤顯示
+        const tagsContainer = document.getElementById(`currentTags_${recordId}`);
+        if (tagsContainer) {
+            tagsContainer.innerHTML = record.tags.map(tag => `
+                <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
+                    ${tag}
+                    <span onclick="removeTag('${recordId}', '${tag}')" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
+                </span>
+            `).join('');
+        }
+        
+        showNotification(currentLanguage === 'zh' ? '標籤已移除' : 'Tag removed', 'success');
+    }
+}
+
+/**
+ * 更新模態框中的收藏按鈕
+ */
+function updateModalFavoriteButton(recordId) {
+    const record = divinationManager.getRecordById(recordId);
+    const btn = document.getElementById(`modalFavoriteBtn_${recordId}`);
+    
+    if (btn && record) {
+        btn.style.background = record.isFavorite ? 'var(--primary-gold)' : 'transparent';
+        btn.style.color = record.isFavorite ? 'var(--dark-red)' : 'var(--primary-gold)';
+        btn.innerHTML = `${record.isFavorite ? '⭐ ' : '☆ '}${record.isFavorite ? (currentLanguage === 'zh' ? '已收藏' : 'Favorited') : (currentLanguage === 'zh' ? '加入收藏' : 'Add to Favorites')}`;
+    }
+}
+
+/**
+ * 更新記錄數量徽章
+ */
+function updateRecordsBadge() {
+    const badge = document.getElementById('recordsBadge');
+    if (badge && divinationManager) {
+        const totalRecords = divinationManager.getAllRecords().length;
+        
+        if (totalRecords > 0) {
+            badge.textContent = totalRecords > 99 ? '99+' : totalRecords.toString();
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+// 修改現有的 showLoadingAndGetResults 函數，在成功獲取結果後保存記錄
+// 找到 displayFinalResults(interpretation); 這行，在其後添加：
+
+/**
+ * 在占卜完成後自動保存記錄
+ */
+function saveCurrentDivination(interpretation) {
+    try {
+        const recordData = {
+            question: currentQuestion,
+            mode: currentMode,
+            cards: selectedCards,
+            interpretation: interpretation
+        };
+        
+        const savedRecord = divinationManager.saveRecord(recordData);
+        
+        if (savedRecord) {
+            console.log('✅ 占卜記錄已自動保存');
+            updateRecordsBadge(); // 更新徽章
+            
+            // 顯示保存成功的提示（可選）
+            setTimeout(() => {
+                showNotification(
+                    currentLanguage === 'zh' ? '占卜記錄已保存' : 'Divination record saved', 
+                    'success'
+                );
+            }, 2000);
+        }
+    } catch (error) {
+        console.error('自動保存記錄失敗:', error);
+    }
+}
+
+// 頁面加載時更新徽章
+document.addEventListener('DOMContentLoaded', function() {
+    // 延遲更新徽章，確保 divinationManager 已初始化
+    setTimeout(() => {
+        updateRecordsBadge();
+    }, 1000);
+});
+
+// 點擊模態框外部關閉
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('recordModal');
+    if (modal && e.target === modal) {
+        closeRecordModal();
+    }
+});
+
+// ESC 鍵關閉模態框
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeRecordModal();
+    }
+});
