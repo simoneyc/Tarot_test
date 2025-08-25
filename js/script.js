@@ -1,6 +1,205 @@
 // API 端點配置
 const API_BASE_URL = 'https://tarot-backend-n9oa.onrender.com';
 
+window.showPerformanceReport = () => performanceMonitor.showReport();
+
+// ===== 圖片預加載管理器 =====
+class ImagePreloader {
+    constructor() {
+        this.imageCache = new Map(); // 緩存已加載的圖片
+        this.loadingPromises = new Map(); // 避免重複加載同一張圖片
+        this.preloadStarted = false;
+    }
+
+    // 預加載核心圖片（大牌前10張，最常被抽到）
+    // 在 ImagePreloader 類中，替換整個 preloadEssentialImages 方法
+    preloadEssentialImages() {
+        if (this.preloadStarted) return Promise.resolve();
+        this.preloadStarted = true;
+        
+        const essentialCards = [
+            "愚者 The Fool",
+            "魔術師 The Magician", 
+            "女祭司 The High Priestess",
+            "皇后 The Empress",
+            "皇帝 The Emperor",
+            "教皇 The Hierophant",
+            "戀人 The Lovers",
+            "戰車 The Chariot",
+            "力量 Strength",
+            "隱士 The Hermit"
+        ];
+
+        console.log('🖼️ 開始預加載核心圖片...');
+        
+        // 創建預加載序列
+        const preloadSequence = async () => {
+            // 顯示進度指示器
+            showPreloadProgress();
+            
+            // 預加載卡背圖片（最重要）
+            try {
+                await this.preloadImage('./images/tarot/card-back.jpg');
+                updatePreloadProgress(1, essentialCards.length + 1);
+            } catch (error) {
+                console.warn('卡背圖片預加載失敗:', error);
+            }
+            
+            // 預加載核心塔羅牌圖片
+            let completed = 1; // 卡背已完成
+            
+            for (const cardName of essentialCards) {
+                try {
+                    const imagePath = getTarotImagePath(cardName);
+                    await this.preloadImage(imagePath);
+                    console.log(`✅ 預加載成功: ${cardName}`);
+                } catch (error) {
+                    console.warn(`⚠️ 預加載失敗: ${cardName}`, error);
+                }
+                
+                completed++;
+                updatePreloadProgress(completed, essentialCards.length + 1);
+                
+                // 每張圖片之間稍微延遲，避免網路阻塞
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+
+            console.log(`✅ 預加載完成: ${completed}/${essentialCards.length + 1} 張圖片`);
+            
+            // 延遲隱藏進度條，讓用戶看到完成狀態
+            setTimeout(() => {
+                hidePreloadProgress();
+            }, 1000);
+        };
+
+        // 執行預加載序列並返回 Promise
+        return preloadSequence().catch(error => {
+            console.error('預加載過程出錯:', error);
+            hidePreloadProgress();
+        });
+    }
+
+    // 預加載單張圖片
+    preloadImage(imagePath) {
+        // 如果已經緩存，直接返回
+        if (this.imageCache.has(imagePath)) {
+            return Promise.resolve(this.imageCache.get(imagePath));
+        }
+
+        // 如果正在加載，返回現有的 Promise
+        if (this.loadingPromises.has(imagePath)) {
+            return this.loadingPromises.get(imagePath);
+        }
+
+        const promise = new Promise((resolve, reject) => {
+            const img = new Image();
+            
+            // 設置超時機制（10秒）
+            const timeout = setTimeout(() => {
+                img.src = ''; // 取消加載
+                reject(new Error(`圖片加載超時: ${imagePath}`));
+            }, 10000);
+            
+            img.onload = () => {
+                clearTimeout(timeout);
+                this.imageCache.set(imagePath, img);
+                console.log(`✅ 圖片加載成功: ${imagePath.split('/').pop()}`);
+                resolve(img);
+            };
+            
+            img.onerror = () => {
+                clearTimeout(timeout);
+                console.warn(`❌ 圖片加載失敗: ${imagePath}`);
+                
+                // 如果是塔羅牌圖片失敗，嘗試加載備用圖片
+                if (imagePath !== './images/tarot/card-back.jpg') {
+                    const fallbackImg = new Image();
+                    fallbackImg.onload = () => {
+                        console.log(`🔄 使用備用圖片: ${imagePath.split('/').pop()}`);
+                        resolve(fallbackImg);
+                    };
+                    fallbackImg.onerror = () => reject(new Error(`備用圖片也無法加載`));
+                    fallbackImg.src = './images/tarot/card-back.jpg';
+                } else {
+                    reject(new Error(`無法加載圖片: ${imagePath}`));
+                }
+            };
+            
+            img.src = imagePath;
+        });
+
+        this.loadingPromises.set(imagePath, promise);
+        return promise;
+    }
+
+    // 智能預加載：根據用戶選中的牌預加載
+    async smartPreload(selectedCards) {
+        if (!selectedCards || selectedCards.length === 0) return;
+        
+        console.log('🎯 智能預加載選中的牌...');
+        const promises = selectedCards.map(card => {
+            const imagePath = getTarotImagePath(card.name);
+            return this.preloadImage(imagePath).catch(error => {
+                console.warn(`智能預加載失敗: ${card.name}`, error);
+                return null;
+            });
+        });
+
+        try {
+            await Promise.allSettled(promises);
+            console.log('✅ 智能預加載完成');
+        } catch (error) {
+            console.error('智能預加載出錯:', error);
+        }
+    }
+
+    // 批量預加載（用於知識庫等場景）
+    async batchPreload(cardNames, onProgress = null) {
+        console.log(`📦 批量預加載 ${cardNames.length} 張圖片...`);
+        let completed = 0;
+        
+        for (const cardName of cardNames) {
+            try {
+                const imagePath = getTarotImagePath(cardName);
+                await this.preloadImage(imagePath);
+                completed++;
+                
+                if (onProgress) {
+                    onProgress(completed, cardNames.length);
+                }
+            } catch (error) {
+                console.warn(`批量預加載失敗: ${cardName}`, error);
+                completed++;
+            }
+        }
+        
+        console.log(`✅ 批量預加載完成: ${completed}/${cardNames.length}`);
+    }
+
+    // 檢查圖片是否已緩存
+    isImageCached(imagePath) {
+        return this.imageCache.has(imagePath);
+    }
+
+    // 獲取緩存統計
+    getCacheStats() {
+        return {
+            cachedImages: this.imageCache.size,
+            loadingImages: this.loadingPromises.size
+        };
+    }
+
+    // 清理緩存（如果需要釋放記憶體）
+    clearCache() {
+        this.imageCache.clear();
+        this.loadingPromises.clear();
+        console.log('🗑️ 圖片緩存已清理');
+    }
+}
+
+// 創建全局圖片預加載器實例
+const imagePreloader = new ImagePreloader();
+
 // 全局語言設置
 let currentLanguage = 'zh';
 
@@ -206,14 +405,43 @@ function getTarotImagePath(cardName) {
     return imagePath;
 }
 
-// 圖片檢查函數
-function checkImageExists(imagePath) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = imagePath;
-    });
+// 替換原有的 checkImageExists 函數
+async function checkImageExists(imagePath) {
+    try {
+        // 優先檢查緩存
+        if (imagePreloader.isImageCached(imagePath)) {
+            return true;
+        }
+        
+        // 嘗試預加載圖片
+        await imagePreloader.preloadImage(imagePath);
+        return true;
+    } catch (error) {
+        console.warn(`圖片檢查失敗: ${imagePath}`, error);
+        return false;
+    }
+}
+
+// 新增：獲取預加載的圖片元素
+function getPreloadedImage(imagePath) {
+    return imagePreloader.imageCache.get(imagePath) || null;
+}
+
+// 新增：安全的圖片加載函數
+async function loadImageSafely(imagePath, fallbackPath = './images/tarot/card-back.jpg') {
+    try {
+        await imagePreloader.preloadImage(imagePath);
+        return imagePath;
+    } catch (error) {
+        console.warn(`使用備用圖片: ${imagePath} -> ${fallbackPath}`);
+        try {
+            await imagePreloader.preloadImage(fallbackPath);
+            return fallbackPath;
+        } catch (fallbackError) {
+            console.error('連備用圖片都無法加載:', fallbackError);
+            return null;
+        }
+    }
 }
 
 // 神秘箴言
@@ -412,8 +640,10 @@ function updateLanguageElements() {
     }
 }
 
-// 初始化事件監聽器
+// 替換原有的 DOMContentLoaded 事件監聽器
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 TarotVision 正在初始化...');
+    
     // 語言切換按鈕事件
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -421,12 +651,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // 檢查是否為桌面端並支持 hover，決定是否顯示粒子效果
     const isMobile = window.innerWidth <= 768 || !window.matchMedia('(hover: hover)').matches;
     if (!isMobile && window.matchMedia('(min-width: 769px)').matches && window.matchMedia('(hover: hover)').matches) {
         initializeParticles();
     }
+    
+    // 設置牌陣監聽器
     setupSpreadListeners();
+    
+    // 顯示第一步
     showStep(1);
+    
+    // 🆕 開始預加載核心圖片（使用 Promise 而不是 await）
+    setTimeout(() => {
+        imagePreloader.preloadEssentialImages()
+            .then(() => {
+                console.log('📊 圖片緩存統計:', imagePreloader.getCacheStats());
+            })
+            .catch(error => {
+                console.error('預加載初始化失敗:', error);
+            });
+    }, 1000);
+    
+    console.log('✅ TarotVision 初始化完成');
 });
 
 // 粒子系統初始化
@@ -610,8 +858,10 @@ function showScrollHint() {
     }
 }
 
-// 選擇卡片
+// 替換原有的 selectCard 函數
 async function selectCard(cardElement) {
+
+    const selectionStartTime = performance.now();
     const maxCards = parseInt(document.getElementById('totalCards').textContent);
     if (selectedCards.length >= maxCards || cardElement.classList.contains('selected')) return;
     
@@ -621,8 +871,20 @@ async function selectCard(cardElement) {
     const cardName = cardElement.dataset.cardName;
     const cardSymbol = cardElement.dataset.cardSymbol;
     
+    // 🆕 使用改進的圖片加載
     const imagePath = getTarotImagePath(cardName);
-    const imageExists = await checkImageExists(imagePath);
+    console.log(`🃏 選擇卡牌: ${cardName} (${orientation})`);
+    
+    // 預加載圖片（如果還沒預加載的話）
+    let imageExists = false;
+    try {
+        await imagePreloader.preloadImage(imagePath);
+        imageExists = true;
+        console.log(`✅ 圖片已就緒: ${cardName}`);
+    } catch (error) {
+        console.warn(`⚠️ 圖片加載失敗，使用備用顯示: ${cardName}`, error);
+        imageExists = false;
+    }
     
     if (orientation === "reversed") {
         cardElement.classList.add("reversed");
@@ -631,6 +893,8 @@ async function selectCard(cardElement) {
     const cardFront = cardElement.querySelector('.card-front');
     
     if (imageExists) {
+        // 使用預加載的圖片
+        const preloadedImg = imagePreloader.imageCache.get(imagePath);
         cardFront.innerHTML = `
             <img src="${imagePath}" 
                  alt="${cardName}" 
@@ -663,6 +927,7 @@ async function selectCard(cardElement) {
             </div>
         `;
     } else {
+        // 使用符號顯示
         cardFront.innerHTML = `
             <div style="
                 text-align: center;
@@ -691,7 +956,22 @@ async function selectCard(cardElement) {
     
     updateProgress();
     
+    // 🆕 選卡後智能預加載其他可能需要的圖片
+    if (selectedCards.length < maxCards) {
+        // 預加載剩餘未選中的卡牌中的一些熱門牌
+        const remainingCards = document.querySelectorAll('.tarot-card:not(.selected)');
+        const randomCards = Array.from(remainingCards)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 5) // 隨機預加載5張
+            .map(card => ({ name: card.dataset.cardName }));
+        
+        if (randomCards.length > 0) {
+            imagePreloader.smartPreload(randomCards);
+        }
+    }
+    
     if (selectedCards.length === maxCards) {
+        console.log('🎯 所有卡牌已選擇，準備進行解讀');
         setTimeout(() => {
             showStep(6);
             const questionLabel = t('question-label');
@@ -699,6 +979,10 @@ async function selectCard(cardElement) {
             showLoadingAndGetResults();
         }, 1000);
     }
+
+    const selectionEndTime = performance.now();
+    performanceMonitor.recordCardSelection(cardName, selectionEndTime - selectionStartTime);
+
 }
 
 // 增強的載入訊息顯示
@@ -815,7 +1099,7 @@ async function showLoadingAndGetResults() {
     }
 }
 
-// 顯示最終結果
+// 替換原有的混亂代碼段，插入完整的函數
 async function displayFinalResults(interpretation) {
     let formattedInterpretation = interpretation.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     formattedInterpretation = formattedInterpretation.replace(/\* /g, '');
@@ -869,7 +1153,21 @@ async function displayFinalResults(interpretation) {
         `;
         
         const imagePath = getTarotImagePath(card.name);
-        const imageExists = await checkImageExists(imagePath);
+        
+        // 🆕 優先使用預加載的圖片
+        let imageExists = imagePreloader.isImageCached(imagePath);
+        
+        // 如果沒有緩存，嘗試加載
+        if (!imageExists) {
+            console.log(`🔄 結果頁面補充加載圖片: ${card.name}`);
+            try {
+                await imagePreloader.preloadImage(imagePath);
+                imageExists = true;
+            } catch (error) {
+                console.warn(`結果頁面圖片加載失敗: ${card.name}`, error);
+                imageExists = false;
+            }
+        }
         
         cardDisplay.innerHTML = `
             <div style="position: relative; margin-bottom: 15px;">
@@ -885,7 +1183,7 @@ async function displayFinalResults(interpretation) {
                             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
                             ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
                          "
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                         onerror="console.warn('結果頁圖片載入失敗:', '${card.name}'); this.style.display='none'; this.nextElementSibling.style.display='flex';">
                      <div style="
                         width: 140px; 
                         height: 230px; 
@@ -1089,3 +1387,99 @@ function toggleLanguage() {
         updateSpreadDescription();
     }
 }
+
+
+// ===== 預加載進度控制函數 =====
+
+// 顯示預加載進度
+function showPreloadProgress() {
+    const indicator = document.getElementById('preloadIndicator');
+    if (indicator) {
+        indicator.style.display = 'block';
+        updateLanguageElements(); // 確保語言正確
+    }
+}
+
+// 隱藏預加載進度
+function hidePreloadProgress() {
+    const indicator = document.getElementById('preloadIndicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+}
+
+// 更新預加載進度
+function updatePreloadProgress(current, total) {
+    const progressBar = document.getElementById('preloadProgress');
+    if (progressBar) {
+        const percentage = (current / total) * 100;
+        progressBar.style.width = percentage + '%';
+    }
+}
+
+// ===== 性能監控函數 =====
+
+// 性能監控器
+class PerformanceMonitor {
+    constructor() {
+        this.metrics = {
+            imageLoadTimes: [],
+            cardSelectionTimes: [],
+            pageLoadTime: performance.now()
+        };
+    }
+
+    // 記錄圖片加載時間
+    recordImageLoad(imagePath, loadTime) {
+        this.metrics.imageLoadTimes.push({
+            path: imagePath,
+            time: loadTime,
+            timestamp: Date.now()
+        });
+    }
+
+    // 記錄選卡時間
+    recordCardSelection(cardName, selectionTime) {
+        this.metrics.cardSelectionTimes.push({
+            card: cardName,
+            time: selectionTime,
+            timestamp: Date.now()
+        });
+    }
+
+    // 獲取性能報告
+    getPerformanceReport() {
+        const avgImageLoadTime = this.metrics.imageLoadTimes.length > 0 
+            ? this.metrics.imageLoadTimes.reduce((sum, item) => sum + item.time, 0) / this.metrics.imageLoadTimes.length
+            : 0;
+
+        const avgCardSelectionTime = this.metrics.cardSelectionTimes.length > 0
+            ? this.metrics.cardSelectionTimes.reduce((sum, item) => sum + item.time, 0) / this.metrics.cardSelectionTimes.length
+            : 0;
+
+        return {
+            totalPageLoadTime: performance.now() - this.metrics.pageLoadTime,
+            averageImageLoadTime: avgImageLoadTime,
+            averageCardSelectionTime: avgCardSelectionTime,
+            totalImagesLoaded: this.metrics.imageLoadTimes.length,
+            totalCardsSelected: this.metrics.cardSelectionTimes.length,
+            cacheHitRate: imagePreloader.getCacheStats()
+        };
+    }
+
+    // 在控制台顯示性能報告
+    showReport() {
+        const report = this.getPerformanceReport();
+        console.group('📊 TarotVision 性能報告');
+        console.log(`頁面總載入時間: ${report.totalPageLoadTime.toFixed(2)}ms`);
+        console.log(`平均圖片載入時間: ${report.averageImageLoadTime.toFixed(2)}ms`);
+        console.log(`平均選卡響應時間: ${report.averageCardSelectionTime.toFixed(2)}ms`);
+        console.log(`已載入圖片數量: ${report.totalImagesLoaded}`);
+        console.log(`已選擇卡牌數量: ${report.totalCardsSelected}`);
+        console.log(`圖片緩存狀態:`, report.cacheHitRate);
+        console.groupEnd();
+    }
+}
+
+// 創建性能監控器實例
+const performanceMonitor = new PerformanceMonitor();

@@ -67,6 +67,19 @@
                 </p>
                 <div class="ornament">◊ ✧ ◊</div>
                 <br><br>
+
+                <!-- 預加載進度指示器 -->
+                <div id="preloadIndicator" style="display: none; text-align: center; margin: 20px 0;">
+                    <div style="font-size: 0.9rem; color: var(--primary-gold); opacity: 0.8; margin-bottom: 10px;">
+                        <span data-zh="正在準備神秘卡牌..." data-en="Preparing mystical cards...">正在準備神秘卡牌...</span>
+                    </div>
+                    <div style="width: 200px; height: 4px; background: rgba(212, 175, 55, 0.3); border-radius: 4px; margin: 0 auto; overflow: hidden;">
+                        <div id="preloadProgress" style="height: 100%; background: var(--primary-gold); width: 0%; transition: width 0.3s ease; border-radius: 4px;"></div>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--primary-gold); opacity: 0.6; margin-top: 8px;">
+                        <span data-zh="這將提升您的占卜體驗" data-en="This will enhance your divination experience">這將提升您的占卜體驗</span>
+                    </div>
+                </div>
                 <button class="btn" onclick="startDivination()" 
                         data-zh="開始神秘之旅" 
                         data-en="Begin Mystical Journey">開始神秘之旅</button>
