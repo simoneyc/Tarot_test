@@ -2727,19 +2727,40 @@ function addTag(recordId) {
         record.tags.push(tag);
         divinationManager.updateRecord(record);
         
+        // 清空輸入框
+        input.value = '';
+        
         // 更新標籤顯示
         const tagsContainer = document.getElementById(`currentTags_${recordId}`);
         if (tagsContainer) {
-            tagsContainer.innerHTML = record.tags.map(t => `
+            tagsContainer.innerHTML = record.tags.map(tag => `
                 <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
-                    ${t}
-                    <span onclick="removeTag('${recordId}', '${t}')" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
+                    ${tag}
+                    <span onclick="removeTag('${recordId}', '${tag}')" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
                 </span>
             `).join('');
         }
         
-        input.value = '';
+        // 恢復按鈕狀態
+        if (addButton) {
+            addButton.disabled = false;
+            addButton.textContent = currentLanguage === 'zh' ? '添加' : 'Add';
+            addButton.style.opacity = '1';
+        }
+        
         showNotification(currentLanguage === 'zh' ? '標籤已添加' : 'Tag added', 'success');
+        
+    } else {
+        // 恢復按鈕狀態 - 失敗情況
+        if (addButton) {
+            addButton.disabled = false;
+            addButton.textContent = currentLanguage === 'zh' ? '添加' : 'Add';
+            addButton.style.opacity = '1';
+        }
+        
+        if (record && record.tags.includes(tag)) {
+            showNotification(currentLanguage === 'zh' ? '標籤已存在' : 'Tag already exists', 'warning');
+        }
     }
 }
 
