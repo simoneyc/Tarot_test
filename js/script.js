@@ -2117,8 +2117,14 @@ class HistoryUI {
                 <div class="record-cards-preview">
                     ${record.cards.slice(0, 5).map(card => `
                         <div class="card-mini ${card.orientation === 'reversed' ? 'reversed' : ''}" 
-                             title="${card.name} (${card.orientation})">
-                            ${card.symbol}
+                            title="${card.name} (${card.orientation})">
+                            <img src="${getTarotImagePath(card.name)}" 
+                                alt="${card.name}"
+                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div style="width: 100%; height: 100%; display: none; align-items: center; justify-content: center; font-size: 1rem; ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}">
+                                ${card.symbol}
+                            </div>
                         </div>
                     `).join('')}
                     ${record.cards.length > 5 ? '<span style="color: rgba(212, 175, 55, 0.7);">...</span>' : ''}
@@ -2469,17 +2475,27 @@ function openRecordModal(recordId) {
                 <div style="
                     width: 120px; 
                     height: 200px; 
-                    background: linear-gradient(135deg, var(--dark-red), #4a0000);
                     border: 2px solid var(--primary-gold);
                     border-radius: 10px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 3rem;
-                    color: var(--primary-gold);
                     margin: 0 auto;
+                    overflow: hidden;
                     ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
-                ">${card.symbol}</div>
+                ">
+                    <img src="${getTarotImagePath(card.name)}" 
+                        alt="${card.name}"
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="
+                        width: 100%; 
+                        height: 100%; 
+                        background: linear-gradient(135deg, var(--dark-red), #4a0000);
+                        display: none;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 3rem;
+                        color: var(--primary-gold);
+                    ">${card.symbol}</div>
+                </div>
                 ${card.orientation === 'reversed' ? `
                     <div style="
                         position: absolute; 
