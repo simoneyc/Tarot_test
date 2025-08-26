@@ -2508,7 +2508,7 @@ function openRecordModal(recordId) {
 
     // 填充模態框內容
     content.innerHTML = `
-        <div style="text-align: center; margin-bottom: 30px;">
+        <div style="text-align: center; margin-bottom: 30px; margin-top: 120px;">
             <h2 style="color: var(--primary-gold); font-family: 'Philosopher', serif; margin-bottom: 10px;">
                 ${currentLanguage === 'zh' ? '占卜記錄詳情' : 'Divination Record Details'}
             </h2>
@@ -2648,6 +2648,7 @@ function openRecordModal(recordId) {
     `;
 
     // 顯示模態框
+    modal.style.zIndex = '10001';
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden'; // 防止背景滾動
 }
