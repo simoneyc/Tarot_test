@@ -1809,6 +1809,15 @@ body {
     padding: 20px;
 }
 
+/* 過濾器區域 */
+.filters-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
 .history-header {
     text-align: center;
     margin-bottom: 40px;
@@ -1817,7 +1826,7 @@ body {
 .history-controls {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 30px;
     flex-wrap: wrap;
     gap: 15px;
@@ -1880,6 +1889,16 @@ body {
     font-family: 'Cinzel', serif;
     font-size: 0.9rem;
     transition: all 0.3s ease;
+    flex: 1;
+    min-width: 120px; /* 確保最小寬度 */
+}
+
+/* 控制區域 */
+.controls-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
 .filter-dropdown:focus {
@@ -2160,77 +2179,87 @@ body {
     margin-bottom: 20px;
 }
 
-/* 響應式設計 */
+/* 響應式調整 */
 @media (max-width: 768px) {
     .history-controls {
         flex-direction: column;
         align-items: stretch;
     }
-
+    
     .search-box {
+        order: 1;
         min-width: auto;
+        margin-bottom: 0;
+    }
+    
+    .controls-section {
+        order: 2;
+        justify-content: space-between;
         margin-bottom: 15px;
     }
-
-    .records-grid {
-        grid-template-columns: 1fr;
+    
+    .filters-section {
+        order: 3;
+        justify-content: stretch;
     }
-
-    .record-card {
-        padding: 15px;
+    
+    .filter-dropdown {
+        min-width: 100px;
     }
-
-    .record-cards-preview {
-        gap: 5px;
-    }
-
-    .card-mini {
-        width: 30px;
-        height: 45px;
-        font-size: 0.9rem;
-    }
-
+    
     .view-toggle {
-        margin-top: 10px;
+        flex: 1;
+        margin-top: 0;
     }
     
-    /* 導航欄響應式調整 */
-    .nav-history-btn {
-        padding: 8px 12px;
-        font-size: 0.9rem;
-    }
-    
-    .history-text {
-        display: none; /* 小屏幕只顯示圖標 */
+    .clear-records-btn {
+        flex-shrink: 0;
     }
 }
 
 @media (max-width: 480px) {
-    .history-container {
-        padding: 15px;
+    .filters-section {
+        gap: 8px;
     }
-
-    .record-header {
-        flex-direction: column;
+    
+    .filter-dropdown {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+        min-width: 90px;
+    }
+    
+    .controls-section {
         gap: 10px;
-        align-items: flex-start;
     }
-
-    .record-actions {
-        align-self: flex-end;
+    
+    .view-toggle {
+        gap: 3px;
+        padding: 3px;
     }
-
-    .pagination {
-        gap: 5px;
+    
+    .view-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
     }
-
-    .page-btn {
+    
+    .clear-records-btn {
         padding: 6px 10px;
         font-size: 0.8rem;
     }
 }
 
-/* 清除記錄按鈕 */
+/* 確保在極小螢幕上過濾器可以堆疊 */
+@media (max-width: 360px) {
+    .filters-section {
+        flex-direction: column;
+    }
+    
+    .filter-dropdown {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
 .clear-records-btn {
     background: rgba(139, 0, 0, 0.8);
     color: #ff6b6b;
@@ -2243,6 +2272,22 @@ body {
     font-weight: 600;
     transition: all 0.3s ease;
     white-space: nowrap;
+    flex-shrink: 0; /* 防止按鈕被壓縮 */
+}
+
+.clear-records-btn span {
+    display: inline; /* 確保文字顯示 */
+}
+
+/* 極小螢幕只顯示圖標 */
+@media (max-width: 320px) {
+    .clear-records-btn span {
+        display: none;
+    }
+    
+    .clear-records-btn {
+        padding: 8px 12px;
+    }
 }
 
 .clear-records-btn:hover {

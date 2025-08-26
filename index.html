@@ -292,8 +292,27 @@
                         <button class="search-btn" onclick="searchRecords()">🔍</button>
                     </div>
 
-                    <!-- 過濾器 -->
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <!-- 視圖切換和清除按鈕 -->
+                    <div class="controls-section">
+                        <!-- 視圖切換 -->
+                        <div class="view-toggle">
+                            <button class="view-btn active" id="gridViewBtn" onclick="switchView('grid')">
+                                🔳 <span data-zh="卡片" data-en="Grid">卡片</span>
+                            </button>
+                            <button class="view-btn" id="listViewBtn" onclick="switchView('list')">
+                                📋 <span data-zh="列表" data-en="List">列表</span>
+                            </button>
+                        </div>
+                        
+                        <!-- 清除記錄按鈕 -->
+                        <button class="clear-records-btn" onclick="showClearRecordsDialog()" 
+                                title="清除所有占卜記錄">
+                            🗑️ <span data-zh="清除記錄" data-en="Clear Records">清除記錄</span>
+                        </button>
+                    </div>
+
+                    <!-- 過濾器區域 -->
+                    <div class="filters-section">
                         <select class="filter-dropdown" id="modeFilter">
                             <option value="" data-zh="所有模式" data-en="All Modes">所有模式</option>
                             <option value="single" data-zh="單張指引" data-en="Single Guidance">單張指引</option>
@@ -316,24 +335,6 @@
                             <option value="" data-zh="全部記錄" data-en="All Records">全部記錄</option>
                             <option value="favorites" data-zh="僅收藏" data-en="Favorites Only">僅收藏</option>
                         </select>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <!-- 視圖切換 -->
-                        <div class="view-toggle">
-                            <button class="view-btn active" id="gridViewBtn" onclick="switchView('grid')">
-                                🔳 <span data-zh="卡片" data-en="Grid">卡片</span>
-                            </button>
-                            <button class="view-btn" id="listViewBtn" onclick="switchView('list')">
-                                📋 <span data-zh="列表" data-en="List">列表</span>
-                            </button>
-                        </div>
-                        
-                        <!-- 清除記錄按鈕 -->
-                        <button class="clear-records-btn" onclick="showClearRecordsDialog()" 
-                                title="清除所有占卜記錄">
-                            🗑️ <span data-zh="清除記錄" data-en="Clear Records">清除記錄</span>
-                        </button>
                     </div>
                 </div>
 
