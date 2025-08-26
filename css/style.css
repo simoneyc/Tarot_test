@@ -1787,7 +1787,7 @@ body {
     border-radius: 10px;
     min-width: 18px;
     height: 18px;
-    display: flex;
+    display: none !important;
     align-items: center;
     justify-content: center;
     position: absolute;

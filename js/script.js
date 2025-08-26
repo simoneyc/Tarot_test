@@ -1279,7 +1279,7 @@ async function displayFinalResults(interpretation) {
 
     container.appendChild(cardsDisplay);
     // 🆕 自動保存占卜記錄
-    saveCurrentDivination(interpretation);
+    // saveCurrentDivination(interpretation);
 
 }
 
