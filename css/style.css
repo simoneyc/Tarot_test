@@ -2329,3 +2329,117 @@ body {
         font-size: 0.8rem;
     }
 }
+
+/* ===== 按鈕觸覺反饋增強 ===== */
+
+/* 通用按鈕點擊效果 */
+.action-btn, .btn, .page-btn, .clear-records-btn, .view-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn::before, .btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    pointer-events: none;
+}
+
+/* 點擊漣漪效果 */
+.action-btn.clicked::before, .btn.clicked::before {
+    width: 100px;
+    height: 100px;
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+/* 收藏按鈕特殊效果 */
+.favorite-btn {
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.favorite-btn:active {
+    transform: scale(0.8);
+    transition: transform 0.1s ease;
+}
+
+.favorite-btn.clicked {
+    animation: favoriteClick 0.6s ease;
+}
+
+@keyframes favoriteClick {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3) rotate(15deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+/* 刪除按鈕特殊效果 */
+.action-btn[onclick*="deleteRecord"] {
+    transition: all 0.3s ease;
+}
+
+.action-btn[onclick*="deleteRecord"]:active {
+    transform: scale(0.9);
+    background: rgba(255, 107, 107, 0.3);
+    transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.action-btn[onclick*="deleteRecord"].clicked {
+    animation: deleteShake 0.5s ease;
+}
+
+@keyframes deleteShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* 分享按鈕特殊效果 */
+.action-btn[onclick*="shareRecord"] {
+    transition: all 0.3s ease;
+}
+
+.action-btn[onclick*="shareRecord"]:active {
+    transform: scale(0.9) rotateZ(5deg);
+    transition: transform 0.1s ease;
+}
+
+.action-btn[onclick*="shareRecord"].clicked {
+    animation: shareBouce 0.4s ease;
+}
+
+@keyframes shareBouce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* 按鈕狀態指示器 */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: btnSpin 1s linear infinite;
+}
+
+@keyframes btnSpin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}

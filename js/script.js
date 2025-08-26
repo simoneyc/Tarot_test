@@ -2377,10 +2377,12 @@ function searchRecords() {
  * 切換收藏狀態
  */
 function toggleFavorite(recordId) {
+    
     const newStatus = divinationManager.toggleFavorite(recordId);
     
     // 更新UI
     const favoriteBtn = document.querySelector(`[onclick="toggleFavorite('${recordId}')"]`);
+    addButtonFeedback(favoriteBtn, 'favorite');
     if (favoriteBtn) {
         favoriteBtn.textContent = newStatus ? '⭐' : '☆';
         favoriteBtn.classList.toggle('active', newStatus);
@@ -2399,6 +2401,8 @@ function toggleFavorite(recordId) {
  * 刪除記錄
  */
 function deleteRecord(recordId) {
+    const deleteBtn = document.querySelector(`[onclick="deleteRecord('${recordId}')"]`);
+    addButtonFeedback(deleteBtn, 'delete');
     if (confirm(currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?')) {
         const success = divinationManager.deleteRecord(recordId);
         if (success) {
@@ -2414,6 +2418,8 @@ function deleteRecord(recordId) {
  * 分享記錄
  */
 function shareRecord(recordId) {
+    const shareBtn = document.querySelector(`[onclick="shareRecord('${recordId}')"]`);
+    addButtonFeedback(shareBtn, 'share');
     // 這個功能將在下一階段實現
     showNotification(currentLanguage === 'zh' ? '分享功能即將推出' : 'Share feature coming soon', 'info');
 }
@@ -3005,5 +3011,57 @@ function closeClearDialog() {
     if (window.clearDialog) {
         document.body.removeChild(window.clearDialog);
         window.clearDialog = null;
+    }
+}
+
+// ===== 按鈕觸覺反饋輔助函數 =====
+
+/**
+ * 添加按鈕點擊效果
+ */
+function addButtonFeedback(button, effectType = 'default') {
+    if (!button) return;
+    
+    // 添加點擊動畫類
+    button.classList.add('clicked');
+    
+    // 根據按鈕類型添加特殊效果
+    if (effectType === 'favorite') {
+        button.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            button.style.transform = '';
+        }, 200);
+    } else if (effectType === 'delete') {
+        button.style.background = 'rgba(255, 107, 107, 0.3)';
+        setTimeout(() => {
+            button.style.background = '';
+        }, 300);
+    }
+    
+    // 移除動畫類
+    setTimeout(() => {
+        button.classList.remove('clicked');
+    }, 600);
+}
+
+/**
+ * 按鈕加載狀態
+ */
+function setButtonLoading(button, isLoading, originalText = '') {
+    if (!button) return;
+    
+    if (isLoading) {
+        button.classList.add('btn-loading');
+        button.disabled = true;
+        button.setAttribute('data-original-text', button.textContent);
+        button.textContent = currentLanguage === 'zh' ? '處理中...' : 'Processing...';
+    } else {
+        button.classList.remove('btn-loading');
+        button.disabled = false;
+        const originalText = button.getAttribute('data-original-text');
+        if (originalText) {
+            button.textContent = originalText;
+            button.removeAttribute('data-original-text');
+        }
     }
 }
