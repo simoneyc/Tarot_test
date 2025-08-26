@@ -222,7 +222,17 @@ const translations = {
         'reversed': '逆位',
         'notification-spread': '請選擇一種牌陣再繼續！',
         'notification-question': '請輸入你的問題再繼續！',
-        'notification-choices': '請完整描述兩個選項再繼續！'
+        'notification-choices': '請完整描述兩個選項再繼續！',
+        'clear-records': '清除記錄',
+        'clear-records-title': '清除占卜記錄',
+        'clear-records-message': '您希望如何清除記錄？',
+        'clear-all': '清除全部記錄',
+        'clear-non-favorites': '僅清除非收藏記錄',
+        'cancel': '取消',
+        'final-confirm-all': '確定要刪除全部 {count} 條記錄嗎？此操作無法撤銷！',
+        'final-confirm-non-fav': '確定要刪除 {count} 條非收藏記錄嗎？此操作無法撤銷！',
+        'records-cleared': '記錄已清除',
+        'no-records-to-clear': '沒有記錄可以清除'
     },
     en: {
         // 加載和錯誤訊息
@@ -241,7 +251,17 @@ const translations = {
         'reversed': 'Reversed',
         'notification-spread': 'Please choose a spread before continuing!',
         'notification-question': 'Please enter your question before continuing!',
-        'notification-choices': 'Please fully describe both options before continuing!'
+        'notification-choices': 'Please fully describe both options before continuing!',
+        'clear-records': 'Clear Records',
+        'clear-records-title': 'Clear Divination Records',
+        'clear-records-message': 'How would you like to clear the records?',
+        'clear-all': 'Clear All Records',
+        'clear-non-favorites': 'Clear Non-Favorite Records Only',
+        'cancel': 'Cancel',
+        'final-confirm-all': 'Are you sure you want to delete all {count} records? This action cannot be undone!',
+        'final-confirm-non-fav': 'Are you sure you want to delete {count} non-favorite records? This action cannot be undone!',
+        'records-cleared': 'Records cleared',
+        'no-records-to-clear': 'No records to clear'
     }
 };
 
@@ -2817,3 +2837,135 @@ document.addEventListener('keydown', function(e) {
         closeRecordModal();
     }
 });
+
+/**
+ * 顯示清除記錄對話框
+ */
+function showClearRecordsDialog() {
+    const allRecords = divinationManager.getAllRecords();
+    const nonFavoriteRecords = allRecords.filter(r => !r.isFavorite);
+    
+    if (allRecords.length === 0) {
+        showNotification(t('no-records-to-clear'), 'info');
+        return;
+    }
+    
+    // 創建自定義對話框
+    const dialog = document.createElement('div');
+    dialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    
+    dialog.innerHTML = `
+        <div style="
+            background: linear-gradient(135deg, var(--deep-purple), var(--mystic-blue));
+            border: 2px solid var(--primary-gold);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        ">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
+                ${t('clear-records-title')}
+            </h3>
+            <p style="color: rgba(212, 175, 55, 0.9); margin-bottom: 30px; line-height: 1.5;">
+                ${t('clear-records-message')}
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button onclick="confirmClearRecords('all')" style="
+                    background: rgba(139, 0, 0, 0.8);
+                    color: #ff6b6b;
+                    border: 2px solid #ff6b6b;
+                    padding: 12px 20px;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-family: 'Cinzel', serif;
+                    font-weight: bold;
+                ">
+                    🗑️ ${t('clear-all')} (${allRecords.length})
+                </button>
+                ${nonFavoriteRecords.length > 0 ? `
+                <button onclick="confirmClearRecords('non-favorites')" style="
+                    background: rgba(255, 165, 0, 0.8);
+                    color: #ffa500;
+                    border: 2px solid #ffa500;
+                    padding: 12px 20px;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-family: 'Cinzel', serif;
+                    font-weight: bold;
+                ">
+                    ⭐ ${t('clear-non-favorites')} (${nonFavoriteRecords.length})
+                </button>
+                ` : ''}
+                <button onclick="closeClearDialog()" style="
+                    background: transparent;
+                    color: var(--primary-gold);
+                    border: 2px solid var(--primary-gold);
+                    padding: 12px 20px;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-family: 'Cinzel', serif;
+                    font-weight: bold;
+                ">
+                    ${t('cancel')}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    window.clearDialog = dialog;
+}
+
+/**
+ * 確認清除記錄
+ */
+function confirmClearRecords(type) {
+    const allRecords = divinationManager.getAllRecords();
+    const recordsToDelete = type === 'all' ? 
+        allRecords : 
+        allRecords.filter(r => !r.isFavorite);
+    
+    const confirmMessage = type === 'all' ? 
+        t('final-confirm-all').replace('{count}', recordsToDelete.length) :
+        t('final-confirm-non-fav').replace('{count}', recordsToDelete.length);
+    
+    if (confirm(confirmMessage)) {
+        // 執行清除
+        recordsToDelete.forEach(record => {
+            divinationManager.deleteRecord(record.id);
+        });
+        
+        // 關閉對話框
+        closeClearDialog();
+        
+        // 刷新頁面
+        if (historyUI) {
+            historyUI.loadRecords();
+        }
+        updateRecordsBadge();
+        
+        showNotification(t('records-cleared'), 'success');
+    }
+}
+
+/**
+ * 關閉清除對話框
+ */
+function closeClearDialog() {
+    if (window.clearDialog) {
+        document.body.removeChild(window.clearDialog);
+        window.clearDialog = null;
+    }
+}

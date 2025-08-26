@@ -1913,6 +1913,8 @@ body {
     font-family: 'Cinzel', serif;
     font-size: 0.9rem;
     font-weight: 600;
+    flex: 1; /* 新增：讓按鈕平均分配寬度 */
+    text-align: center; /* 新增：確保文字居中 */
 }
 
 .view-btn.active {
@@ -2224,6 +2226,61 @@ body {
 
     .page-btn {
         padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* 清除記錄按鈕 */
+.clear-records-btn {
+    background: rgba(139, 0, 0, 0.8);
+    color: #ff6b6b;
+    border: 2px solid #ff6b6b;
+    border-radius: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.clear-records-btn:hover {
+    background: rgba(255, 107, 107, 0.1);
+    border-color: #ff4757;
+    color: #ff4757;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .history-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .history-controls > div:last-child {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .view-toggle {
+        flex: 1;
+        margin-top: 0;
+    }
+    
+    .clear-records-btn {
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .clear-records-btn {
+        padding: 8px 12px;
         font-size: 0.8rem;
     }
 }
