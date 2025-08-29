@@ -1946,6 +1946,24 @@ class DivinationManager {
             console.log(`${type.toUpperCase()}: ${message}`);
         }
     }
+
+    /**
+     * 更新統計信息
+     * @private
+     */
+    updateStatistics(action, record) {
+        // 這裡可以添加統計邏輯，目前先保持空實現
+        console.log(`統計更新: ${action}`, record.id);
+    }
+
+    /**
+     * 更新收藏索引（性能優化）
+     * @private  
+     */
+    updateFavoritesIndex() {
+        // 收藏索引優化邏輯，目前先保持空實現
+        console.log('收藏索引已更新');
+    }
 }
 
 // 創建全局實例
@@ -2377,24 +2395,61 @@ function searchRecords() {
  * 切換收藏狀態
  */
 function toggleFavorite(recordId) {
-    
-    const newStatus = divinationManager.toggleFavorite(recordId);
-    
-    // 更新UI
     const favoriteBtn = document.querySelector(`[onclick="toggleFavorite('${recordId}')"]`);
+    
+    // 立即添加觸覺回饋
     addButtonFeedback(favoriteBtn, 'favorite');
+    
+    // 獲取當前狀態
+    const record = divinationManager.getRecordById(recordId);
+    if (!record) return;
+    
+    const newStatus = !record.isFavorite;
+    
+    // 立即更新 UI（樂觀更新）
     if (favoriteBtn) {
         favoriteBtn.textContent = newStatus ? '⭐' : '☆';
         favoriteBtn.classList.toggle('active', newStatus);
         favoriteBtn.title = newStatus ? '取消收藏' : '加入收藏';
+        
+        // 添加立即視覺回饋動畫
+        favoriteBtn.style.transform = 'scale(1.3)';
+        favoriteBtn.style.color = newStatus ? '#ffd700' : '';
+        setTimeout(() => {
+            favoriteBtn.style.transform = '';
+        }, 200);
     }
     
-    // 如果當前是只顯示收藏的過濾狀態，刷新列表
-    if (historyUI && historyUI.currentFilters.favoritesOnly && !newStatus) {
-        historyUI.loadRecords();
+    // 執行數據操作
+    try {
+        const actualNewStatus = divinationManager.toggleFavorite(recordId);
+        
+        // 驗證操作是否成功，如果不一致則回滾 UI
+        if (actualNewStatus !== newStatus && favoriteBtn) {
+            favoriteBtn.textContent = actualNewStatus ? '⭐' : '☆';
+            favoriteBtn.classList.toggle('active', actualNewStatus);
+            favoriteBtn.title = actualNewStatus ? '取消收藏' : '加入收藏';
+        }
+        
+        // 如果當前是只顯示收藏的過濾狀態，刷新列表
+        if (historyUI && historyUI.currentFilters.favoritesOnly && !actualNewStatus) {
+            historyUI.loadRecords();
+        }
+        
+        showNotification(actualNewStatus ? '已加入收藏' : '已取消收藏', 'success');
+        
+    } catch (error) {
+        console.error('收藏操作失敗:', error);
+        
+        // 回滾 UI 到原始狀態
+        if (favoriteBtn) {
+            favoriteBtn.textContent = record.isFavorite ? '⭐' : '☆';
+            favoriteBtn.classList.toggle('active', record.isFavorite);
+            favoriteBtn.title = record.isFavorite ? '取消收藏' : '加入收藏';
+        }
+        
+        showNotification('操作失敗，請重試', 'error');
     }
-    
-    showNotification(newStatus ? '已加入收藏' : '已取消收藏', 'success');
 }
 
 /**
@@ -2723,6 +2778,13 @@ function updateNotes(recordId, notes) {
  * 添加標籤
  */
 function addTag(recordId) {
+
+    // 添加按鈕回饋效果
+    const addButton = event?.target;
+    if (addButton) {
+        addButtonFeedback(addButton, 'tag');
+    }
+
     const input = document.getElementById(`newTag_${recordId}`);
     const tag = input.value.trim();
     
@@ -2774,6 +2836,13 @@ function addTag(recordId) {
  * 移除標籤
  */
 function removeTag(recordId, tagToRemove) {
+
+    // 添加按鈕回饋效果
+    const removeButton = event?.target;
+    if (removeButton) {
+        addButtonFeedback(removeButton, 'delete');
+    }
+
     const record = divinationManager.getRecordById(recordId);
     if (record) {
         record.tags = record.tags.filter(tag => tag !== tagToRemove);
@@ -2802,9 +2871,19 @@ function updateModalFavoriteButton(recordId) {
     const btn = document.getElementById(`modalFavoriteBtn_${recordId}`);
     
     if (btn && record) {
+        // 添加過渡動畫
+        btn.style.transition = 'all 0.3s ease';
+        
+        // 更新樣式
         btn.style.background = record.isFavorite ? 'var(--primary-gold)' : 'transparent';
         btn.style.color = record.isFavorite ? 'var(--dark-red)' : 'var(--primary-gold)';
         btn.innerHTML = `${record.isFavorite ? '⭐ ' : '☆ '}${record.isFavorite ? (currentLanguage === 'zh' ? '已收藏' : 'Favorited') : (currentLanguage === 'zh' ? '加入收藏' : 'Add to Favorites')}`;
+        
+        // 短暫的視覺強調
+        btn.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+            btn.style.transform = '';
+        }, 200);
     }
 }
 
@@ -3022,20 +3101,52 @@ function closeClearDialog() {
 function addButtonFeedback(button, effectType = 'default') {
     if (!button) return;
     
-    // 添加點擊動畫類
+    // 基礎點擊動畫
     button.classList.add('clicked');
     
-    // 根據按鈕類型添加特殊效果
-    if (effectType === 'favorite') {
-        button.style.transform = 'scale(1.2)';
-        setTimeout(() => {
-            button.style.transform = '';
-        }, 200);
-    } else if (effectType === 'delete') {
-        button.style.background = 'rgba(255, 107, 107, 0.3)';
-        setTimeout(() => {
-            button.style.background = '';
-        }, 300);
+    // 不同類型的特殊效果
+    switch (effectType) {
+        case 'favorite':
+            // 收藏按鈕特殊效果：放大+旋轉
+            button.style.transition = 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            button.style.transform = 'scale(1.2) rotate(15deg)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1) rotate(0deg)';
+            }, 300);
+            break;
+            
+        case 'delete':
+            // 刪除按鈕：震動效果
+            button.style.animation = 'deleteShake 0.5s ease';
+            button.style.background = 'rgba(255, 107, 107, 0.3)';
+            setTimeout(() => {
+                button.style.background = '';
+                button.style.animation = '';
+            }, 500);
+            break;
+            
+        case 'share':
+            // 分享按鈕：彈跳效果
+            button.style.animation = 'shareBouce 0.4s ease';
+            setTimeout(() => {
+                button.style.animation = '';
+            }, 400);
+            break;
+            
+        case 'tag':
+            // 標籤按鈕：脈衝效果
+            button.style.animation = 'tagPulse 0.6s ease';
+            setTimeout(() => {
+                button.style.animation = '';
+            }, 600);
+            break;
+            
+        default:
+            // 預設效果：縮放
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = '';
+            }, 150);
     }
     
     // 移除動畫類
