@@ -2211,14 +2211,14 @@ class HistoryUI {
                 <!-- 統計 -->
                 <div style="display: flex; align-items: center; gap: 15px; color: rgba(212, 175, 55, 0.7); font-size: 0.8rem;">
                     <span>👁️ ${record.readCount}</span>
-                    ${record.userRating ? `<span>⭐ ${record.userRating}</span>` : ''}
-                    ${record.isFavorite ? '<span style="color: #ffd700;">⭐</span>' : ''}
                 </div>
                 
                 <!-- 操作按鈕 -->
                 <div style="margin-left: 20px;" onclick="event.stopPropagation();">
-                    <button class="action-btn" onclick="toggleFavorite('${record.id}')" 
-                            title="${record.isFavorite ? '取消收藏' : '加入收藏'}">
+                    <button class="action-btn favorite-btn ${record.isFavorite ? 'active' : ''}" 
+                            onclick="toggleFavorite('${record.id}')" 
+                            title="${record.isFavorite ? '取消收藏' : '加入收藏'}"
+                            style="font-size: 1.2rem; padding: 8px; border-radius: 50%; transition: all 0.3s ease;">
                         ${record.isFavorite ? '⭐' : '☆'}
                     </button>
                 </div>
@@ -2395,7 +2395,8 @@ function searchRecords() {
  * 切換收藏狀態
  */
 function toggleFavorite(recordId) {
-    const favoriteBtn = document.querySelector(`[onclick="toggleFavorite('${recordId}')"]`);
+    const favoriteBtn = document.querySelector(`[onclick="toggleFavorite('${recordId}')"]`) ||
+                       document.querySelector(`[onclick*="toggleFavorite('${recordId}')"]`);
     
     // 立即添加觸覺回饋
     addButtonFeedback(favoriteBtn, 'favorite');
