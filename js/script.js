@@ -2218,7 +2218,7 @@ class HistoryUI {
                     <button class="action-btn favorite-btn ${record.isFavorite ? 'active' : ''}" 
                             onclick="toggleFavorite('${record.id}')" 
                             title="${record.isFavorite ? '取消收藏' : '加入收藏'}"
-                            style="font-size: 1.2rem; padding: 8px; border-radius: 50%; transition: all 0.3s ease;">
+                            style="font-size: 1.2rem; padding: 8px; border-radius: 50%; transition: all 0.3s ease; color: ${record.isFavorite ? '#ffd700' : 'rgba(212, 175, 55, 0.7)'};">
                         ${record.isFavorite ? '⭐' : '☆'}
                     </button>
                 </div>
@@ -2395,11 +2395,12 @@ function searchRecords() {
  * 切換收藏狀態
  */
 function toggleFavorite(recordId) {
-    const favoriteBtn = document.querySelector(`[onclick="toggleFavorite('${recordId}')"]`) ||
-                       document.querySelector(`[onclick*="toggleFavorite('${recordId}')"]`);
+    // 查找所有可能的收藏按鈕（卡片視圖和列表視圖）
+    const favoriteButtons = document.querySelectorAll(`[onclick*="toggleFavorite('${recordId}')"]`);
+    const primaryButton = favoriteButtons[0]; // 用於觸覺回饋的主要按鈕
     
     // 立即添加觸覺回饋
-    addButtonFeedback(favoriteBtn, 'favorite');
+    addButtonFeedback(primaryButton, 'favorite');
     
     // 獲取當前狀態
     const record = divinationManager.getRecordById(recordId);
@@ -2407,32 +2408,38 @@ function toggleFavorite(recordId) {
     
     const newStatus = !record.isFavorite;
     
-    // 立即更新 UI（樂觀更新）
-    if (favoriteBtn) {
-        favoriteBtn.textContent = newStatus ? '⭐' : '☆';
-        favoriteBtn.classList.toggle('active', newStatus);
-        favoriteBtn.title = newStatus ? '取消收藏' : '加入收藏';
-        
-        // 添加立即視覺回饋動畫
-        favoriteBtn.style.transform = 'scale(1.3)';
-        favoriteBtn.style.color = newStatus ? '#ffd700' : '';
-        setTimeout(() => {
-            favoriteBtn.style.transform = '';
-        }, 200);
-    }
+    // 立即更新所有視圖中的 UI（樂觀更新）
+    favoriteButtons.forEach(btn => {
+        if (btn) {
+            btn.textContent = newStatus ? '⭐' : '☆';
+            btn.classList.toggle('active', newStatus);
+            btn.title = newStatus ? '取消收藏' : '加入收藏';
+            
+            // 添加立即視覺回饋動畫
+            btn.style.transform = 'scale(1.3)';
+            btn.style.color = newStatus ? '#ffd700' : '';
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 200);
+        }
+    });
     
     // 執行數據操作
     try {
         const actualNewStatus = divinationManager.toggleFavorite(recordId);
         
         // 驗證操作是否成功，如果不一致則回滾 UI
-        if (actualNewStatus !== newStatus && favoriteBtn) {
-            favoriteBtn.textContent = actualNewStatus ? '⭐' : '☆';
-            favoriteBtn.classList.toggle('active', actualNewStatus);
-            favoriteBtn.title = actualNewStatus ? '取消收藏' : '加入收藏';
+        if (actualNewStatus !== newStatus) {
+            favoriteButtons.forEach(btn => {
+                if (btn) {
+                    btn.textContent = actualNewStatus ? '⭐' : '☆';
+                    btn.classList.toggle('active', actualNewStatus);
+                    btn.title = actualNewStatus ? '取消收藏' : '加入收藏';
+                }
+            });
         }
         
-        // 如果當前是只顯示收藏的過濾狀態，刷新列表
+        // 如果當前是僅顯示收藏的過濾狀態，刷新列表
         if (historyUI && historyUI.currentFilters.favoritesOnly && !actualNewStatus) {
             historyUI.loadRecords();
         }
@@ -2443,11 +2450,13 @@ function toggleFavorite(recordId) {
         console.error('收藏操作失敗:', error);
         
         // 回滾 UI 到原始狀態
-        if (favoriteBtn) {
-            favoriteBtn.textContent = record.isFavorite ? '⭐' : '☆';
-            favoriteBtn.classList.toggle('active', record.isFavorite);
-            favoriteBtn.title = record.isFavorite ? '取消收藏' : '加入收藏';
-        }
+        favoriteButtons.forEach(btn => {
+            if (btn) {
+                btn.textContent = record.isFavorite ? '⭐' : '☆';
+                btn.classList.toggle('active', record.isFavorite);
+                btn.title = record.isFavorite ? '取消收藏' : '加入收藏';
+            }
+        });
         
         showNotification('操作失敗，請重試', 'error');
     }
