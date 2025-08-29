@@ -39,16 +39,22 @@
             
             <!-- 導航功能區 -->
             <div class="navbar-controls">
-                <!-- 🆕 歷史記錄按鈕 -->
+                <!-- 歷史記錄按鈕 -->
                 <button class="nav-history-btn" onclick="showHistoryPage()" title="查看占卜記錄">
                     <span class="history-icon">📚</span>
                     <span class="history-text" data-zh="記錄" data-en="History">記錄</span>
                     <span class="history-badge" id="recordsBadge" style="display: none;">0</span>
                 </button>
                 
+                <!-- 新增：主題切換按鈕 -->
+                <button class="theme-toggle-btn" onclick="toggleTheme()" title="切換主題風格">
+                    <span class="theme-icon">🎨</span>
+                    <span class="theme-text" data-zh="模式" data-en="Mode">模式</span>
+                </button>
+                
                 <!-- 語言切換按鈕 -->
                 <button class="lang-toggle-btn" onclick="toggleLanguage()" title="切換語言 / Switch Language">
-                    <span class="lang-icon">🌐</span>
+                    <span class="lang-icon">🌍</span>
                     <span class="lang-text" data-current="zh">中文</span>
                 </button>
             </div>

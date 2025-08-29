@@ -7,21 +7,129 @@
 }
 
 :root {
+    /* 經典主題變數 */
+    --primary-color: #d4af37;
     --primary-gold: #d4af37;
     --dark-red: #8b0000;
     --deep-purple: #1a1a2e;
     --mystic-blue: #16213e;
+    --background-gradient: linear-gradient(135deg, #0a0a0a 0%, var(--deep-purple) 50%, var(--mystic-blue) 100%);
+    --text-color: var(--primary-gold);
+    --card-bg: linear-gradient(135deg, var(--dark-red), #4a0000);
+    --card-border: var(--primary-gold);
+    --modal-bg: linear-gradient(135deg, var(--deep-purple), var(--mystic-blue));
+    --particle-color: var(--primary-gold);
+    --shadow-color: rgba(212, 175, 55, 0.3);
+    --transition-speed: 0.2s;
+}
+
+/* 木質主題變數 */
+[data-theme="wood"] {
+    --primary-color: #8B4513;
+    --primary-gold: #8B4513;
+    --dark-red: #A0522D;
+    --deep-purple: #F5F5DC;
+    --mystic-blue: #DEB887;
+    --background-gradient: linear-gradient(135deg, #FFFEF7 0%, #F5F5DC 50%, #DEB887 100%);
+    --text-color: #654321;
+    --card-bg: linear-gradient(135deg, #F4E4BC, #E6D3A3);
+    --card-border: #8B4513;
+    --modal-bg: linear-gradient(135deg, #F5F5DC, #DEB887);
+    --particle-color: #A0522D;
+    --shadow-color: rgba(139, 69, 19, 0.2);
+}
+
+/* 主題切換按鈕樣式 */
+.theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--primary-gold);
+    border: 2px solid rgba(212, 175, 55, 0.6);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+[data-theme="wood"] .theme-toggle-btn {
+    background: rgba(139, 69, 19, 0.1);
+    color: var(--text-color);
+    border-color: var(--primary-color);
+}
+
+.theme-toggle-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, var(--shadow-color) 0%, transparent 70%);
+    transition: all var(--transition-speed) ease;
+    transform: translate(-50%, -50%);
+}
+
+@media (hover: hover) {
+    .theme-toggle-btn:hover::before {
+        width: 120px;
+        height: 120px;
+    }
+
+    .theme-toggle-btn:hover {
+        border-color: var(--primary-color);
+        background: var(--shadow-color);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px var(--shadow-color);
+    }
+}
+
+@media (hover: none) {
+    .theme-toggle-btn:active {
+        transform: scale(0.95);
+        background: var(--shadow-color);
+    }
+}
+
+.theme-icon {
+    font-size: 1.2rem;
+}
+
+.theme-text {
+    font-weight: 600;
+}
+
+/* 響應式調整 */
+@media (max-width: 480px) {
+    .theme-toggle-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        gap: 4px;
+    }
+    
+    .theme-text {
+        display: none;
+    }
 }
 
 body {
     font-family: 'Cinzel', serif;
-    background: linear-gradient(135deg, #0a0a0a 0%, var(--deep-purple) 50%, var(--mystic-blue) 100%);
-    color: var(--primary-gold);
+    background: var(--background-gradient);
+    color: var(--text-color);
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
     -webkit-overflow-scrolling: touch;
     background-attachment: scroll;
+    transition: all var(--transition-speed) ease;
 }
 
 /* 導航列滑入動畫 */
@@ -42,12 +150,22 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(180deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 46, 0.9) 100%);
+    background: linear-gradient(180deg, 
+        rgba(10, 10, 10, 0.95) 0%, 
+        rgba(26, 26, 46, 0.9) 100%);
     backdrop-filter: blur(15px);
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
     z-index: 9999;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+    border-bottom: 1px solid var(--shadow-color);
     animation: navbarSlideDown 0.5s ease-out;
+    transition: all var(--transition-speed) ease;
+}
+
+[data-theme="wood"] .navbar-fixed {
+    background: linear-gradient(180deg, 
+        rgba(245, 245, 220, 0.95) 0%, 
+        rgba(222, 184, 135, 0.9) 100%);
+    border-bottom-color: var(--primary-color);
 }
 
 .navbar-container {
@@ -754,20 +872,28 @@ body {
 }
 
 .btn {
-    background: linear-gradient(45deg, var(--dark-red), #4a0000);
-    color: var(--primary-gold);
-    border: 2px solid var(--primary-gold);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--card-border);
     padding: 15px 30px;
     font-size: 1.2rem;
     font-family: 'Cinzel', serif;
     cursor: pointer;
     border-radius: 12px;
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 0 20px var(--shadow-color);
     transition: all 0.4s ease;
     text-transform: uppercase;
     letter-spacing: 2px;
     position: relative;
     overflow: hidden;
+}
+
+[data-theme="wood"] .btn {
+    background: linear-gradient(45deg, #D2B48C, #DEB887);
+    color: #654321;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+    text-shadow: none;
 }
 
 .btn::before {
@@ -1018,6 +1144,7 @@ body {
     overflow: hidden;
 }
 
+/* 經典主題牌背 - 更神秘的設計 */
 .card-back::before {
     content: '';
     position: absolute;
@@ -1027,7 +1154,7 @@ body {
     bottom: 8px;
     border: 2px solid var(--primary-gold);
     border-radius: 8px;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="20" fill="none" stroke="%23d4af37" stroke-width="2" opacity="0.3"/><circle cx="20" cy="20" r="5" fill="%23d4af37" opacity="0.4"/><circle cx="80" cy="80" r="5" fill="%23d4af37" opacity="0.4"/><circle cx="80" cy="20" r="5" fill="%23d4af37" opacity="0.4"/><circle cx="20" cy="80" r="5" fill="%23d4af37" opacity="0.4"/></svg>') center/cover;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="mystic" cx="50%" cy="50%"><stop offset="0%" style="stop-color:%23d4af37;stop-opacity:0.1"/><stop offset="100%" style="stop-color:%23d4af37;stop-opacity:0.4"/></radialGradient></defs><circle cx="50" cy="50" r="25" fill="url(%23mystic)" stroke="%23d4af37" stroke-width="1" opacity="0.6"/><polygon points="50,20 55,35 70,35 58,45 63,60 50,50 37,60 42,45 30,35 45,35" fill="%23d4af37" opacity="0.3"/><circle cx="20" cy="20" r="3" fill="%23d4af37" opacity="0.4"/><circle cx="80" cy="80" r="3" fill="%23d4af37" opacity="0.4"/><circle cx="80" cy="20" r="3" fill="%23d4af37" opacity="0.4"/><circle cx="20" cy="80" r="3" fill="%23d4af37" opacity="0.4"/><path d="M15,50 Q50,30 85,50" stroke="%23d4af37" stroke-width="1" fill="none" opacity="0.2"/><path d="M15,50 Q50,70 85,50" stroke="%23d4af37" stroke-width="1" fill="none" opacity="0.2"/></svg>') center/cover;
 }
 
 .card-back::after {
@@ -1040,6 +1167,51 @@ body {
     color: var(--primary-gold);
     text-shadow: 0 0 15px var(--primary-gold);
     animation: cardPulse 3s ease-in-out infinite;
+}
+
+/* 木質主題牌背 - 自然簡約設計 */
+[data-theme="wood"] .card-back {
+    background: linear-gradient(135deg, #F4E4BC 0%, #E6D3A3 50%, #D2B48C 100%);
+    border-color: var(--primary-color);
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="wood"] .card-back::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    border: 1.5px solid rgba(139, 69, 19, 0.6);
+    border-radius: 8px;
+    background: 
+        linear-gradient(45deg, transparent 40%, rgba(139, 69, 19, 0.05) 50%, transparent 60%),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="wood-pattern" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M25,10 Q35,15 45,20 Q35,25 25,30 Q15,25 5,20 Q15,15 25,10" fill="none" stroke="%23A0522D" stroke-width="0.5" opacity="0.3"/><path d="M25,30 Q35,35 45,40 Q35,45 25,50 Q15,45 5,40 Q15,35 25,30" fill="none" stroke="%23D2B48C" stroke-width="0.3" opacity="0.2"/></pattern></defs><rect width="100" height="100" fill="url(%23wood-pattern)"/><circle cx="50" cy="50" r="20" fill="none" stroke="%238B4513" stroke-width="1" opacity="0.2"/><path d="M30,30 L70,30 M70,30 L70,70 M70,70 L30,70 M30,70 L30,30" stroke="%238B4513" stroke-width="0.5" opacity="0.15" fill="none"/></svg>') center/cover;
+}
+
+[data-theme="wood"] .card-back::after {
+    content: '🍃';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.8rem;
+    filter: sepia(1) hue-rotate(20deg) saturate(1.2);
+    text-shadow: 0 2px 8px rgba(139, 69, 19, 0.4);
+    animation: woodCardFloat 4s ease-in-out infinite;
+}
+
+@keyframes woodCardFloat {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(1); 
+        filter: sepia(1) hue-rotate(20deg) saturate(1.2);
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.1); 
+        filter: sepia(1) hue-rotate(25deg) saturate(1.4);
+    }
 }
 
 @keyframes cardPulse {
@@ -2558,4 +2730,263 @@ body {
 
 .favorite-btn {
     transition: all 0.3s ease;
+}
+
+/* ===== 木質主題專用樣式 ===== */
+
+/* 木質背景紋理 */
+[data-theme="wood"] body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.05) 0%, transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(160, 82, 45, 0.03) 0%, transparent 25%),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><pattern id="wood-grain" x="0" y="0" width="100" height="20" patternUnits="userSpaceOnUse"><path d="M0,10 Q25,5 50,10 T100,10" stroke="%23D2B48C" stroke-width="0.5" fill="none" opacity="0.3"/><path d="M0,15 Q30,8 60,15 T100,15" stroke="%23DEB887" stroke-width="0.3" fill="none" opacity="0.2"/></pattern></defs><rect width="200" height="200" fill="url(%23wood-grain)"/></svg>') repeat;
+    z-index: -2;
+    opacity: 0.6;
+}
+
+/* 木質主題標題 */
+[data-theme="wood"] .title {
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.3);
+    animation: none; /* 移除閃爍動畫 */
+}
+
+[data-theme="wood"] .subtitle {
+    color: #8B4513;
+    opacity: 0.8;
+}
+
+/* 木質主題卡片樣式 */
+[data-theme="wood"] .question-form,
+[data-theme="wood"] .spread-card {
+    background: rgba(245, 245, 220, 0.9);
+    border: 2px solid rgba(139, 69, 19, 0.3);
+    box-shadow: 0 8px 32px rgba(139, 69, 19, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+[data-theme="wood"] .spread-card.active {
+    background: rgba(222, 184, 135, 0.7);
+    border-color: var(--primary-color);
+    box-shadow: 0 12px 40px rgba(139, 69, 19, 0.25);
+}
+
+/* 木質主題輸入框 */
+[data-theme="wood"] .question-input,
+[data-theme="wood"] .search-input {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--primary-color);
+    color: #654321;
+}
+
+[data-theme="wood"] .question-input:focus,
+[data-theme="wood"] .search-input:focus {
+    border-color: #A0522D;
+    box-shadow: 0 0 15px rgba(139, 69, 19, 0.3);
+    background: rgba(255, 255, 255, 1);
+}
+
+[data-theme="wood"] .question-input::placeholder,
+[data-theme="wood"] .search-input::placeholder {
+    color: rgba(139, 69, 19, 0.6);
+}
+
+/* 木質主題塔羅牌 */
+[data-theme="wood"] .card-back {
+    background: linear-gradient(135deg, #F4E4BC, #E6D3A3);
+    border-color: var(--primary-color);
+}
+
+[data-theme="wood"] .card-back::before {
+    border-color: var(--primary-color);
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="15" fill="none" stroke="%238B4513" stroke-width="1" opacity="0.4"/><path d="M30 30 Q50 40 70 30" fill="none" stroke="%238B4513" stroke-width="1" opacity="0.3"/><path d="M30 70 Q50 60 70 70" fill="none" stroke="%238B4513" stroke-width="1" opacity="0.3"/><circle cx="25" cy="25" r="2" fill="%238B4513" opacity="0.5"/><circle cx="75" cy="75" r="2" fill="%238B4513" opacity="0.5"/><circle cx="75" cy="25" r="2" fill="%238B4513" opacity="0.5"/><circle cx="25" cy="75" r="2" fill="%238B4513" opacity="0.5"/></svg>') center/cover;
+}
+
+[data-theme="wood"] .card-back::after {
+    content: '🍃';
+    color: var(--primary-color);
+    text-shadow: 0 0 8px rgba(139, 69, 19, 0.5);
+}
+
+[data-theme="wood"] .card-front {
+    background: linear-gradient(135deg, #F5F5DC, #DEB887);
+    color: #654321;
+    border-color: var(--primary-color);
+}
+
+[data-theme="wood"] .card-front::before {
+    border-color: #654321;
+}
+
+/* 木質主題進度條 */
+[data-theme="wood"] .progress-fill,
+[data-theme="wood"] .enhanced-progress-fill {
+    background: linear-gradient(90deg, 
+        var(--primary-color) 0%, 
+        #A0522D 50%, 
+        var(--primary-color) 100%);
+    box-shadow: 0 0 10px rgba(139, 69, 19, 0.4);
+}
+
+[data-theme="wood"] .progress-bar,
+[data-theme="wood"] .enhanced-progress-bar {
+    background: rgba(139, 69, 19, 0.2);
+}
+
+/* 木質主題裝飾 */
+[data-theme="wood"] .ornament {
+    color: var(--primary-color);
+    text-shadow: 1px 1px 3px rgba(139, 69, 19, 0.3);
+    animation: woodOrnamentGlow 4s ease-in-out infinite;
+}
+
+@keyframes woodOrnamentGlow {
+    0%, 100% { text-shadow: 1px 1px 3px rgba(139, 69, 19, 0.3); }
+    50% { text-shadow: 2px 2px 6px rgba(139, 69, 19, 0.5); }
+}
+
+/* 木質主題載入動畫 */
+[data-theme="wood"] .shuffling-card {
+    background: linear-gradient(135deg, #F4E4BC, #E6D3A3);
+    border-color: var(--primary-color);
+}
+
+[data-theme="wood"] .shuffling-card::after {
+    content: '🍃';
+    color: var(--primary-color);
+    text-shadow: 0 0 8px rgba(139, 69, 19, 0.5);
+}
+
+/* 木質主題模態框 */
+[data-theme="wood"] #recordModal > div {
+    background: linear-gradient(135deg, #F5F5DC, #DEB887);
+    border-color: var(--primary-color);
+}
+
+[data-theme="wood"] #recordModal .history-container,
+[data-theme="wood"] .ai-interpretation,
+[data-theme="wood"] .selected-cards-display > div {
+    background: rgba(245, 245, 220, 0.9);
+    border-color: rgba(139, 69, 19, 0.3);
+}
+
+/* 木質主題歷史記錄 */
+[data-theme="wood"] .record-card {
+    background: rgba(245, 245, 220, 0.9);
+    border-color: rgba(139, 69, 19, 0.3);
+}
+
+[data-theme="wood"] .record-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
+}
+
+/* 木質主題篩選器 */
+[data-theme="wood"] .filter-dropdown,
+[data-theme="wood"] .view-toggle {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(139, 69, 19, 0.4);
+    color: #654321;
+}
+
+[data-theme="wood"] .view-btn.active {
+    background: var(--primary-color);
+    color: #FFFEF7;
+}
+
+/* 移除木質主題的星星背景 */
+[data-theme="wood"] body::after {
+    display: none !important;
+}
+
+/* 木質主題的簡約星星裝飾 */
+[data-theme="wood"] body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><pattern id="wood-stars" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="%23A0522D" opacity="0.2"/><circle cx="60" cy="40" r="0.8" fill="%238B4513" opacity="0.15"/><circle cx="40" cy="65" r="0.6" fill="%23A0522D" opacity="0.1"/></pattern></defs><rect width="400" height="400" fill="url(%23wood-stars)"/></svg>') repeat;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+/* 木質主題響應式調整 */
+@media (max-width: 768px) {
+    [data-theme="wood"] .navbar-fixed {
+        background: linear-gradient(180deg, 
+            rgba(245, 245, 220, 0.98) 0%, 
+            rgba(222, 184, 135, 0.95) 100%);
+    }
+    
+    [data-theme="wood"] .question-form,
+    [data-theme="wood"] .spread-card {
+        background: rgba(245, 245, 220, 0.95);
+    }
+}
+
+@media (max-width: 480px) {
+    [data-theme="wood"] .theme-toggle-btn {
+        background: rgba(139, 69, 19, 0.15);
+        border-color: rgba(139, 69, 19, 0.5);
+    }
+}
+
+/* 主題切換過渡動畫 */
+html {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 關鍵元素的平滑過渡 */
+.container,
+.navbar-fixed,
+.btn,
+.question-form,
+.spread-card,
+.tarot-card,
+.record-card {
+    transition: all 0.2s ease;
+}
+
+/* 木質主題特殊動畫 */
+[data-theme="wood"] .tarot-card:hover:not(.selected):not(.flipped) {
+    transform: translateY(-15px) scale(1.08);
+    box-shadow: 0 15px 35px rgba(139, 69, 19, 0.4);
+}
+
+[data-theme="wood"] .btn::before {
+    background: radial-gradient(circle, rgba(139, 69, 19, 0.3) 0%, transparent 70%);
+}
+
+@media (hover: hover) {
+    [data-theme="wood"] .btn:hover {
+        background: linear-gradient(45deg, #C19A6B, #D2B48C);
+        box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+        transform: translateY(-2px) scale(1.02);
+    }
+}
+
+/* 木質主題載入動畫優化 */
+[data-theme="wood"] .mystical-loading {
+    animation: woodMysticalPulse 3s ease-in-out infinite;
+}
+
+@keyframes woodMysticalPulse {
+    0%, 100% { opacity: 0.8; color: #8B4513; }
+    50% { opacity: 1; color: #A0522D; }
+}
+
+/* 木質主題進度條動畫 */
+[data-theme="wood"] .enhanced-progress-fill::after {
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(139, 69, 19, 0.4) 50%, 
+        transparent 100%);
 }

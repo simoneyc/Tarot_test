@@ -596,7 +596,167 @@ const tarotCards = [
 let selectedCards = [];
 let currentQuestion = "";
 let currentMode = "three";
-let currentTheme = "classic";
+
+
+// 主題管理
+let currentTheme = 'classic';
+
+/**
+ * 初始化主題
+ */
+function initializeTheme() {
+    // 從 localStorage 讀取主題偏好
+    const savedTheme = localStorage.getItem('tarot_theme') || 'classic';
+    setTheme(savedTheme, false); // false 表示不需要動畫
+}
+
+/**
+ * 設置主題
+ */
+// 優化主題設置函數
+function setTheme(theme, animate = true) {
+    try {
+        // 驗證主題名稱
+        if (!['classic', 'wood'].includes(theme)) {
+            console.warn('⚠️ 無效的主題名稱，使用預設主題');
+            theme = 'classic';
+        }
+        
+        currentTheme = theme;
+        
+        // 性能優化：避免不必要的重複設置
+        const currentDataTheme = document.documentElement.getAttribute('data-theme');
+        if (currentDataTheme === theme && !animate) {
+            return;
+        }
+        
+        // 添加過渡動畫
+        if (animate) {
+            document.documentElement.style.transition = 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+            setTimeout(() => {
+                document.documentElement.style.transition = '';
+            }, 200);
+        }
+        
+        // 設置 data-theme 屬性
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        // 儲存偏好（添加錯誤處理）
+        try {
+            localStorage.setItem('tarot_theme', theme);
+        } catch (e) {
+            console.warn('⚠️ 無法儲存主題偏好設置');
+        }
+        
+        // 更新主題按鈕
+        updateThemeButton();
+        
+        // 處理粒子效果
+        setTimeout(() => handleParticles(), 100);
+        
+        // 觸發自定義事件
+        document.dispatchEvent(new CustomEvent('themeChanged', { 
+            detail: { theme, previousTheme: currentDataTheme }
+        }));
+        
+        console.log(`🎨 主題已切換至: ${theme === 'classic' ? '經典神秘' : '現代木質'}`);
+        
+    } catch (error) {
+        console.error('❌ 主題切換失敗:', error);
+        // 降級處理
+        if (theme !== 'classic') {
+            setTheme('classic', false);
+        }
+    }
+}
+
+// 添加主題變化事件監聽器（用於其他組件響應主題變化）
+document.addEventListener('themeChanged', function(e) {
+    const { theme } = e.detail;
+    
+    // 更新記錄數量徽章（如果存在）
+    updateRecordsBadge();
+    
+    // 重新應用語言設置（確保主題切換後文字正確）
+    setTimeout(() => {
+        updateLanguageElements();
+    }, 50);
+});
+
+/**
+ * 切換主題
+ */
+function toggleTheme() {
+    const newTheme = currentTheme === 'classic' ? 'wood' : 'classic';
+    setTheme(newTheme, true);
+    
+    // 添加按鈕點擊反饋
+    const btn = document.querySelector('.theme-toggle-btn');
+    if (btn) {
+        btn.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            btn.style.transform = '';
+        }, 150);
+    }
+}
+
+/**
+ * 更新主題按鈕顯示
+ */
+function updateThemeButton() {
+    const btn = document.querySelector('.theme-toggle-btn');
+    const icon = btn?.querySelector('.theme-icon');
+    const text = btn?.querySelector('.theme-text');
+    
+    if (icon && text) {
+        if (currentTheme === 'classic') {
+            icon.textContent = '🌙'; // 經典模式顯示月亮
+            text.setAttribute('data-zh', '木質');
+            text.setAttribute('data-en', 'Wood');
+            if (currentLanguage === 'zh') {
+                text.textContent = '木質';
+            } else {
+                text.textContent = 'Wood';
+            }
+        } else {
+            icon.textContent = '✨'; // 木質模式顯示星星
+            text.setAttribute('data-zh', '經典');
+            text.setAttribute('data-en', 'Classic');
+            if (currentLanguage === 'zh') {
+                text.textContent = '經典';
+            } else {
+                text.textContent = 'Classic';
+            }
+        }
+    }
+}
+
+/**
+ * 處理粒子效果顯示/隱藏
+ */
+// 修改現有的 handleParticles 函數
+function handleParticles() {
+    const particlesContainer = document.getElementById('particles');
+    if (!particlesContainer) return;
+    
+    if (currentTheme === 'wood') {
+        // 木質主題：隱藏並清理粒子
+        particlesContainer.style.display = 'none';
+        clearParticles();
+    } else {
+        // 經典主題：顯示粒子（如果是桌面端）
+        const isMobile = window.innerWidth <= 768 || !window.matchMedia('(hover: hover)').matches;
+        if (!isMobile && window.matchMedia('(min-width: 769px)').matches && window.matchMedia('(hover: hover)').matches) {
+            particlesContainer.style.display = 'block';
+            // 如果粒子容器為空，重新初始化
+            if (particlesContainer.children.length === 0) {
+                initializeParticles();
+            }
+        } else {
+            particlesContainer.style.display = 'none';
+        }
+    }
+}
 
 // 回到主畫面功能
 function goToHome() {
@@ -658,11 +818,17 @@ function updateLanguageElements() {
     if (document.getElementById('step3').classList.contains('active')) {
         updateSpreadDescription();
     }
+
+    // 更新主題按鈕文字（在函數結尾添加）
+    updateThemeButton();
 }
 
 // 替換原有的 DOMContentLoaded 事件監聽器
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 TarotVision 正在初始化...');
+    
+    // 初始化主題（新增這行）
+    initializeTheme();
     
     // 語言切換按鈕事件
     document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -697,33 +863,72 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ TarotVision 初始化完成');
 });
 
-// 粒子系統初始化
+// 修改現有函數，添加主題檢查
 function initializeParticles() {
+    // 只在經典主題且桌面端初始化粒子
+    if (currentTheme !== 'classic') return;
+    
     const particlesContainer = document.getElementById('particles');
     if (!particlesContainer) return;
+    
+    const isMobile = window.innerWidth <= 768 || !window.matchMedia('(hover: hover)').matches;
+    if (isMobile || !window.matchMedia('(min-width: 769px)').matches || !window.matchMedia('(hover: hover)').matches) {
+        return;
+    }
+    
     const particleCount = 30;
     for (let i = 0; i < particleCount; i++) {
         setTimeout(() => createParticle(particlesContainer), i * 300);
     }
-    setInterval(() => {
+    
+    // 動態維護粒子數量
+    const particleInterval = setInterval(() => {
+        if (currentTheme !== 'classic') {
+            clearInterval(particleInterval);
+            return;
+        }
+        
         if (particlesContainer.children.length < particleCount) {
             createParticle(particlesContainer);
         }
     }, 2000);
+    
+    // 儲存間隔ID以便清理
+    window.particleInterval = particleInterval;
 }
 
+// 優化 createParticle 函數，支援主題色彩
 function createParticle(container) {
     const particle = document.createElement('div');
     particle.className = 'particle';
     particle.style.left = Math.random() * 100 + '%';
     particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
     particle.style.animationDelay = Math.random() * 2 + 's';
+    
+    // 根據主題設置顏色
+    const particleColor = currentTheme === 'classic' ? 'var(--primary-gold)' : '#A0522D';
+    particle.style.background = particleColor;
+    
     container.appendChild(particle);
+    
     setTimeout(() => {
         if (particle.parentNode) {
             particle.parentNode.removeChild(particle);
         }
     }, 8000);
+}
+
+// 新增：清理粒子效果的函數
+function clearParticles() {
+    const particlesContainer = document.getElementById('particles');
+    if (particlesContainer) {
+        particlesContainer.innerHTML = '';
+    }
+    
+    if (window.particleInterval) {
+        clearInterval(window.particleInterval);
+        window.particleInterval = null;
+    }
 }
 
 // 設置牌陣選擇監聽器
