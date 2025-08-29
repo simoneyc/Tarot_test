@@ -1977,11 +1977,15 @@ body {
 }
 
 .records-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 25px;
     margin-bottom: 40px;
+    justify-content: center;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 20px;
 }
 
 .records-list {
@@ -1997,9 +2001,9 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    flex: 0 0 auto;
-    width: 350px;
-    max-width: 100%;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto; /* 確保單個卡片也置中 */
 }
 
 @media (max-width: 768px) {
@@ -2008,17 +2012,43 @@ body {
     }
 }
 
+/* 大螢幕：3-4張並排 */
+@media (min-width: 1400px) {
+    .records-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        max-width: 1400px;
+    }
+}
+
+/* 中等螢幕：2-3張並排 */
+@media (max-width: 1200px) {
+    .records-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        max-width: 1000px;
+    }
+}
+
+/* 平板：1-2張並排 */
+@media (max-width: 768px) {
+    .records-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        padding: 0 15px;
+    }
+}
+
+/* 手機：1張全寬 */
 @media (max-width: 480px) {
     .records-grid {
+        grid-template-columns: 1fr;
         gap: 15px;
         padding: 0 10px;
     }
     
     .record-card {
-        width: 100%;
-        min-width: 280px;
+        max-width: none;
     }
-}    
+} 
 
 .record-card::before {
     content: '';
