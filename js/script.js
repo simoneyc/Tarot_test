@@ -1622,18 +1622,41 @@ class DivinationManager {
      * @param {string} recordId - 記錄ID
      * @returns {Object|null} 記錄對象
      */
+    /**
+     * 根據ID獲取記錄（純讀取，不計數）
+     */
     getRecordById(recordId) {
         const records = this.getAllRecords();
-        const record = records.find(r => r.id === recordId);
+        return records.find(r => r.id === recordId) || null;
+    }
+
+    /**
+     * 增加查看次數（帶防重複機制）
+     */
+    incrementViewCount(recordId) {
+        // 防重複計數機制（5分鐘內同一記錄不重複計數）
+        const viewKey = `viewed_${recordId}`;
+        const lastViewTime = sessionStorage.getItem(viewKey);
+        const now = Date.now();
         
-        if (record) {
-            // 更新查看統計
-            record.readCount++;
-            record.lastViewed = new Date().toISOString();
-            this.updateRecord(record);
+        if (lastViewTime && (now - parseInt(lastViewTime)) < 5 * 60 * 1000) {
+            return false; // 5分鐘內已查看過，不重複計數
         }
         
-        return record || null;
+        const record = this.getRecordById(recordId);
+        if (record) {
+            record.readCount = (record.readCount || 0) + 1;
+            record.lastViewed = new Date().toISOString();
+            this.updateRecord(record);
+            
+            // 記錄查看時間
+            sessionStorage.setItem(viewKey, now.toString());
+            
+            console.log(`👁️ 查看次數已更新: ${recordId} -> ${record.readCount}`);
+            return record.readCount;
+        }
+        
+        return false;
     }
 
     /**
@@ -2524,6 +2547,16 @@ function openRecordModal(recordId) {
         return;
     }
 
+    // 增加查看次數並獲取新的計數
+    const newViewCount = divinationManager.incrementViewCount(recordId);
+    
+    // 即時更新所有位置的查看次數顯示
+    if (newViewCount !== false) {
+        setTimeout(() => {
+            updateViewCountEverywhere(recordId, newViewCount);
+        }, 100);
+    }
+
     const modal = document.getElementById('recordModal');
     const content = document.getElementById('modalContent');
     
@@ -2697,7 +2730,7 @@ function openRecordModal(recordId) {
                 <div style="color: var(--primary-gold); font-size: 1.2rem; font-weight: bold;">👁️</div>
                 <div style="color: rgba(212, 175, 55, 0.8); font-size: 0.8rem; margin-top: 5px;">
                     ${currentLanguage === 'zh' ? '查看次數' : 'View Count'}<br>
-                    <strong>${record.readCount}</strong>
+                    <strong id="modalViewCount_${record.id}">${record.readCount}</strong>
                 </div>
             </div>
             <div style="text-align: center;">
@@ -2737,7 +2770,14 @@ function openRecordModal(recordId) {
     // 顯示模態框
     modal.style.zIndex = '10001';
     modal.style.display = 'block';
-    document.body.style.overflow = 'hidden'; // 防止背景滾動
+    document.body.style.overflow = 'hidden';
+
+    // 即時更新查看次數顯示
+    if (newViewCount !== false) {
+        setTimeout(() => {
+            updateViewCountEverywhere(recordId, newViewCount);
+        }, 100);
+    }
 }
 
 /**
@@ -2752,10 +2792,64 @@ function closeRecordModal() {
 }
 
 /**
+ * 更新所有位置的查看次數顯示
+ */
+function updateViewCountEverywhere(recordId, newCount) {
+    if (newCount === false) return;
+    
+    // 1. 更新彈窗中的顯示
+    const modalViewCount = document.getElementById(`modalViewCount_${recordId}`);
+    if (modalViewCount) {
+        modalViewCount.textContent = newCount;
+        modalViewCount.style.color = '#ffd700';
+        modalViewCount.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            modalViewCount.style.color = '';
+            modalViewCount.style.transform = '';
+        }, 500);
+    }
+    
+    // 2. 更新歷史記錄頁面的卡片視圖
+    const recordCards = document.querySelectorAll('.record-card');
+    recordCards.forEach(card => {
+        if (card.getAttribute('onclick')?.includes(recordId)) {
+            const viewCountSpan = card.querySelector('.stat-item span:last-child');
+            if (viewCountSpan && viewCountSpan.previousElementSibling?.textContent === '👁️') {
+                viewCountSpan.textContent = newCount;
+                // 添加更新動畫
+                viewCountSpan.style.color = '#ffd700';
+                viewCountSpan.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    viewCountSpan.style.color = '';
+                    viewCountSpan.style.transform = '';
+                }, 500);
+            }
+        }
+    });
+    
+    // 3. 更新歷史記錄頁面的列表視圖
+    const listItems = document.querySelectorAll('#recordsList [onclick*="openRecordModal"]');
+    listItems.forEach(item => {
+        if (item.getAttribute('onclick')?.includes(recordId)) {
+            // 找到包含眼睛圖標的span元素
+            const viewCountElement = item.querySelector('span');
+            if (viewCountElement && viewCountElement.textContent.includes('👁️')) {
+                viewCountElement.textContent = `👁️ ${newCount}`;
+                // 添加更新動畫
+                viewCountElement.style.color = '#ffd700';
+                setTimeout(() => {
+                    viewCountElement.style.color = 'rgba(212, 175, 55, 0.7)';
+                }, 500);
+            }
+        }
+    });
+}
+
+/**
  * 更新評分
  */
 function updateRating(recordId, rating) {
-    const record = divinationManager.getRecordById(recordId);
+    // const record = divinationManager.getRecordById(recordId);
     if (record) {
         record.userRating = rating;
         divinationManager.updateRecord(record);
