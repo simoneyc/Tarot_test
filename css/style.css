@@ -57,6 +57,16 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: nowrap; /* 改為 nowrap */
+    gap: 10px; /* 新增間距控制 */
+}
+
+.navbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 1; /* 允許收縮 */
+    min-width: 0; /* 重要：允許flex項目收縮到比內容更小 */
 }
 
 /* 語言切換按鈕樣式優化 */
@@ -78,6 +88,27 @@ body {
     position: relative;
     overflow: hidden;
     white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .nav-history-btn, .lang-toggle-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        gap: 4px;
+        flex-shrink: 1;
+        min-width: 0;
+    }
+    
+    .history-text, .lang-text {
+        display: none;
+    }
+}
+
+@media (max-width: 360px) {
+    .nav-history-btn, .lang-toggle-btn {
+        padding: 6px 8px;
+        min-width: 40px;
+    }
 }
 
 .lang-toggle-btn::before {
@@ -1946,8 +1977,9 @@ body {
 }
 
 .records-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 25px;
     margin-bottom: 40px;
 }
@@ -1965,7 +1997,28 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    flex: 0 0 auto;
+    width: 350px;
+    max-width: 100%;
 }
+
+@media (max-width: 768px) {
+    .record-card {
+        width: 320px;
+    }
+}
+
+@media (max-width: 480px) {
+    .records-grid {
+        gap: 15px;
+        padding: 0 10px;
+    }
+    
+    .record-card {
+        width: 100%;
+        min-width: 280px;
+    }
+}    
 
 .record-card::before {
     content: '';
