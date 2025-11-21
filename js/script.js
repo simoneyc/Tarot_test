@@ -3054,7 +3054,7 @@ function updateViewCountEverywhere(recordId, newCount) {
  * 更新評分
  */
 function updateRating(recordId, rating) {
-    // const record = divinationManager.getRecordById(recordId);
+    const record = divinationManager.getRecordById(recordId);
     if (record) {
         record.userRating = rating;
         divinationManager.updateRecord(record);
