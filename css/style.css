@@ -1417,18 +1417,18 @@ body {
     --error-red-dark: #B04940;
     --warning-orange: #E8A562;
     
-    /* 透明度變體 */
+    /* 透明度變體 - 改成淺色 */
     --gold-alpha-10: rgba(201, 169, 97, 0.1);
     --gold-alpha-20: rgba(201, 169, 97, 0.2);
     --gold-alpha-30: rgba(201, 169, 97, 0.3);
     --gold-alpha-60: rgba(201, 169, 97, 0.6);
     --gold-alpha-80: rgba(201, 169, 97, 0.8);
     --gold-alpha-90: rgba(201, 169, 97, 0.9);
-    --black-alpha-50: rgba(107, 87, 68, 0.5);
-    --black-alpha-60: rgba(107, 87, 68, 0.6);
-    --black-alpha-70: rgba(107, 87, 68, 0.7);
-    --black-alpha-80: rgba(107, 87, 68, 0.8);
-    --black-alpha-90: rgba(107, 87, 68, 0.9);
+    --black-alpha-50: rgba(255, 255, 255, 0.4);
+    --black-alpha-60: rgba(255, 255, 255, 0.5);
+    --black-alpha-70: rgba(255, 255, 255, 0.6);
+    --black-alpha-80: rgba(255, 255, 255, 0.7);
+    --black-alpha-90: rgba(255, 255, 255, 0.8);
     
     /* 漸變效果 - 米白色系 */
     --gradient-red-dark: linear-gradient(135deg, #E8D4A0, #C9A961);
@@ -1447,21 +1447,39 @@ body {
 /* 背景 */
 [data-theme="wood"] body {
     background: var(--gradient-bg);
-    color: #6B5744;
+    color: #5A4A38;
 }
 
-/* 標題文字 */
+/* 標題文字 - 深棕色易讀 */
 [data-theme="wood"] .title {
-    color: var(--primary-gold-dark);
-    text-shadow: 0 2px 10px rgba(201, 169, 97, 0.3);
+    color: #5A4A38 !important;
+    text-shadow: 0 2px 8px rgba(90, 74, 56, 0.2);
 }
 
 [data-theme="wood"] .subtitle {
-    color: #8B7355;
+    color: #6B5744 !important;
 }
 
 [data-theme="wood"] .ornament {
-    color: var(--primary-gold);
+    color: var(--primary-gold) !important;
+}
+
+/* 所有標題統一 */
+[data-theme="wood"] h1,
+[data-theme="wood"] h2,
+[data-theme="wood"] h3 {
+    color: #5A4A38 !important;
+}
+
+/* 段落文字 */
+[data-theme="wood"] p {
+    color: #5A4A38 !important;
+}
+
+/* 強調文字 */
+[data-theme="wood"] strong {
+    color: #3E3020 !important;
+    font-weight: 700;
 }
 
 /* 導航列 */
@@ -1482,7 +1500,7 @@ body {
 }
 
 [data-theme="wood"] .navbar-name {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .navbar-subtitle {
@@ -1493,7 +1511,7 @@ body {
 [data-theme="wood"] .lang-toggle-btn,
 [data-theme="wood"] .theme-toggle-btn {
     background: rgba(245, 243, 239, 0.8);
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
     border-color: rgba(201, 169, 97, 0.5);
 }
 
@@ -1505,9 +1523,10 @@ body {
 /* 按鈕 */
 [data-theme="wood"] .btn {
     background: linear-gradient(135deg, #E8D4A0, #C9A961);
-    color: #6B5744;
+    color: #3E3020 !important;
     border-color: var(--primary-gold-dark);
     box-shadow: 0 4px 15px rgba(201, 169, 97, 0.3);
+    font-weight: 600;
 }
 
 /* 牌陣卡片 */
@@ -1518,11 +1537,11 @@ body {
 }
 
 [data-theme="wood"] .spread-card h3 {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .spread-card p {
-    color: #6B5744;
+    color: #6B5744 !important;
 }
 
 [data-theme="wood"] .spread-card.active {
@@ -1533,7 +1552,7 @@ body {
 
 [data-theme="wood"] .spread-detail {
     background: rgba(201, 169, 97, 0.2);
-    color: #6B5744;
+    color: #5A4A38 !important;
     border-color: var(--primary-gold);
 }
 
@@ -1543,15 +1562,20 @@ body {
 
 /* 問題輸入 */
 [data-theme="wood"] .question-form {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.6) !important;
     border-color: var(--primary-gold);
     box-shadow: 0 10px 30px rgba(139, 115, 85, 0.15);
+}
+
+[data-theme="wood"] .question-form h2,
+[data-theme="wood"] .question-form p {
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .question-input {
     background: rgba(245, 243, 239, 0.9);
     border-color: var(--primary-gold);
-    color: #6B5744;
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .question-input:focus {
@@ -1561,20 +1585,21 @@ body {
 }
 
 [data-theme="wood"] .question-input::placeholder {
-    color: rgba(139, 115, 85, 0.5);
+    color: rgba(90, 74, 56, 0.5) !important;
 }
 
 [data-theme="wood"] #spreadDescription {
-    background: rgba(245, 243, 239, 0.6);
-    border-color: var(--primary-gold);
+    background: rgba(255, 255, 255, 0.4) !important;
+    border: 2px solid var(--primary-gold);
+    backdrop-filter: blur(8px);
 }
 
 [data-theme="wood"] #spreadDescription h3 {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] #spreadDescription p {
-    color: #6B5744;
+    color: #6B5744 !important;
 }
 
 /* 塔羅牌 */
@@ -1612,7 +1637,7 @@ body {
 
 /* 進度條 */
 [data-theme="wood"] .progress {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .progress-bar {
@@ -1625,7 +1650,7 @@ body {
 }
 
 [data-theme="wood"] .scroll-hint {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 /* 結果卡片 */
@@ -1641,14 +1666,18 @@ body {
 }
 
 [data-theme="wood"] .card-label {
-    color: var(--primary-gold-dark);
-    text-shadow: 0 0 10px rgba(201, 169, 97, 0.3);
+    color: #5A4A38 !important;
+    text-shadow: 0 0 8px rgba(90, 74, 56, 0.2);
+}
+
+[data-theme="wood"] .card-name {
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .card-interpretation {
-    background: rgba(245, 243, 239, 0.8);
+    background: rgba(255, 255, 255, 0.7);
     border-color: var(--primary-gold);
-    color: #6B5744;
+    color: #6B5744 !important;
 }
 
 /* 增強載入 */
@@ -1662,7 +1691,7 @@ body {
 }
 
 [data-theme="wood"] .progress-text {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .enhanced-progress-bar {
@@ -1676,7 +1705,7 @@ body {
 
 [data-theme="wood"] .mystical-loading,
 [data-theme="wood"] .mystical-quotes {
-    color: #8B7355;
+    color: #6B5744 !important;
 }
 
 /* 歷史記錄 */
@@ -1691,11 +1720,11 @@ body {
 }
 
 [data-theme="wood"] .record-question {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .record-summary {
-    color: #6B5744;
+    color: #6B5744 !important;
 }
 
 [data-theme="wood"] .record-date,
@@ -1706,7 +1735,7 @@ body {
 [data-theme="wood"] .search-input {
     background: rgba(245, 243, 239, 0.8);
     border-color: var(--primary-gold);
-    color: #6B5744;
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .search-input:focus {
@@ -1715,7 +1744,7 @@ body {
 }
 
 [data-theme="wood"] .search-input::placeholder {
-    color: rgba(139, 115, 85, 0.5);
+    color: rgba(90, 74, 56, 0.5) !important;
 }
 
 [data-theme="wood"] .search-btn {
@@ -1729,7 +1758,7 @@ body {
 [data-theme="wood"] .filter-dropdown {
     background: rgba(245, 243, 239, 0.9);
     border-color: rgba(201, 169, 97, 0.5);
-    color: #6B5744;
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .filter-dropdown:focus {
@@ -1739,7 +1768,7 @@ body {
 
 [data-theme="wood"] .filter-dropdown option {
     background: #F5F3EF;
-    color: #6B5744;
+    color: #5A4A38;
 }
 
 [data-theme="wood"] .view-toggle {
@@ -1748,7 +1777,7 @@ body {
 }
 
 [data-theme="wood"] .view-btn {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .view-btn.active {
@@ -1773,7 +1802,7 @@ body {
 
 [data-theme="wood"] .page-btn {
     border-color: rgba(201, 169, 97, 0.5);
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
 }
 
 [data-theme="wood"] .page-btn:hover,
@@ -1791,7 +1820,7 @@ body {
 
 [data-theme="wood"] .tag {
     background: rgba(201, 169, 97, 0.2);
-    color: #6B5744;
+    color: #5A4A38 !important;
     border-color: var(--primary-gold);
 }
 
@@ -1814,7 +1843,93 @@ body {
 }
 
 [data-theme="wood"] .empty-state h3 {
-    color: var(--primary-gold-dark);
+    color: #5A4A38 !important;
+}
+
+/* ========== 結果頁面專用優化 ========== */
+
+/* 用戶問題框 - 淺色背景 */
+[data-theme="wood"] #userQuestion {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 2px solid var(--primary-gold) !important;
+    color: #5A4A38 !important;
+}
+
+[data-theme="wood"] #userQuestion strong {
+    color: #3E3020 !important;
+}
+
+/* AI 解讀框 - 淺色背景 */
+[data-theme="wood"] .ai-interpretation {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border: 2px solid var(--primary-gold) !important;
+    color: #5A4A38 !important;
+}
+
+[data-theme="wood"] .ai-interpretation > div:first-child {
+    color: #3E3020 !important;
+    font-weight: 700;
+}
+
+[data-theme="wood"] .ai-interpretation strong {
+    color: #3E3020 !important;
+}
+
+[data-theme="wood"] .ai-interpretation div {
+    color: #5A4A38 !important;
+}
+
+/* 確保所有結果區域文字可見 */
+[data-theme="wood"] #resultsContainer,
+[data-theme="wood"] #resultsContainer * {
+    color: #5A4A38 !important;
+}
+
+[data-theme="wood"] #resultsContainer strong {
+    color: #3E3020 !important;
+}
+
+[data-theme="wood"] #resultsContainer .ornament {
+    color: var(--primary-gold) !important;
+}
+
+/* 選中卡片顯示區 */
+[data-theme="wood"] .selected-cards-display {
+    background: transparent !important;
+}
+
+[data-theme="wood"] .selected-cards-display > div {
+    background: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 強制覆蓋 inline styles 的深色背景 */
+[data-theme="wood"] [style*="rgba(0,0,0,0.7)"],
+[data-theme="wood"] [style*="rgba(0, 0, 0, 0.7)"] {
+    background: rgba(255, 255, 255, 0.5) !important;
+    color: #5A4A38 !important;
+}
+
+[data-theme="wood"] [style*="rgba(0,0,0,0.6)"],
+[data-theme="wood"] [style*="rgba(0, 0, 0, 0.6)"] {
+    background: rgba(255, 255, 255, 0.4) !important;
+    color: #5A4A38 !important;
+}
+
+[data-theme="wood"] [style*="rgba(0,0,0,0.8)"],
+[data-theme="wood"] [style*="rgba(0, 0, 0, 0.8)"] {
+    background: rgba(255, 255, 255, 0.6) !important;
+    color: #5A4A38 !important;
+}
+
+/* 載入進度區 */
+[data-theme="wood"] .enhanced-loading {
+    background: transparent !important;
+}
+
+[data-theme="wood"] .progress-container {
+    background: rgba(255, 255, 255, 0.4);
+    padding: 20px;
+    border-radius: 15px;
 }
 
 /* 木質主題 - 桌面端特效 */

@@ -1341,7 +1341,7 @@ async function displayFinalResults(interpretation) {
     const container = document.getElementById('resultsContainer');
     container.innerHTML = `
         <div class="ai-interpretation" style="
-            background: rgba(0,0,0,0.7); 
+            background: var(--black-alpha-70); 
             padding: 30px; 
             border-radius: 15px; 
             border: 1px solid var(--primary-gold); 
@@ -1378,7 +1378,7 @@ async function displayFinalResults(interpretation) {
         const cardDisplay = document.createElement('div');
         cardDisplay.style.cssText = `
             text-align: center; 
-            background: rgba(0,0,0,0.6); 
+            background: var(--black-alpha-60);
             padding: 20px; 
             border-radius: 15px; 
             border: 2px solid var(--primary-gold);
@@ -2323,7 +2323,7 @@ class HistoryUI {
         document.getElementById('recordsGrid').style.display = 'none';
         
         container.innerHTML = `
-            <div style="background: rgba(0,0,0,0.8); border-radius: 15px; overflow: hidden;">
+            <div style="background: var(--black-alpha-80); border-radius: 15px; overflow: hidden;">
                 ${records.map(record => this.createRecordListItem(record)).join('')}
             </div>
         `;
@@ -2779,7 +2779,7 @@ function openRecordModal(recordId) {
 
     // 生成卡牌展示
     const cardsDisplay = record.cards.map((card, index) => `
-        <div style="text-align: center; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 15px; border: 2px solid var(--primary-gold); max-width: 200px;">
+        <div style="text-align: center; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 2px solid var(--primary-gold); max-width: 200px;">
             <div style="position: relative; margin-bottom: 15px;">
                 <div style="
                     width: 120px; 
@@ -2841,7 +2841,7 @@ function openRecordModal(recordId) {
         </div>
 
         <!-- 問題 -->
-        <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
             <h3 style="color: var(--primary-gold); margin-bottom: 15px; font-family: 'Philosopher', serif;">
                 ${t('question-label')}
             </h3>
@@ -2861,7 +2861,7 @@ function openRecordModal(recordId) {
         </div>
 
         <!-- 解讀內容 -->
-        <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
             <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
                 ${t('oracle-reading')}
             </h3>
@@ -2871,7 +2871,7 @@ function openRecordModal(recordId) {
         </div>
 
         <!-- 用戶筆記和評分 -->
-        <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
             <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
                 ${currentLanguage === 'zh' ? '個人筆記與評價' : 'Personal Notes & Rating'}
             </h3>
@@ -2898,14 +2898,14 @@ function openRecordModal(recordId) {
                     ${currentLanguage === 'zh' ? '個人筆記：' : 'Personal Notes:'}
                 </label>
                 <textarea id="recordNotes_${record.id}" 
-                          style="width: 100%; height: 100px; background: rgba(0,0,0,0.8); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 10px; padding: 15px; font-family: 'Cinzel', serif; font-size: 0.9rem; resize: vertical;"
+                          style="width: 100%; height: 100px; background: var(--black-alpha-80); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 10px; padding: 15px; font-family: 'Cinzel', serif; font-size: 0.9rem; resize: vertical;"
                           placeholder="${currentLanguage === 'zh' ? '在此記錄你的想法、感受或後續發展...' : 'Record your thoughts, feelings, or follow-up developments...'}"
                           onchange="updateNotes('${record.id}', this.value)">${record.userNotes || ''}</textarea>
             </div>
         </div>
 
         <!-- 標籤管理 -->
-        <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
             <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
                 ${currentLanguage === 'zh' ? '標籤管理' : 'Tag Management'}
             </h3>
@@ -2919,7 +2919,7 @@ function openRecordModal(recordId) {
             </div>
             <div style="display: flex; gap: 10px;">
                 <input type="text" id="newTag_${record.id}" 
-                       style="flex: 1; padding: 10px; background: rgba(0,0,0,0.8); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 8px; font-family: 'Cinzel', serif;"
+                       style="flex: 1; padding: 10px; background: var(--black-alpha-80); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 8px; font-family: 'Cinzel', serif;"
                        placeholder="${currentLanguage === 'zh' ? '新增標籤...' : 'Add tag...'}"
                        onkeypress="if(event.key==='Enter') addTag('${record.id}')">
                 <button onclick="addTag('${record.id}')" 
@@ -2930,7 +2930,7 @@ function openRecordModal(recordId) {
         </div>
 
         <!-- 統計信息 -->
-        <div style="display: flex; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 20px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-around; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
             <div style="text-align: center;">
                 <div style="color: var(--primary-gold); font-size: 1.2rem; font-weight: bold;">👁️</div>
                 <div style="color: rgba(212, 175, 55, 0.8); font-size: 0.8rem; margin-top: 5px;">
