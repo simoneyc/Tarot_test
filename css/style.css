@@ -1400,7 +1400,7 @@ body {
 /* ========== 主題系統 ========== */
 
 /* 米白色優雅主題 */
-[data-theme="wood"] {
+[data-theme="light"] {
     /* 主色調 - 米白金色系 */
     --primary-gold: #C9A961;
     --primary-gold-light: #E8D4A0;
@@ -1445,83 +1445,83 @@ body {
 }
 
 /* 背景 */
-[data-theme="wood"] body {
+[data-theme="light"] body {
     background: var(--gradient-bg);
     color: #94440a;
 }
 
 /* 標題文字 - 深棕色易讀 */
-[data-theme="wood"] .title {
+[data-theme="light"] .title {
     color: #94440a !important;
     text-shadow: 0 2px 8px rgba(90, 74, 56, 0.2);
 }
 
-[data-theme="wood"] .subtitle {
+[data-theme="light"] .subtitle {
     color: #6B5744 !important;
 }
 
-[data-theme="wood"] .ornament {
+[data-theme="light"] .ornament {
     color: var(--primary-gold) !important;
 }
 
 /* 所有標題統一 */
-[data-theme="wood"] h1,
-[data-theme="wood"] h2,
-[data-theme="wood"] h3 {
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3 {
     color: #94440a !important;
 }
 
 /* 段落文字 */
-[data-theme="wood"] p {
+[data-theme="light"] p {
     color: #94440a !important;
 }
 
 /* 強調文字 */
-[data-theme="wood"] strong {
+[data-theme="light"] strong {
     color: #3E3020 !important;
     font-weight: 700;
 }
 
 /* 導航列 */
-[data-theme="wood"] .navbar-fixed {
+[data-theme="light"] .navbar-fixed {
     background: linear-gradient(180deg, rgba(253, 252, 250, 0.98) 0%, rgba(245, 243, 239, 0.95) 100%);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(201, 169, 97, 0.3);
     box-shadow: 0 2px 15px rgba(139, 115, 85, 0.1);
 }
 
-[data-theme="wood"] .navbar-brand {
+[data-theme="light"] .navbar-brand {
     background: rgba(245, 243, 239, 0.6);
     border: 1px solid rgba(201, 169, 97, 0.3);
 }
 
-[data-theme="wood"] .navbar-brand::before {
+[data-theme="light"] .navbar-brand::before {
     background: linear-gradient(90deg, transparent, rgba(201, 169, 97, 0.15), transparent);
 }
 
-[data-theme="wood"] .navbar-name {
+[data-theme="light"] .navbar-name {
     color: #94440a !important;
 }
 
-[data-theme="wood"] .navbar-subtitle {
+[data-theme="light"] .navbar-subtitle {
     color: var(--primary-gold);
 }
 
-[data-theme="wood"] .nav-history-btn,
-[data-theme="wood"] .lang-toggle-btn,
-[data-theme="wood"] .theme-toggle-btn {
+[data-theme="light"] .nav-history-btn,
+[data-theme="light"] .lang-toggle-btn,
+[data-theme="light"] .theme-toggle-btn {
     background: rgba(245, 243, 239, 0.8);
     color: #94440a !important;
     border-color: rgba(201, 169, 97, 0.5);
 }
 
 /* 頁面標題區 */
-[data-theme="wood"] .header {
+[data-theme="light"] .header {
     border-bottom: 2px solid var(--primary-gold);
 }
 
 /* 按鈕 */
-[data-theme="wood"] .btn {
+[data-theme="light"] .btn {
     background: linear-gradient(135deg, #E8D4A0, #C9A961);
     color: #3E3020 !important;
     border-color: var(--primary-gold-dark);
@@ -1530,442 +1530,442 @@ body {
 }
 
 /* 牌陣卡片 */
-[data-theme="wood"] .spread-card {
+[data-theme="light"] .spread-card {
     background: rgba(255, 255, 255, 0.7);
     border-color: rgba(201, 169, 97, 0.5);
     backdrop-filter: blur(10px);
 }
 
-[data-theme="wood"] .spread-card h3 {
+[data-theme="light"] .spread-card h3 {
     color: #94440a !important;
 }
 
-[data-theme="wood"] .spread-card p {
+[data-theme="light"] .spread-card p {
     color: #6B5744 !important;
 }
 
-[data-theme="wood"] .spread-card.active {
+[data-theme="light"] .spread-card.active {
     border-color: var(--primary-gold);
     background: rgba(232, 212, 160, 0.2);
     box-shadow: 0 15px 40px rgba(201, 169, 97, 0.25);
 }
 
-[data-theme="wood"] .spread-detail {
+[data-theme="light"] .spread-detail {
     background: rgba(201, 169, 97, 0.2);
     color: #94440a !important;
     border-color: var(--primary-gold);
 }
 
-[data-theme="wood"] .spread-icon {
+[data-theme="light"] .spread-icon {
     filter: drop-shadow(0 0 10px rgba(201, 169, 97, 0.5));
 }
 
 /* 問題輸入 */
-[data-theme="wood"] .question-form {
+[data-theme="light"] .question-form {
     background: rgba(255, 255, 255, 0.6) !important;
     border-color: var(--primary-gold);
     box-shadow: 0 10px 30px rgba(139, 115, 85, 0.15);
 }
 
-[data-theme="wood"] .question-form h2,
-[data-theme="wood"] .question-form p {
+[data-theme="light"] .question-form h2,
+[data-theme="light"] .question-form p {
     color: #94440a !important;
 }
 
-[data-theme="wood"] .question-input {
+[data-theme="light"] .question-input {
     background: rgba(245, 243, 239, 0.9);
     border-color: var(--primary-gold);
     color: #94440a !important;
 }
 
-[data-theme="wood"] .question-input:focus {
+[data-theme="light"] .question-input:focus {
     border-color: var(--primary-gold-light);
     box-shadow: 0 0 20px rgba(201, 169, 97, 0.3);
     background: rgba(253, 252, 250, 1);
 }
 
-[data-theme="wood"] .question-input::placeholder {
+[data-theme="light"] .question-input::placeholder {
     color: rgba(90, 74, 56, 0.5) !important;
 }
 
-[data-theme="wood"] #spreadDescription {
+[data-theme="light"] #spreadDescription {
     background: rgba(255, 255, 255, 0.4) !important;
     border: 2px solid var(--primary-gold);
     backdrop-filter: blur(8px);
 }
 
-[data-theme="wood"] #spreadDescription h3 {
+[data-theme="light"] #spreadDescription h3 {
     color: #94440a !important;
 }
 
-[data-theme="wood"] #spreadDescription p {
+[data-theme="light"] #spreadDescription p {
     color: #6B5744 !important;
 }
 
 /* 塔羅牌 */
-[data-theme="wood"] .card-back {
+[data-theme="light"] .card-back {
     background: linear-gradient(135deg, #E8D4A0, #C9A961);
     color: #6B5744;
 }
 
-[data-theme="wood"] .card-back::before {
+[data-theme="light"] .card-back::before {
     border-color: #6B5744;
 }
 
-[data-theme="wood"] .card-back::after {
+[data-theme="light"] .card-back::after {
     color: #6B5744;
     text-shadow: 0 0 10px rgba(107, 87, 68, 0.3);
 }
 
-[data-theme="wood"] .card-front {
+[data-theme="light"] .card-front {
     background: linear-gradient(135deg, #FDFCFA, #F5F3EF);
     color: var(--primary-gold-dark);
 }
 
-[data-theme="wood"] .card-front::before {
+[data-theme="light"] .card-front::before {
     border-color: var(--primary-gold);
 }
 
-[data-theme="wood"] .shuffling-card {
+[data-theme="light"] .shuffling-card {
     background: linear-gradient(135deg, #E8D4A0, #C9A961);
     border-color: var(--primary-gold-dark);
 }
 
-[data-theme="wood"] .shuffling-card::after {
+[data-theme="light"] .shuffling-card::after {
     color: #6B5744;
 }
 
 /* 進度條 */
-[data-theme="wood"] .progress {
+[data-theme="light"] .progress {
     color: #94440a !important;
 }
 
-[data-theme="wood"] .progress-bar {
+[data-theme="light"] .progress-bar {
     background: rgba(201, 169, 97, 0.2);
 }
 
-[data-theme="wood"] .progress-fill {
+[data-theme="light"] .progress-fill {
     background: linear-gradient(90deg, var(--primary-gold), var(--primary-gold-light));
     box-shadow: 0 0 10px rgba(201, 169, 97, 0.5);
 }
 
-[data-theme="wood"] .scroll-hint {
+[data-theme="light"] .scroll-hint {
     color: #94440a !important;
 }
 
 /* 結果卡片 */
-[data-theme="wood"] .selected-card {
+[data-theme="light"] .selected-card {
     background: linear-gradient(135deg, #FDFCFA, #F5F3EF);
     border-color: var(--primary-gold-dark);
     color: #6B5744;
     box-shadow: 0 15px 50px rgba(139, 115, 85, 0.2);
 }
 
-[data-theme="wood"] .selected-card::before {
+[data-theme="light"] .selected-card::before {
     border-color: var(--primary-gold);
 }
 
-[data-theme="wood"] .card-label {
+[data-theme="light"] .card-label {
     color: #94440a !important;
     text-shadow: 0 0 8px rgba(90, 74, 56, 0.2);
 }
 
-[data-theme="wood"] .card-name {
+[data-theme="light"] .card-name {
     color: #94440a !important;
 }
 
-[data-theme="wood"] .card-interpretation {
+[data-theme="light"] .card-interpretation {
     background: rgba(255, 255, 255, 0.7);
     border-color: var(--primary-gold);
     color: #6B5744 !important;
 }
 
 /* 增強載入 */
-[data-theme="wood"] .symbol {
+[data-theme="light"] .symbol {
     color: var(--primary-gold);
     filter: drop-shadow(0 0 10px rgba(201, 169, 97, 0.5));
 }
 
-[data-theme="wood"] .energy-circle {
+[data-theme="light"] .energy-circle {
     border-color: var(--primary-gold);
 }
 
-[data-theme="wood"] .progress-text {
+[data-theme="light"] .progress-text {
     color: #94440a !important;
 }
 
-[data-theme="wood"] .enhanced-progress-bar {
+[data-theme="light"] .enhanced-progress-bar {
     background: rgba(201, 169, 97, 0.2);
 }
 
-[data-theme="wood"] .enhanced-progress-fill {
+[data-theme="light"] .enhanced-progress-fill {
     background: linear-gradient(90deg, var(--primary-gold) 0%, var(--primary-gold-light) 50%, var(--primary-gold) 100%);
     box-shadow: 0 0 15px rgba(201, 169, 97, 0.5);
 }
 
-[data-theme="wood"] .mystical-loading,
-[data-theme="wood"] .mystical-quotes {
+[data-theme="light"] .mystical-loading,
+[data-theme="light"] .mystical-quotes {
     color: #6B5744 !important;
 }
 
 /* 歷史記錄 */
-[data-theme="wood"] .record-card {
+[data-theme="light"] .record-card {
     background: rgba(255, 255, 255, 0.8);
     border-color: rgba(201, 169, 97, 0.5);
 }
 
-[data-theme="wood"] .record-card:hover {
+[data-theme="light"] .record-card:hover {
     border-color: var(--primary-gold);
     box-shadow: 0 10px 30px rgba(201, 169, 97, 0.25);
 }
 
-[data-theme="wood"] .record-question {
+[data-theme="light"] .record-question {
     color: #94440a !important;
 }
 
-[data-theme="wood"] .record-summary {
+[data-theme="light"] .record-summary {
     color: #6B5744 !important;
 }
 
-[data-theme="wood"] .record-date,
-[data-theme="wood"] .record-meta {
+[data-theme="light"] .record-date,
+[data-theme="light"] .record-meta {
     color: #8B7355;
 }
 
-[data-theme="wood"] .search-input {
+[data-theme="light"] .search-input {
     background: rgba(245, 243, 239, 0.8);
     border-color: var(--primary-gold);
     color: #94440a !important;
 }
 
-[data-theme="wood"] .search-input:focus {
+[data-theme="light"] .search-input:focus {
     background: rgba(253, 252, 250, 0.95);
     box-shadow: 0 0 15px rgba(201, 169, 97, 0.3);
 }
 
-[data-theme="wood"] .search-input::placeholder {
+[data-theme="light"] .search-input::placeholder {
     color: rgba(90, 74, 56, 0.5) !important;
 }
 
-[data-theme="wood"] .search-btn {
+[data-theme="light"] .search-btn {
     color: var(--primary-gold-dark);
 }
 
-[data-theme="wood"] .search-btn:hover {
+[data-theme="light"] .search-btn:hover {
     background: rgba(201, 169, 97, 0.15);
 }
 
-[data-theme="wood"] .filter-dropdown {
+[data-theme="light"] .filter-dropdown {
     background: rgba(245, 243, 239, 0.9);
     border-color: rgba(201, 169, 97, 0.5);
     color: #94440a !important;
 }
 
-[data-theme="wood"] .filter-dropdown:focus {
+[data-theme="light"] .filter-dropdown:focus {
     border-color: var(--primary-gold);
     box-shadow: 0 0 10px rgba(201, 169, 97, 0.2);
 }
 
-[data-theme="wood"] .filter-dropdown option {
+[data-theme="light"] .filter-dropdown option {
     background: #F5F3EF;
     color: #94440a;
 }
 
-[data-theme="wood"] .view-toggle {
+[data-theme="light"] .view-toggle {
     background: rgba(245, 243, 239, 0.9);
     border-color: rgba(201, 169, 97, 0.5);
 }
 
-[data-theme="wood"] .view-btn {
+[data-theme="light"] .view-btn {
     color: #94440a !important;
 }
 
-[data-theme="wood"] .view-btn.active {
+[data-theme="light"] .view-btn.active {
     background: var(--primary-gold);
     color: #FDFCFA;
 }
 
-[data-theme="wood"] .view-btn:hover:not(.active) {
+[data-theme="light"] .view-btn:hover:not(.active) {
     background: rgba(201, 169, 97, 0.15);
 }
 
-[data-theme="wood"] .clear-records-btn {
+[data-theme="light"] .clear-records-btn {
     background: rgba(200, 90, 84, 0.15);
     color: var(--error-red-dark);
     border-color: var(--error-red);
 }
 
-[data-theme="wood"] .clear-records-btn:hover {
+[data-theme="light"] .clear-records-btn:hover {
     background: rgba(200, 90, 84, 0.25);
     border-color: var(--error-red-dark);
 }
 
-[data-theme="wood"] .page-btn {
+[data-theme="light"] .page-btn {
     border-color: rgba(201, 169, 97, 0.5);
     color: #94440a !important;
 }
 
-[data-theme="wood"] .page-btn:hover,
-[data-theme="wood"] .page-btn.active {
+[data-theme="light"] .page-btn:hover,
+[data-theme="light"] .page-btn.active {
     background: var(--primary-gold);
     color: #FDFCFA;
     border-color: var(--primary-gold);
     box-shadow: 0 4px 15px rgba(201, 169, 97, 0.3);
 }
 
-[data-theme="wood"] .card-mini {
+[data-theme="light"] .card-mini {
     background: linear-gradient(135deg, #E8D4A0, #C9A961);
     border-color: var(--primary-gold-dark);
 }
 
-[data-theme="wood"] .tag {
+[data-theme="light"] .tag {
     background: rgba(201, 169, 97, 0.2);
     color: #94440a !important;
     border-color: var(--primary-gold);
 }
 
-[data-theme="wood"] .action-btn {
+[data-theme="light"] .action-btn {
     color: #8B7355;
 }
 
-[data-theme="wood"] .action-btn:hover {
+[data-theme="light"] .action-btn:hover {
     background: rgba(201, 169, 97, 0.15);
     color: var(--primary-gold-dark);
 }
 
-[data-theme="wood"] .action-btn.favorite-btn.active {
+[data-theme="light"] .action-btn.favorite-btn.active {
     color: var(--primary-gold);
     text-shadow: 0 0 8px rgba(201, 169, 97, 0.6);
 }
 
-[data-theme="wood"] .empty-state {
+[data-theme="light"] .empty-state {
     color: #8B7355;
 }
 
-[data-theme="wood"] .empty-state h3 {
+[data-theme="light"] .empty-state h3 {
     color: #94440a !important;
 }
 
 /* ========== 結果頁面專用優化 ========== */
 
 /* 用戶問題框 - 淺色背景 */
-[data-theme="wood"] #userQuestion {
+[data-theme="light"] #userQuestion {
     background: rgba(255, 255, 255, 0.5) !important;
     border: 2px solid var(--primary-gold) !important;
     color: #94440a !important;
 }
 
-[data-theme="wood"] #userQuestion strong {
+[data-theme="light"] #userQuestion strong {
     color: #3E3020 !important;
 }
 
 /* AI 解讀框 - 淺色背景 */
-[data-theme="wood"] .ai-interpretation {
+[data-theme="light"] .ai-interpretation {
     background: rgba(255, 255, 255, 0.5) !important;
     border: 2px solid var(--primary-gold) !important;
     color: #94440a !important;
 }
 
-[data-theme="wood"] .ai-interpretation > div:first-child {
+[data-theme="light"] .ai-interpretation > div:first-child {
     color: #3E3020 !important;
     font-weight: 700;
 }
 
-[data-theme="wood"] .ai-interpretation strong {
+[data-theme="light"] .ai-interpretation strong {
     color: #3E3020 !important;
 }
 
-[data-theme="wood"] .ai-interpretation div {
+[data-theme="light"] .ai-interpretation div {
     color: #94440a !important;
 }
 
 /* 確保所有結果區域文字可見 */
-[data-theme="wood"] #resultsContainer,
-[data-theme="wood"] #resultsContainer * {
+[data-theme="light"] #resultsContainer,
+[data-theme="light"] #resultsContainer * {
     color: #94440a !important;
 }
 
-[data-theme="wood"] #resultsContainer strong {
+[data-theme="light"] #resultsContainer strong {
     color: #3E3020 !important;
 }
 
-[data-theme="wood"] #resultsContainer .ornament {
+[data-theme="light"] #resultsContainer .ornament {
     color: var(--primary-gold) !important;
 }
 
 /* 選中卡片顯示區 */
-[data-theme="wood"] .selected-cards-display {
+[data-theme="light"] .selected-cards-display {
     background: transparent !important;
 }
 
-[data-theme="wood"] .selected-cards-display > div {
+[data-theme="light"] .selected-cards-display > div {
     background: rgba(255, 255, 255, 0.4) !important;
 }
 
 /* 強制覆蓋 inline styles 的深色背景 */
-[data-theme="wood"] [style*="rgba(0,0,0,0.7)"],
-[data-theme="wood"] [style*="rgba(0, 0, 0, 0.7)"] {
+[data-theme="light"] [style*="rgba(0,0,0,0.7)"],
+[data-theme="light"] [style*="rgba(0, 0, 0, 0.7)"] {
     background: rgba(255, 255, 255, 0.5) !important;
     color: #94440a !important;
 }
 
-[data-theme="wood"] [style*="rgba(0,0,0,0.6)"],
-[data-theme="wood"] [style*="rgba(0, 0, 0, 0.6)"] {
+[data-theme="light"] [style*="rgba(0,0,0,0.6)"],
+[data-theme="light"] [style*="rgba(0, 0, 0, 0.6)"] {
     background: rgba(255, 255, 255, 0.4) !important;
     color: #94440a !important;
 }
 
-[data-theme="wood"] [style*="rgba(0,0,0,0.8)"],
-[data-theme="wood"] [style*="rgba(0, 0, 0, 0.8)"] {
+[data-theme="light"] [style*="rgba(0,0,0,0.8)"],
+[data-theme="light"] [style*="rgba(0, 0, 0, 0.8)"] {
     background: rgba(255, 255, 255, 0.6) !important;
     color: #94440a !important;
 }
 
 /* 載入進度區 */
-[data-theme="wood"] .enhanced-loading {
+[data-theme="light"] .enhanced-loading {
     background: transparent !important;
 }
 
-[data-theme="wood"] .progress-container {
+[data-theme="light"] .progress-container {
     background: rgba(255, 255, 255, 0.4);
     padding: 20px;
     border-radius: 15px;
 }
 
-/* 木質主題 - 桌面端特效 */
+/* 明亮主題 - 桌面端特效 */
 @media (min-width: 769px) and (hover: hover) {
-    [data-theme="wood"] .navbar-brand:hover {
+    [data-theme="light"] .navbar-brand:hover {
         box-shadow: 0 8px 25px rgba(201, 169, 97, 0.3);
     }
     
-    [data-theme="wood"] .navbar-brand:hover .navbar-logo svg {
+    [data-theme="light"] .navbar-brand:hover .navbar-logo svg {
         filter: drop-shadow(0 4px 12px rgba(201, 169, 97, 0.6));
     }
     
-    [data-theme="wood"] .nav-history-btn:hover,
-    [data-theme="wood"] .lang-toggle-btn:hover,
-    [data-theme="wood"] .theme-toggle-btn:hover {
+    [data-theme="light"] .nav-history-btn:hover,
+    [data-theme="light"] .lang-toggle-btn:hover,
+    [data-theme="light"] .theme-toggle-btn:hover {
         background: rgba(232, 212, 160, 0.3);
         box-shadow: 0 4px 15px rgba(201, 169, 97, 0.2);
     }
     
-    [data-theme="wood"] .btn:hover {
+    [data-theme="light"] .btn:hover {
         background: linear-gradient(135deg, #F0DFB5, #D4B672);
         box-shadow: 0 6px 20px rgba(201, 169, 97, 0.4);
     }
     
-    [data-theme="wood"] .spread-card:hover {
+    [data-theme="light"] .spread-card:hover {
         box-shadow: 0 20px 50px rgba(201, 169, 97, 0.3);
     }
     
-    [data-theme="wood"] .tarot-card:hover:not(.selected):not(.flipped) {
+    [data-theme="light"] .tarot-card:hover:not(.selected):not(.flipped) {
         box-shadow: 0 25px 50px rgba(201, 169, 97, 0.5);
     }
 }
 
 /* 米白主題 - 移動端背景 */
 @media (hover: none) {
-    [data-theme="wood"] body::after {
+    [data-theme="light"] body::after {
         background: 
             radial-gradient(circle at 20% 30%, rgba(201, 169, 97, 0.08) 0%, transparent 30%),
             radial-gradient(circle at 80% 20%, rgba(201, 169, 97, 0.06) 0%, transparent 25%),

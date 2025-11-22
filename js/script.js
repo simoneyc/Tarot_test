@@ -617,7 +617,7 @@ function initializeTheme() {
 function setTheme(theme, animate = true) {
     try {
         // 驗證主題名稱
-        if (!['classic', 'wood'].includes(theme)) {
+        if (!['classic', 'light'].includes(theme)) {
             console.warn('⚠️ 無效的主題名稱，使用預設主題');
             theme = 'classic';
         }
@@ -659,7 +659,7 @@ function setTheme(theme, animate = true) {
             detail: { theme, previousTheme: currentDataTheme }
         }));
         
-        console.log(`🎨 主題已切換至: ${theme === 'classic' ? '經典神秘' : '現代木質'}`);
+        console.log(`🎨 主題已切換至: ${theme === 'classic' ? '經典神秘' : '現代明亮'}`);
         
     } catch (error) {
         console.error('❌ 主題切換失敗:', error);
@@ -687,7 +687,7 @@ document.addEventListener('themeChanged', function(e) {
  * 切換主題
  */
 function toggleTheme() {
-    const newTheme = currentTheme === 'classic' ? 'wood' : 'classic';
+    const newTheme = currentTheme === 'classic' ? 'light' : 'classic';
     setTheme(newTheme, true);
     
     // 添加按鈕點擊反饋
@@ -711,15 +711,15 @@ function updateThemeButton() {
     if (icon && text) {
         if (currentTheme === 'classic') {
             icon.textContent = '🌙'; // 經典模式顯示月亮
-            text.setAttribute('data-zh', '木質');
-            text.setAttribute('data-en', 'Wood');
+            text.setAttribute('data-zh', '明亮');
+            text.setAttribute('data-en', 'light');
             if (currentLanguage === 'zh') {
-                text.textContent = '木質';
+                text.textContent = '明亮';
             } else {
-                text.textContent = 'Wood';
+                text.textContent = 'light';
             }
         } else {
-            icon.textContent = '✨'; // 木質模式顯示星星
+            icon.textContent = '✨'; // 明亮模式顯示星星
             text.setAttribute('data-zh', '經典');
             text.setAttribute('data-en', 'Classic');
             if (currentLanguage === 'zh') {
@@ -739,8 +739,8 @@ function handleParticles() {
     const particlesContainer = document.getElementById('particles');
     if (!particlesContainer) return;
     
-    if (currentTheme === 'wood') {
-        // 木質主題：隱藏並清理粒子
+    if (currentTheme === 'light') {
+        // 明亮主題：隱藏並清理粒子
         particlesContainer.style.display = 'none';
         clearParticles();
     } else {
