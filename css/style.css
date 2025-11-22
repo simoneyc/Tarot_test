@@ -1447,12 +1447,12 @@ body {
 /* 背景 */
 [data-theme="wood"] body {
     background: var(--gradient-bg);
-    color: #75460C;
+    color: #94440a;
 }
 
 /* 標題文字 - 深棕色易讀 */
 [data-theme="wood"] .title {
-    color: #75460C !important;
+    color: #94440a !important;
     text-shadow: 0 2px 8px rgba(90, 74, 56, 0.2);
 }
 
@@ -1468,12 +1468,12 @@ body {
 [data-theme="wood"] h1,
 [data-theme="wood"] h2,
 [data-theme="wood"] h3 {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 /* 段落文字 */
 [data-theme="wood"] p {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 /* 強調文字 */
@@ -1500,7 +1500,7 @@ body {
 }
 
 [data-theme="wood"] .navbar-name {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .navbar-subtitle {
@@ -1511,7 +1511,7 @@ body {
 [data-theme="wood"] .lang-toggle-btn,
 [data-theme="wood"] .theme-toggle-btn {
     background: rgba(245, 243, 239, 0.8);
-    color: #75460C !important;
+    color: #94440a !important;
     border-color: rgba(201, 169, 97, 0.5);
 }
 
@@ -1537,7 +1537,7 @@ body {
 }
 
 [data-theme="wood"] .spread-card h3 {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .spread-card p {
@@ -1552,7 +1552,7 @@ body {
 
 [data-theme="wood"] .spread-detail {
     background: rgba(201, 169, 97, 0.2);
-    color: #75460C !important;
+    color: #94440a !important;
     border-color: var(--primary-gold);
 }
 
@@ -1569,13 +1569,13 @@ body {
 
 [data-theme="wood"] .question-form h2,
 [data-theme="wood"] .question-form p {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .question-input {
     background: rgba(245, 243, 239, 0.9);
     border-color: var(--primary-gold);
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .question-input:focus {
@@ -1595,7 +1595,7 @@ body {
 }
 
 [data-theme="wood"] #spreadDescription h3 {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] #spreadDescription p {
@@ -1637,7 +1637,7 @@ body {
 
 /* 進度條 */
 [data-theme="wood"] .progress {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .progress-bar {
@@ -1650,7 +1650,7 @@ body {
 }
 
 [data-theme="wood"] .scroll-hint {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 /* 結果卡片 */
@@ -1666,12 +1666,12 @@ body {
 }
 
 [data-theme="wood"] .card-label {
-    color: #75460C !important;
+    color: #94440a !important;
     text-shadow: 0 0 8px rgba(90, 74, 56, 0.2);
 }
 
 [data-theme="wood"] .card-name {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .card-interpretation {
@@ -1691,7 +1691,7 @@ body {
 }
 
 [data-theme="wood"] .progress-text {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .enhanced-progress-bar {
@@ -1720,7 +1720,7 @@ body {
 }
 
 [data-theme="wood"] .record-question {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .record-summary {
@@ -1735,7 +1735,7 @@ body {
 [data-theme="wood"] .search-input {
     background: rgba(245, 243, 239, 0.8);
     border-color: var(--primary-gold);
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .search-input:focus {
@@ -1758,7 +1758,7 @@ body {
 [data-theme="wood"] .filter-dropdown {
     background: rgba(245, 243, 239, 0.9);
     border-color: rgba(201, 169, 97, 0.5);
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .filter-dropdown:focus {
@@ -1768,7 +1768,7 @@ body {
 
 [data-theme="wood"] .filter-dropdown option {
     background: #F5F3EF;
-    color: #75460C;
+    color: #94440a;
 }
 
 [data-theme="wood"] .view-toggle {
@@ -1777,7 +1777,7 @@ body {
 }
 
 [data-theme="wood"] .view-btn {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .view-btn.active {
@@ -1802,7 +1802,7 @@ body {
 
 [data-theme="wood"] .page-btn {
     border-color: rgba(201, 169, 97, 0.5);
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .page-btn:hover,
@@ -1820,7 +1820,7 @@ body {
 
 [data-theme="wood"] .tag {
     background: rgba(201, 169, 97, 0.2);
-    color: #75460C !important;
+    color: #94440a !important;
     border-color: var(--primary-gold);
 }
 
@@ -1843,7 +1843,7 @@ body {
 }
 
 [data-theme="wood"] .empty-state h3 {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 /* ========== 結果頁面專用優化 ========== */
@@ -1852,7 +1852,7 @@ body {
 [data-theme="wood"] #userQuestion {
     background: rgba(255, 255, 255, 0.5) !important;
     border: 2px solid var(--primary-gold) !important;
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] #userQuestion strong {
@@ -1863,7 +1863,7 @@ body {
 [data-theme="wood"] .ai-interpretation {
     background: rgba(255, 255, 255, 0.5) !important;
     border: 2px solid var(--primary-gold) !important;
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] .ai-interpretation > div:first-child {
@@ -1876,13 +1876,13 @@ body {
 }
 
 [data-theme="wood"] .ai-interpretation div {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 /* 確保所有結果區域文字可見 */
 [data-theme="wood"] #resultsContainer,
 [data-theme="wood"] #resultsContainer * {
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] #resultsContainer strong {
@@ -1906,19 +1906,19 @@ body {
 [data-theme="wood"] [style*="rgba(0,0,0,0.7)"],
 [data-theme="wood"] [style*="rgba(0, 0, 0, 0.7)"] {
     background: rgba(255, 255, 255, 0.5) !important;
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] [style*="rgba(0,0,0,0.6)"],
 [data-theme="wood"] [style*="rgba(0, 0, 0, 0.6)"] {
     background: rgba(255, 255, 255, 0.4) !important;
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 [data-theme="wood"] [style*="rgba(0,0,0,0.8)"],
 [data-theme="wood"] [style*="rgba(0, 0, 0, 0.8)"] {
     background: rgba(255, 255, 255, 0.6) !important;
-    color: #75460C !important;
+    color: #94440a !important;
 }
 
 /* 載入進度區 */
