@@ -72,6 +72,13 @@
             <div class="ornament">✦ ◊ ✧ ◊ ✦</div>
         </header>
 
+        <nav class="reading-steps" id="readingSteps" aria-label="占卜進度" hidden>
+            <div class="reading-step" data-flow-step="1"><span>1</span><strong data-zh="牌陣" data-en="Spread">牌陣</strong></div>
+            <div class="reading-step" data-flow-step="2"><span>2</span><strong data-zh="提問" data-en="Question">提問</strong></div>
+            <div class="reading-step" data-flow-step="3"><span>3</span><strong data-zh="選牌" data-en="Cards">選牌</strong></div>
+            <div class="reading-step" data-flow-step="4"><span>4</span><strong data-zh="解讀" data-en="Reading">解讀</strong></div>
+        </nav>
+
         <!-- 步驟1: 歡迎頁 -->
         <div id="step1" class="step active">
             <div style="text-align: center;">
@@ -163,9 +170,12 @@
                 
                 <div style="text-align: center; margin-top: 40px;">
                     <div class="ornament">✧</div>
+                    <div class="flow-actions">
+                    <button class="btn btn-secondary" onclick="showStep(1)" data-zh="返回首頁" data-en="Back Home">返回首頁</button>
                     <button class="btn" onclick="confirmSpreadSelection()" 
                             data-zh="確認選擇" 
                             data-en="Confirm Selection">確認選擇</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -195,6 +205,19 @@
                     data-zh-placeholder="在此輸入你最想了解的問題..."
                     data-en-placeholder="Enter the question you most want to understand..."
                     placeholder="在此輸入你最想了解的問題..." maxlength="150">
+                <div class="question-meta">
+                    <span class="field-error" id="questionError" role="alert"></span>
+                    <span id="questionCount">0 / 150</span>
+                </div>
+
+                <div class="question-examples">
+                    <div class="examples-label" data-zh="不知道怎麼問？試試看：" data-en="Need inspiration? Try:">不知道怎麼問？試試看：</div>
+                    <div class="example-chips">
+                        <button type="button" class="example-chip" data-question-zh="我目前最需要留意的是什麼？" data-question-en="What needs my attention most right now?" data-zh="我目前需要留意什麼？" data-en="What needs my attention?">我目前需要留意什麼？</button>
+                        <button type="button" class="example-chip" data-question-zh="接下來三個月，我的工作重點是什麼？" data-question-en="What should I focus on in my work over the next three months?" data-zh="未來三個月的工作重點" data-en="My next three months at work">未來三個月的工作重點</button>
+                        <button type="button" class="example-chip" data-question-zh="面對目前的選擇，我忽略了什麼？" data-question-en="What am I overlooking in the choice before me?" data-zh="這個選擇中忽略了什麼？" data-en="What am I overlooking?">這個選擇中忽略了什麼？</button>
+                    </div>
+                </div>
                 
                 <div id="choiceInputs" style="display: none;">
                     <input type="text" id="choice1Input" class="question-input" 
@@ -208,9 +231,12 @@
                 </div>
                 
                 <div class="ornament" style="font-size: 1.5rem;">✧</div>
+                <div class="flow-actions">
+                <button class="btn btn-secondary" onclick="showStep(2)" data-zh="上一步" data-en="Back">上一步</button>
                 <button class="btn" onclick="submitQuestion()" 
                         data-zh="召喚神諭" 
                         data-en="Summon Oracle">召喚神諭</button>
+                </div>
             </div>
         </div>
 
@@ -236,6 +262,11 @@
                     </div>
                 </div>
             </div>
+            <div class="selection-actions" id="selectionActions">
+                <button class="btn btn-secondary" onclick="returnToQuestion()" data-zh="修改問題" data-en="Edit Question">修改問題</button>
+                <div class="selection-status" id="selectionStatus" data-zh="選好後可在此確認" data-en="Confirm here after selecting">選好後可在此確認</div>
+                <button class="btn" id="confirmCardsBtn" onclick="confirmSelectedCards()" disabled data-zh="確認選牌" data-en="Confirm Cards">確認選牌</button>
+            </div>
         </div>
 
         <!-- 步驟5: 洗牌頁 -->
@@ -250,11 +281,12 @@
                     <div class="shuffling-card"></div>
                 </div>
                 <p class="mystical-loading" 
-                   data-zh="命運的牌卡正在為你的問題重新排列...<br><span style='font-size: 0.9rem; opacity: 0.7;'>即將為你展現神秘的選擇</span>"
-                   data-en="The cards of destiny are rearranging for your question...<br><span style='font-size: 0.9rem; opacity: 0.7;'>About to reveal mystical choices for you</span>">
-                    命運的牌卡正在為你的問題重新排列...<br>
-                    <span style="font-size: 0.9rem; opacity: 0.7;">即將為你展現神秘的選擇</span>
+                   data-zh="深呼吸，將注意力放在你的問題上...<br><span style='font-size: 0.9rem; opacity: 0.7;'>準備好後，選擇最吸引你的牌</span>"
+                   data-en="Take a breath and focus on your question...<br><span style='font-size: 0.9rem; opacity: 0.7;'>When ready, choose the cards that draw you in</span>">
+                    深呼吸，將注意力放在你的問題上...<br>
+                    <span style="font-size: 0.9rem; opacity: 0.7;">準備好後，選擇最吸引你的牌</span>
                 </p>
+                <button class="focus-skip" onclick="proceedToCardSelection()" data-zh="我準備好了，開始選牌" data-en="I'm ready — choose cards">我準備好了，開始選牌</button>
             </div>
         </div>
         

@@ -596,6 +596,7 @@ const tarotCards = [
 let selectedCards = [];
 let currentQuestion = "";
 let currentMode = "three";
+let focusGuideTimer = null;
 
 
 // 主題管理
@@ -822,6 +823,11 @@ function updateLanguageElements() {
     if (document.getElementById('step3').classList.contains('active')) {
         updateSpreadDescription();
     }
+    if (document.getElementById('step4').classList.contains('active')) {
+        updateSelectionPageSettings();
+        updateSelectedCardPositions();
+        updateProgress();
+    }
 
     // 更新主題按鈕文字（在函數結尾添加）
     updateThemeButton();
@@ -995,7 +1001,20 @@ function updateSpreadDescription() {
 
 // 提交問題
 function submitQuestion() {
-    currentQuestion = document.getElementById('questionInput').value.trim();
+    const questionInput = document.getElementById('questionInput');
+    const questionError = document.getElementById('questionError');
+    currentQuestion = questionInput.value.trim();
+
+    questionInput.classList.remove('input-error');
+    questionError.textContent = '';
+
+    if (!currentQuestion) {
+        const message = currentLanguage === 'zh' ? '請先輸入你想詢問的問題' : 'Please enter your question first';
+        questionInput.classList.add('input-error');
+        questionError.textContent = message;
+        questionInput.focus();
+        return;
+    }
     
     if (currentMode === 'choice') {
         const choice1 = document.getElementById('choice1Input').value.trim();
@@ -1009,19 +1028,17 @@ function submitQuestion() {
             `${currentQuestion}\nOption One: ${choice1}\nOption Two: ${choice2}`;
     }
     
-    if (!currentQuestion) {
-        showNotification(t('notification-question'), 'warning');
-        return;
-    }
-    
-    showStep(5); // 顯示洗牌動畫
-    
-    // 3秒後進入選牌頁面
-    setTimeout(() => {
-        updateSelectionPageSettings();
-        showStep(4);
-        generateCards();
-    }, 3000);
+    showStep(5); // 顯示可略過的專注引導
+    clearTimeout(focusGuideTimer);
+    focusGuideTimer = setTimeout(proceedToCardSelection, 3000);
+}
+
+function proceedToCardSelection() {
+    clearTimeout(focusGuideTimer);
+    focusGuideTimer = null;
+    updateSelectionPageSettings();
+    showStep(4);
+    generateCards();
 }
 
 // 更新選牌頁面設置
@@ -1036,10 +1053,27 @@ function updateSelectionPageSettings() {
 function showStep(stepNumber) {
     document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
     document.getElementById('step' + stepNumber).classList.add('active');
+    updateReadingSteps(stepNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateReadingSteps(stepNumber) {
+    const tracker = document.getElementById('readingSteps');
+    if (!tracker) return;
+    const flowMap = { 2: 1, 3: 2, 5: 3, 4: 3, 6: 4 };
+    const activeFlowStep = flowMap[stepNumber];
+    tracker.hidden = !activeFlowStep;
+    tracker.querySelectorAll('.reading-step').forEach(item => {
+        const itemStep = Number(item.dataset.flowStep);
+        item.classList.toggle('active', itemStep === activeFlowStep);
+        item.classList.toggle('completed', itemStep < activeFlowStep);
+    });
 }
 
 // 生成卡片
 function generateCards() {
+    selectedCards = [];
+    updateProgress();
     const cardsFan = document.getElementById('cardsFan');
     cardsFan.innerHTML = '';
     const shuffledCards = [...tarotCards].sort(() => Math.random() - 0.5);
@@ -1092,7 +1126,12 @@ async function selectCard(cardElement) {
 
     const selectionStartTime = performance.now();
     const maxCards = parseInt(document.getElementById('totalCards').textContent);
-    if (selectedCards.length >= maxCards || cardElement.classList.contains('selected')) return;
+    if (cardElement.classList.contains('selected')) {
+        deselectCard(cardElement);
+        return;
+    }
+    if (selectedCards.length >= maxCards || cardElement.classList.contains('selecting')) return;
+    cardElement.classList.add('selecting');
     
     createSelectEffect(cardElement);
     const orientation = Math.random() < 0.5 ? "upright" : "reversed";
@@ -1175,6 +1214,7 @@ async function selectCard(cardElement) {
     }
     
     cardElement.classList.add("flipped", "selected");
+    cardElement.classList.remove('selecting');
     
     selectedCards.push({
         element: cardElement,
@@ -1182,6 +1222,7 @@ async function selectCard(cardElement) {
         orientation: orientation,
         symbol: cardSymbol
     });
+    updateSelectedCardPositions();
     
     updateProgress();
     
@@ -1199,16 +1240,6 @@ async function selectCard(cardElement) {
         }
     }
     
-    if (selectedCards.length === maxCards) {
-        console.log('🎯 所有卡牌已選擇，準備進行解讀');
-        setTimeout(() => {
-            showStep(6);
-            const questionLabel = t('question-label');
-            document.getElementById('userQuestion').innerHTML = `<strong>${questionLabel}</strong><br>"${currentQuestion}"`;
-            showLoadingAndGetResults();
-        }, 1000);
-    }
-
     const selectionEndTime = performance.now();
     performanceMonitor.recordCardSelection(cardName, selectionEndTime - selectionStartTime);
 
@@ -1521,6 +1552,15 @@ function updateProgress() {
     const progress = (selectedCards.length / maxCards) * 100;
     document.getElementById('selectedCount').textContent = selectedCards.length;
     document.getElementById('progressFill').style.width = progress + '%';
+    const confirmButton = document.getElementById('confirmCardsBtn');
+    const status = document.getElementById('selectionStatus');
+    const ready = selectedCards.length === maxCards;
+    if (confirmButton) confirmButton.disabled = !ready;
+    if (status) {
+        status.textContent = ready
+            ? (currentLanguage === 'zh' ? '牌已選齊，可以確認' : 'Your cards are ready')
+            : (currentLanguage === 'zh' ? `還需選擇 ${maxCards - selectedCards.length} 張` : `${maxCards - selectedCards.length} card(s) remaining`);
+    }
 }
 
 function showNotification(message, type = 'info') {
@@ -1554,6 +1594,8 @@ function restartDivination() {
     document.getElementById('choice1Input').value = '';
     document.getElementById('choice2Input').value = '';
     document.getElementById('choiceInputs').style.display = 'none';
+    document.getElementById('questionCount').textContent = '0 / 150';
+    document.getElementById('questionError').textContent = '';
     
     // 清理進度
     document.getElementById('selectedCount').textContent = '0';
@@ -3489,3 +3531,81 @@ function setButtonLoading(button, isLoading, originalText = '') {
         }
     }
 }
+
+function deselectCard(cardElement) {
+    const selectedIndex = selectedCards.findIndex(card => card.element === cardElement);
+    if (selectedIndex === -1) return;
+
+    selectedCards.splice(selectedIndex, 1);
+    cardElement.classList.remove('selected', 'flipped', 'reversed', 'selecting');
+    cardElement.querySelector('.card-front').innerHTML = `
+        <div style="text-align: center;">
+            <div style="font-size: 1.8rem; margin-bottom: 8px;">${cardElement.dataset.cardSymbol}</div>
+            <div style="font-size: 0.75rem; line-height: 1.3;">${cardElement.dataset.cardName}</div>
+        </div>`;
+    cardElement.querySelector('.card-position-badge')?.remove();
+    updateSelectedCardPositions();
+    updateProgress();
+}
+
+function updateSelectedCardPositions() {
+    const positions = spreadInfo[currentMode].positions[currentLanguage];
+    selectedCards.forEach((card, index) => {
+        let badge = card.element.querySelector('.card-position-badge');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'card-position-badge';
+            card.element.appendChild(badge);
+        }
+        badge.textContent = `${index + 1}. ${positions[index]}`;
+    });
+}
+
+function confirmSelectedCards() {
+    const maxCards = Number(document.getElementById('totalCards').textContent);
+    if (selectedCards.length !== maxCards) return;
+
+    showStep(6);
+    const questionLabel = t('question-label');
+    document.getElementById('userQuestion').innerHTML = `<strong>${questionLabel}</strong><br>"${currentQuestion}"`;
+    showLoadingAndGetResults();
+}
+
+function returnToQuestion() {
+    selectedCards = [];
+    document.getElementById('cardsFan').innerHTML = '';
+    updateProgress();
+    showStep(3);
+    document.getElementById('questionInput').focus();
+}
+
+function initializeQuestionExperience() {
+    const input = document.getElementById('questionInput');
+    const count = document.getElementById('questionCount');
+    const error = document.getElementById('questionError');
+    if (!input || !count) return;
+
+    const updateCount = () => {
+        count.textContent = `${input.value.length} / ${input.maxLength}`;
+        input.classList.remove('input-error');
+        error.textContent = '';
+    };
+
+    input.addEventListener('input', updateCount);
+    input.addEventListener('keydown', event => {
+        if (event.key === 'Enter' && !event.isComposing) {
+            event.preventDefault();
+            submitQuestion();
+        }
+    });
+
+    document.querySelectorAll('.example-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            input.value = currentLanguage === 'zh' ? chip.dataset.questionZh : chip.dataset.questionEn;
+            updateCount();
+            input.focus();
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initializeQuestionExperience);
