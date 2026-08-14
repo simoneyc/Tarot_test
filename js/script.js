@@ -710,7 +710,7 @@ function updateThemeButton() {
     
     if (icon && text) {
         if (currentTheme === 'classic') {
-            icon.textContent = '☼'; // 深色模式可切換至明亮模式
+            icon.textContent = '🌙'; // 經典模式顯示月亮
             text.setAttribute('data-zh', '明亮');
             text.setAttribute('data-en', 'light');
             if (currentLanguage === 'zh') {
@@ -719,7 +719,7 @@ function updateThemeButton() {
                 text.textContent = 'light';
             }
         } else {
-            icon.textContent = '☾'; // 明亮模式可切換至深色模式
+            icon.textContent = '✨'; // 明亮模式顯示星星
             text.setAttribute('data-zh', '經典');
             text.setAttribute('data-en', 'Classic');
             if (currentLanguage === 'zh') {
