@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div class="network-status" id="networkStatus" role="status" aria-live="polite" hidden></div>
+    <div class="sr-only" id="liveAnnouncements" aria-live="polite" aria-atomic="true"></div>
     <div class="magic-particles" id="particles"></div>
     
     <!-- 固定導航列 -->
@@ -40,7 +42,7 @@
             <!-- 導航功能區 -->
             <div class="navbar-controls">
                 <!-- 歷史記錄按鈕 -->
-                <button class="nav-history-btn" onclick="showHistoryPage()" title="查看占卜記錄">
+                <button class="nav-history-btn" onclick="showHistoryPage()" title="查看占卜記錄" aria-label="查看占卜記錄">
                     <span class="history-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" focusable="false">
                             <path d="M5 4.75h10.25A2.75 2.75 0 0 1 18 7.5v11.75H7.5A2.5 2.5 0 0 1 5 16.75v-12Z"/>
@@ -52,7 +54,7 @@
                 </button>
                 
                 <!-- 語言切換按鈕 -->
-                <button class="lang-toggle-btn" onclick="toggleLanguage()" title="切換語言 / Switch Language">
+                <button class="lang-toggle-btn" onclick="toggleLanguage()" title="切換語言 / Switch Language" aria-label="切換語言 / Switch Language">
                     <span class="lang-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" focusable="false">
                             <circle cx="12" cy="12" r="8.5"/>
@@ -295,17 +297,15 @@
 
         <!-- 步驟6: 結果頁 -->
         <div id="step6" class="step">
-            <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
+            <h2 class="result-page-title"
                 data-zh="命運的神諭已降臨" 
                 data-en="The Divine Oracle Has Descended">命運的神諭已降臨</h2>
-            <div id="userQuestion" style="text-align: center; margin-bottom: 50px; font-size: 1.4rem; 
-                background: var(--black-alpha-70); padding: 30px; border-radius: 15px; 
-                border: 1px solid var(--primary-gold); backdrop-filter: blur(10px);"></div>
+            <div id="userQuestion" class="result-question"></div>
             
             <div class="selected-cards" id="resultsContainer">
             </div>
 
-            <div style="text-align: center; margin-top: 50px;">
+            <div class="result-footer">
                 <div class="ornament">✦ ◊ ✦</div>
                 <button class="btn" onclick="restartDivination()" 
                         data-zh="重新探索命運" 
@@ -324,6 +324,12 @@
                     <p style="color: rgba(212, 175, 55, 0.8);">
                         <span data-zh="回顧你的神秘旅程" data-en="Review your mystical journey">回顧你的神秘旅程</span>
                     </p>
+                    <p class="history-privacy" data-zh="紀錄只保存在這台裝置，不會上傳到伺服器。" data-en="Records stay on this device and are not uploaded to the server.">紀錄只保存在這台裝置，不會上傳到伺服器。</p>
+                    <div class="history-data-actions">
+                        <button class="history-tool-btn" onclick="exportHistoryRecords()" data-zh="匯出備份" data-en="Export backup">匯出備份</button>
+                        <button class="history-tool-btn" onclick="document.getElementById('historyImportInput').click()" data-zh="匯入備份" data-en="Import backup">匯入備份</button>
+                        <input type="file" id="historyImportInput" accept="application/json,.json" hidden onchange="importHistoryRecords(event)">
+                    </div>
                 </div>
 
                 <!-- 控制區域 -->
@@ -334,7 +340,7 @@
                             data-zh-placeholder="搜索問題、解讀內容或標籤..."
                             data-en-placeholder="Search questions, interpretations, or tags..."
                             placeholder="搜索問題、解讀內容或標籤...">
-                        <button class="search-btn" onclick="searchRecords()">🔍</button>
+                        <button class="search-btn" onclick="searchRecords()" aria-label="搜尋記錄">⌕</button>
                     </div>
 
                     <!-- 視圖切換和清除按鈕 -->
@@ -429,7 +435,7 @@
         </div>
 
         <!-- 記錄詳情模態框 -->
-        <div id="recordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; overflow-y: auto;">
+        <div id="recordModal" role="dialog" aria-modal="true" aria-label="占卜記錄詳情" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; overflow-y: auto;">
             <div style="max-width: 800px; margin: 120px auto 50px auto; background: linear-gradient(135deg, var(--deep-purple), var(--mystic-blue)); border: 2px solid var(--primary-gold); border-radius: 20px; position: relative;">
                 <button onclick="closeRecordModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: var(--primary-gold); font-size: 2rem; cursor: pointer;">×</button>
                 <div id="modalContent" style="padding: 40px;">

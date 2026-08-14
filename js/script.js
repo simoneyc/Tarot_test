@@ -697,6 +697,8 @@ let readingElapsedTimer = null;
 let readingStartedAt = 0;
 let readingPhase = 'idle';
 let readingInFlight = false;
+let lastInterpretation = '';
+let modalTriggerElement = null;
 
 
 // 主題管理
@@ -1044,10 +1046,23 @@ function clearParticles() {
 // 設置牌陣選擇監聽器
 function setupSpreadListeners() {
     document.querySelectorAll('.spread-card').forEach(card => {
+        card.tabIndex = 0;
+        card.setAttribute('role', 'radio');
+        card.setAttribute('aria-checked', card.classList.contains('active') ? 'true' : 'false');
         card.addEventListener('click', function() {
-            document.querySelectorAll('.spread-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.spread-card').forEach(c => {
+                c.classList.remove('active');
+                c.setAttribute('aria-checked', 'false');
+            });
             this.classList.add('active');
+            this.setAttribute('aria-checked', 'true');
             currentMode = this.dataset.mode;
+        });
+        card.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                card.click();
+            }
         });
     });
 }
@@ -1157,6 +1172,13 @@ function showStep(stepNumber) {
     document.getElementById('step' + stepNumber).classList.add('active');
     updateReadingSteps(stepNumber);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => {
+        const heading = document.querySelector(`#step${stepNumber} h1, #step${stepNumber} h2`);
+        if (heading) {
+            heading.tabIndex = -1;
+            heading.focus({ preventScroll: true });
+        }
+    }, 250);
 }
 
 function updateReadingSteps(stepNumber) {
@@ -1185,6 +1207,10 @@ function generateCards() {
         cardElement.className = 'tarot-card';
         cardElement.dataset.cardName = cardData.name;
         cardElement.dataset.cardSymbol = cardData.symbol;
+        cardElement.tabIndex = 0;
+        cardElement.setAttribute('role', 'button');
+        cardElement.setAttribute('aria-pressed', 'false');
+        cardElement.setAttribute('aria-label', currentLanguage === 'zh' ? '選擇一張覆蓋的塔羅牌' : 'Select a face-down tarot card');
         
         cardElement.style.zIndex = index;
         cardElement.innerHTML = `
@@ -1201,6 +1227,12 @@ function generateCards() {
         cardElement.addEventListener('click', (e) => {
             e.stopPropagation();
             selectCard(cardElement);
+        });
+        cardElement.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectCard(cardElement);
+            }
         });
         cardsFan.appendChild(cardElement);
     });
@@ -1317,6 +1349,8 @@ async function selectCard(cardElement) {
     
     cardElement.classList.add("flipped", "selected");
     cardElement.classList.remove('selecting');
+    cardElement.setAttribute('aria-pressed', 'true');
+    cardElement.setAttribute('aria-label', `${cardName}，${orientation === 'upright' ? t('upright') : t('reversed')}，${currentLanguage === 'zh' ? '再按一次可取消' : 'press again to deselect'}`);
     
     selectedCards.push({
         element: cardElement,
@@ -1432,6 +1466,58 @@ function clearLoadingAnimation() {
     readingElapsedTimer = null;
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
+    const controller = new AbortController();
+    const parentSignal = options.signal;
+    const forwardAbort = () => controller.abort();
+    if (parentSignal) {
+        if (parentSignal.aborted) controller.abort();
+        parentSignal.addEventListener('abort', forwardAbort, { once: true });
+    }
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } catch (error) {
+        if (controller.signal.aborted && !parentSignal?.aborted) {
+            const timeoutError = new Error('REQUEST_TIMEOUT');
+            timeoutError.name = 'TimeoutError';
+            throw timeoutError;
+        }
+        throw error;
+    } finally {
+        clearTimeout(timeout);
+        parentSignal?.removeEventListener('abort', forwardAbort);
+    }
+}
+
+async function fetchReadingWithRetry(requestBody, maxAttempts = 3) {
+    let lastError;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            if (attempt > 1) {
+                const detail = document.getElementById('readingWaitDetail');
+                if (detail) detail.textContent = currentLanguage === 'zh'
+                    ? `服務暫時忙碌，正在進行第 ${attempt - 1} 次重新嘗試…`
+                    : `The service is busy. Retry ${attempt - 1} is in progress…`;
+                await new Promise(resolve => setTimeout(resolve, 1500 * (attempt - 1)));
+            }
+            const response = await fetchWithTimeout(`${API_BASE_URL}/api/tarot-reading`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody),
+                signal: readingAbortController.signal
+            }, 120000);
+
+            if ((response.status === 429 || response.status === 503) && attempt < maxAttempts) continue;
+            return response;
+        } catch (error) {
+            lastError = error;
+            if (error.name === 'AbortError' || error.name === 'TimeoutError' || attempt === maxAttempts) throw error;
+        }
+    }
+    throw lastError;
+}
+
 // API 調用和結果顯示
 async function showLoadingAndGetResults() {
     if (readingInFlight) return;
@@ -1455,24 +1541,17 @@ async function showLoadingAndGetResults() {
             language: currentLanguage // 新增語言參數
         };
 
-        const healthResponse = await fetch(`${API_BASE_URL}/api/health`, {
+        const healthResponse = await fetchWithTimeout(`${API_BASE_URL}/api/health`, {
             cache: 'no-store',
             signal: readingAbortController.signal
-        });
+        }, 65000);
         if (!healthResponse.ok) throw new Error(`Health check failed: ${healthResponse.status}`);
 
         updateReadingStatus('submitting');
         await new Promise(resolve => setTimeout(resolve, 250));
         updateReadingStatus('interpreting');
 
-        const response = await fetch(`${API_BASE_URL}/api/tarot-reading`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody),
-            signal: readingAbortController.signal
-        });
+        const response = await fetchReadingWithRetry(requestBody);
 
         if (!response.ok) {
             throw new Error(`API 請求失敗: ${response.status}`);
@@ -1500,6 +1579,8 @@ async function showLoadingAndGetResults() {
         readingInFlight = false;
         if (error.name === 'AbortError') {
             showReadingCancelled();
+        } else if (error.name === 'TimeoutError') {
+            showAPIError(new Error(currentLanguage === 'zh' ? '服務回應逾時' : 'The service timed out'));
         } else {
             showAPIError(error);
         }
@@ -1509,7 +1590,7 @@ async function showLoadingAndGetResults() {
 }
 
 // 替換原有的混亂代碼段，插入完整的函數
-async function displayFinalResults(interpretation) {
+async function displayFinalResultsLegacy(interpretation) {
     let formattedInterpretation = interpretation.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     formattedInterpretation = formattedInterpretation.replace(/\* /g, '');
 
@@ -1732,6 +1813,8 @@ function updateProgress() {
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
+    notification.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    notification.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
     const bgColor = type === 'error' ? 'rgba(255, 107, 107, 0.9)' : 
                    type === 'warning' ? 'rgba(255, 193, 7, 0.9)' : 
                    'rgba(212, 175, 55, 0.9)';
@@ -1742,6 +1825,8 @@ function showNotification(message, type = 'info') {
         font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     `;
     notification.textContent = message;
+    const liveRegion = document.getElementById('liveAnnouncements');
+    if (liveRegion) liveRegion.textContent = message;
     document.body.appendChild(notification);
     setTimeout(() => {
         if (notification.parentNode) {
@@ -1755,6 +1840,7 @@ function restartDivination() {
     selectedCards = [];
     currentQuestion = "";
     currentMode = "three";
+    document.title = currentLanguage === 'zh' ? 'TarotVision - 塔羅視界' : 'TarotVision - Mystical Insights';
     
     // 清理表單
     document.getElementById('questionInput').value = '';
@@ -1774,7 +1860,10 @@ function restartDivination() {
     
     // 重置牌陣選擇
     document.querySelectorAll('.spread-card').forEach(card => card.classList.remove('active'));
-    document.querySelector('.spread-card[data-mode="three"]').classList.add('active');
+    document.querySelectorAll('.spread-card').forEach(card => card.setAttribute('aria-checked', 'false'));
+    const defaultSpread = document.querySelector('.spread-card[data-mode="three"]');
+    defaultSpread.classList.add('active');
+    defaultSpread.setAttribute('aria-checked', 'true');
     
     showStep(1);
 }
@@ -2554,7 +2643,7 @@ class HistoryUI {
         const formattedTime = date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
         
         return `
-            <div class="record-card" onclick="openRecordModal('${record.id}')">
+            <div class="record-card" role="button" tabindex="0" onclick="openRecordModal('${record.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRecordModal('${record.id}');}">
                 <!-- 卡片頭部 -->
                 <div class="record-header">
                     <div class="record-date">${formattedDate} ${formattedTime}</div>
@@ -2906,13 +2995,17 @@ function toggleFavorite(recordId) {
 /**
  * 刪除記錄
  */
-function deleteRecord(recordId) {
+let recentlyDeletedRecord = null;
+let undoDeleteTimer = null;
+
+function deleteRecord(recordId, skipConfirm = false) {
     const deleteBtn = document.querySelector(`[onclick="deleteRecord('${recordId}')"]`);
     addButtonFeedback(deleteBtn, 'delete');
-    if (confirm(currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?')) {
+    if (skipConfirm || confirm(currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?')) {
+        recentlyDeletedRecord = divinationManager.getRecordById(recordId);
         const success = divinationManager.deleteRecord(recordId);
         if (success) {
-            showNotification(currentLanguage === 'zh' ? '記錄已刪除' : 'Record deleted', 'success');
+            showUndoDeleteNotice();
             if (historyUI) {
                 historyUI.loadRecords();
             }
@@ -2926,8 +3019,97 @@ function deleteRecord(recordId) {
 function shareRecord(recordId) {
     const shareBtn = document.querySelector(`[onclick="shareRecord('${recordId}')"]`);
     addButtonFeedback(shareBtn, 'share');
-    // 這個功能將在下一階段實現
-    showNotification(currentLanguage === 'zh' ? '分享功能即將推出' : 'Share feature coming soon', 'info');
+    const record = divinationManager.getRecordById(recordId);
+    if (!record) return;
+    const cards = record.cards.map(card => `${card.position}：${card.name}（${card.orientation === 'upright' ? t('upright') : t('reversed')}）`).join('\n');
+    copyTextToClipboard(`${record.question}\n\n${cards}\n\n${record.interpretation}`)
+        .then(() => showNotification(currentLanguage === 'zh' ? '記錄已複製，可貼到其他應用程式分享' : 'Record copied and ready to share', 'success'))
+        .catch(() => showNotification(currentLanguage === 'zh' ? '複製失敗' : 'Copy failed', 'error'));
+}
+
+function showUndoDeleteNotice() {
+    document.querySelector('.undo-delete-notice')?.remove();
+    clearTimeout(undoDeleteTimer);
+    const notice = document.createElement('div');
+    notice.className = 'undo-delete-notice';
+    notice.setAttribute('role', 'status');
+    notice.innerHTML = `
+        <span>${currentLanguage === 'zh' ? '記錄已刪除' : 'Record deleted'}</span>
+        <button type="button" onclick="undoDeleteRecord()">${currentLanguage === 'zh' ? '復原' : 'Undo'}</button>`;
+    document.body.appendChild(notice);
+    undoDeleteTimer = setTimeout(() => {
+        notice.remove();
+        recentlyDeletedRecord = null;
+    }, 7000);
+}
+
+function undoDeleteRecord() {
+    if (!recentlyDeletedRecord) return;
+    const records = divinationManager.getAllRecords();
+    if (!records.some(record => record.id === recentlyDeletedRecord.id)) {
+        records.unshift(recentlyDeletedRecord);
+        localStorage.setItem(divinationManager.storageKeys.RECORDS, JSON.stringify(records.slice(0, divinationManager.maxRecords)));
+    }
+    recentlyDeletedRecord = null;
+    clearTimeout(undoDeleteTimer);
+    document.querySelector('.undo-delete-notice')?.remove();
+    historyUI?.loadRecords();
+    updateRecordsBadge();
+    showNotification(currentLanguage === 'zh' ? '記錄已復原' : 'Record restored', 'success');
+}
+
+function exportHistoryRecords() {
+    const records = divinationManager.getAllRecords();
+    if (!records.length) {
+        showNotification(currentLanguage === 'zh' ? '目前沒有可匯出的記錄' : 'There are no records to export', 'warning');
+        return;
+    }
+    const backup = { app: 'TarotVision', version: 1, exportedAt: new Date().toISOString(), records };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tarotvision-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showNotification(currentLanguage === 'zh' ? `已匯出 ${records.length} 筆記錄` : `Exported ${records.length} records`, 'success');
+}
+
+async function importHistoryRecords(event) {
+    const input = event.target;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+        const data = JSON.parse(await file.text());
+        if (data.app !== 'TarotVision' || !Array.isArray(data.records)) throw new Error('INVALID_BACKUP');
+        const validRecords = data.records
+            .filter(record => record && typeof record.id === 'string' && typeof record.question === 'string' && Array.isArray(record.cards))
+            .map(record => ({
+                ...record,
+                id: record.id.replace(/[^a-zA-Z0-9_-]/g, ''),
+                question: record.question.replace(/[<>]/g, ''),
+                interpretation: String(record.interpretation || '').replace(/[<>]/g, ''),
+                interpretationSummary: String(record.interpretationSummary || '').replace(/[<>]/g, ''),
+                tags: Array.isArray(record.tags) ? record.tags.map(tag => String(tag).replace(/[<>'"]/g, '')).slice(0, 20) : [],
+                cards: record.cards.filter(card => card && typeof card.name === 'string').slice(0, 10)
+            }))
+            .filter(record => record.id && record.cards.length);
+        if (!validRecords.length) throw new Error('EMPTY_BACKUP');
+        const existing = divinationManager.getAllRecords();
+        const merged = new Map(existing.map(record => [record.id, record]));
+        validRecords.forEach(record => merged.set(record.id, record));
+        const records = Array.from(merged.values())
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .slice(0, divinationManager.maxRecords);
+        localStorage.setItem(divinationManager.storageKeys.RECORDS, JSON.stringify(records));
+        historyUI?.loadRecords();
+        updateRecordsBadge();
+        showNotification(currentLanguage === 'zh' ? `已匯入備份，目前共有 ${records.length} 筆記錄` : `Backup imported. ${records.length} records available`, 'success');
+    } catch (error) {
+        showNotification(currentLanguage === 'zh' ? '無法匯入：檔案不是有效的 TarotVision 備份' : 'Import failed: this is not a valid TarotVision backup', 'error');
+    } finally {
+        input.value = '';
+    }
 }
 
 // ===== 歷史記錄整合功能 =====
@@ -2959,6 +3141,7 @@ function showHistoryPage() {
  * 打開記錄詳情模態框
  */
 function openRecordModal(recordId) {
+    modalTriggerElement = document.activeElement;
     const record = divinationManager.getRecordById(recordId);
     if (!record) {
         showNotification('記錄不存在', 'error');
@@ -3178,7 +3361,7 @@ function openRecordModal(recordId) {
                     style="background: transparent; color: var(--primary-gold); border: 2px solid var(--primary-gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
                 📤 ${currentLanguage === 'zh' ? '分享' : 'Share'}
             </button>
-            <button onclick="if(confirm('${currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?'}')) { deleteRecord('${record.id}'); closeRecordModal(); }" 
+            <button onclick="if(confirm('${currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?'}')) { deleteRecord('${record.id}', true); closeRecordModal(); }"
                     style="background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
                 🗑️ ${currentLanguage === 'zh' ? '刪除' : 'Delete'}
             </button>
@@ -3189,6 +3372,7 @@ function openRecordModal(recordId) {
     modal.style.zIndex = '10001';
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
+    modal.querySelector('button')?.focus();
 
     // 即時更新查看次數顯示
     if (newViewCount !== false) {
@@ -3206,6 +3390,8 @@ function closeRecordModal() {
     if (modal) {
         modal.style.display = 'none';
         document.body.style.overflow = ''; // 恢復背景滾動
+        modalTriggerElement?.focus();
+        modalTriggerElement = null;
     }
 }
 
@@ -3478,6 +3664,22 @@ document.addEventListener('click', function(e) {
 
 // ESC 鍵關閉模態框
 document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('recordModal');
+    if (e.key === 'Tab' && modal?.style.display === 'block') {
+        const focusable = Array.from(modal.querySelectorAll('button, input, textarea, select, [tabindex]:not([tabindex="-1"])'))
+            .filter(element => !element.disabled && element.offsetParent !== null);
+        if (focusable.length) {
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+    }
     if (e.key === 'Escape') {
         closeRecordModal();
     }
@@ -3705,6 +3907,8 @@ function deselectCard(cardElement) {
 
     selectedCards.splice(selectedIndex, 1);
     cardElement.classList.remove('selected', 'flipped', 'reversed', 'selecting');
+    cardElement.setAttribute('aria-pressed', 'false');
+    cardElement.setAttribute('aria-label', currentLanguage === 'zh' ? '選擇一張覆蓋的塔羅牌' : 'Select a face-down tarot card');
     cardElement.querySelector('.card-front').innerHTML = `
         <div style="text-align: center;">
             <div style="font-size: 1.8rem; margin-bottom: 8px;">${cardElement.dataset.cardSymbol}</div>
@@ -3798,3 +4002,119 @@ function renderQuestionExamples(forceRefresh = false) {
 }
 
 document.addEventListener('DOMContentLoaded', initializeQuestionExperience);
+
+function escapeHtml(value = '') {
+    return String(value).replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[character]);
+}
+
+function formatReadingText(text) {
+    return escapeHtml(text)
+        .replace(/^#{1,6}\s*/gm, '')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .split(/\n{2,}/)
+        .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
+        .join('');
+}
+
+async function displayFinalResults(interpretation) {
+    lastInterpretation = interpretation;
+    const container = document.getElementById('resultsContainer');
+    const positions = spreadInfo[currentMode].positions[currentLanguage];
+    const plainParagraphs = interpretation.split(/\n{2,}/).map(item => item.trim()).filter(Boolean);
+    const summary = (plainParagraphs[0] || interpretation).replace(/[#*_]/g, '').slice(0, 220);
+    const cardsMarkup = selectedCards.map((card, index) => `
+        <article class="result-card-item">
+            <div class="result-card-image ${card.orientation === 'reversed' ? 'is-reversed' : ''}">
+                <img src="${getTarotImagePath(card.name)}" alt="${escapeHtml(card.name)}">
+            </div>
+            <div class="result-card-position">${escapeHtml(positions[index])}</div>
+            <h3>${escapeHtml(card.name)}</h3>
+            <span class="result-orientation ${card.orientation}">${card.orientation === 'upright' ? t('upright') : t('reversed')}</span>
+        </article>
+    `).join('');
+
+    container.innerHTML = `
+        <section class="result-summary" aria-labelledby="resultSummaryTitle">
+            <span class="result-section-kicker">${currentLanguage === 'zh' ? '核心訊息' : 'Core message'}</span>
+            <h3 id="resultSummaryTitle">${escapeHtml(summary)}${summary.length >= 220 ? '…' : ''}</h3>
+        </section>
+
+        <section class="result-section" aria-labelledby="drawnCardsTitle">
+            <div class="result-section-heading">
+                <span class="result-section-kicker">${currentLanguage === 'zh' ? '你的牌陣' : 'Your spread'}</span>
+                <h2 id="drawnCardsTitle">${currentLanguage === 'zh' ? '本次抽到的牌' : 'Cards drawn'}</h2>
+            </div>
+            <div class="result-cards-grid">${cardsMarkup}</div>
+        </section>
+
+        <section class="result-section result-reading" aria-labelledby="fullReadingTitle">
+            <div class="result-section-heading">
+                <span class="result-section-kicker">${currentLanguage === 'zh' ? '完整解讀' : 'Full interpretation'}</span>
+                <h2 id="fullReadingTitle">${t('oracle-reading')}</h2>
+            </div>
+            <div class="result-reading-body">${formatReadingText(interpretation)}</div>
+        </section>
+
+        <div class="result-action-bar" aria-label="${currentLanguage === 'zh' ? '解讀操作' : 'Reading actions'}">
+            <button class="btn btn-secondary" onclick="copyCurrentReading()">${currentLanguage === 'zh' ? '複製解讀' : 'Copy reading'}</button>
+            <button class="btn btn-secondary" onclick="regenerateReading()">${currentLanguage === 'zh' ? '保留牌卡，重新解讀' : 'Regenerate with these cards'}</button>
+            <button class="btn" onclick="showHistoryPage()">${currentLanguage === 'zh' ? '查看占卜記錄' : 'View history'}</button>
+        </div>`;
+
+    document.title = currentLanguage === 'zh' ? '解讀完成｜TarotVision' : 'Reading ready | TarotVision';
+}
+
+async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+    }
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    textarea.remove();
+}
+
+async function copyCurrentReading() {
+    const positions = spreadInfo[currentMode].positions[currentLanguage];
+    const cardsText = selectedCards.map((card, index) => `${positions[index]}：${card.name}（${card.orientation === 'upright' ? t('upright') : t('reversed')}）`).join('\n');
+    const text = `${currentQuestion}\n\n${cardsText}\n\n${lastInterpretation}`;
+    try {
+        await copyTextToClipboard(text);
+        showNotification(currentLanguage === 'zh' ? '解讀已複製' : 'Reading copied', 'success');
+    } catch (error) {
+        showNotification(currentLanguage === 'zh' ? '無法複製，請手動選取文字' : 'Unable to copy automatically', 'error');
+    }
+}
+
+function regenerateReading() {
+    if (readingInFlight) return;
+    showLoadingAndGetResults();
+}
+
+function updateNetworkStatus() {
+    const banner = document.getElementById('networkStatus');
+    if (!banner) return;
+    if (navigator.onLine) {
+        banner.textContent = currentLanguage === 'zh' ? '網路已恢復連線' : 'Connection restored';
+        banner.hidden = false;
+        banner.classList.remove('is-offline');
+        setTimeout(() => { if (navigator.onLine) banner.hidden = true; }, 2500);
+    } else {
+        banner.textContent = currentLanguage === 'zh' ? '目前沒有網路連線；你的問題與牌卡仍會保留。' : 'You are offline. Your question and cards will remain available.';
+        banner.hidden = false;
+        banner.classList.add('is-offline');
+    }
+}
+
+window.addEventListener('offline', updateNetworkStatus);
+window.addEventListener('online', updateNetworkStatus);
+document.addEventListener('DOMContentLoaded', () => {
+    if (!navigator.onLine) updateNetworkStatus();
+});
