@@ -2962,11 +2962,36 @@ body {
 }
 
 .examples-label {
-    margin-bottom: 10px;
     color: #a99f90;
     font-family: 'Noto Sans TC', sans-serif;
     font-size: 0.82rem;
 }
+
+.examples-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.refresh-examples {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    color: #a99b7a;
+    background: transparent;
+    border: 1px solid rgba(201,165,92,.18);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: .7rem;
+    transition: all .2s ease;
+}
+
+.refresh-examples span[aria-hidden="true"] { font-size: .9rem; transition: transform .25s ease; }
 
 .example-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .example-chip {
@@ -3040,7 +3065,8 @@ body {
 
 @media (min-width: 769px) and (hover: hover) {
     .btn-secondary:hover { color: #ecd79f; background: rgba(201,165,92,.07); border-color: rgba(201,165,92,.55); box-shadow: none; }
-    .example-chip:hover, .focus-skip:hover { color: #f0dda9; background: rgba(201,165,92,.11); border-color: rgba(201,165,92,.45); }
+    .example-chip:hover, .focus-skip:hover, .refresh-examples:hover { color: #f0dda9; background: rgba(201,165,92,.11); border-color: rgba(201,165,92,.45); }
+    .refresh-examples:hover span[aria-hidden="true"] { transform: rotate(180deg); }
 }
 
 @media (max-width: 600px) {

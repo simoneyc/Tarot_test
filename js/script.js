@@ -324,6 +324,101 @@ const spreadInfo = {
     }
 };
 
+const questionExamples = {
+    single: {
+        zh: [
+            '我今天最需要留意的是什麼？',
+            '此刻我最需要聽見什麼提醒？',
+            '面對目前的困惑，我可以從哪裡開始？',
+            '今天有什麼能量值得我善加運用？',
+            '我現在忽略了哪個重要訊息？',
+            '什麼行動最能幫助現在的我？'
+        ],
+        en: [
+            'What needs my attention most today?',
+            'What reminder do I need to hear right now?',
+            'Where can I begin with my current confusion?',
+            'What energy can I make good use of today?',
+            'What important message am I overlooking?',
+            'What action would help me most right now?'
+        ]
+    },
+    three: {
+        zh: [
+            '這件事是如何走到現在，又可能往哪裡發展？',
+            '過去的什麼經驗正在影響我目前的選擇？',
+            '這段關係接下來三個月可能如何發展？',
+            '我的工作狀態接下來會有什麼變化？',
+            '目前的困境將如何演變，我該如何準備？',
+            '這個計畫從現在到未來可能經歷什麼？'
+        ],
+        en: [
+            'How did this situation reach the present, and where might it go?',
+            'What past experience is influencing my current choice?',
+            'How might this relationship develop over the next three months?',
+            'How might my work situation change from here?',
+            'How could this challenge unfold, and how can I prepare?',
+            'What journey might this plan take from now into the future?'
+        ]
+    },
+    core: {
+        zh: [
+            '目前問題真正的核心是什麼？',
+            '阻礙我前進的關鍵因素是什麼？',
+            '我可以如何突破目前的停滯？',
+            '在這個局面中，我還沒有看見的優勢是什麼？',
+            '要改善目前的關係，我最需要面對什麼？',
+            '要讓工作進展更順利，我應該調整哪個部分？'
+        ],
+        en: [
+            'What is the true core of my current situation?',
+            'What key factor is preventing me from moving forward?',
+            'How can I break through this period of stagnation?',
+            'What unseen advantage do I have in this situation?',
+            'What must I face to improve this relationship?',
+            'What should I adjust to help my work progress more smoothly?'
+        ]
+    },
+    choice: {
+        zh: [
+            '面對這兩個選擇，我分別需要考量什麼？',
+            '哪個選項更符合我現階段真正的需要？',
+            '選擇不同道路，各自可能帶來什麼影響？',
+            '在這次抉擇中，我忽略了什麼重要因素？',
+            '我該留在現況，還是接受新的機會？',
+            '這兩個方向，哪一個更有助於我的長期成長？'
+        ],
+        en: [
+            'What should I consider about each of these two choices?',
+            'Which option better reflects what I truly need right now?',
+            'What might each path bring into my life?',
+            'What important factor am I overlooking in this decision?',
+            'Should I remain where I am or accept the new opportunity?',
+            'Which direction better supports my long-term growth?'
+        ]
+    },
+    love: {
+        zh: [
+            '我與對方目前各自抱持什麼心態？',
+            '對方如何看待我們現在的關係？',
+            '這段關係接下來可能往哪個方向發展？',
+            '我們之間真正需要溝通的是什麼？',
+            '我可以如何讓這段關係更健康地發展？',
+            '這段感情目前最大的課題是什麼？'
+        ],
+        en: [
+            'What attitudes do we each currently hold toward this relationship?',
+            'How does the other person view our relationship right now?',
+            'Where might this relationship be heading next?',
+            'What do we truly need to communicate about?',
+            'How can I help this relationship develop in a healthier way?',
+            'What is the greatest lesson in this relationship right now?'
+        ]
+    }
+};
+
+const lastQuestionExampleIndexes = {};
+
 // 塔羅牌圖片映射
 const tarotImageMap = {
     // 大牌 (Major Arcana)
@@ -1002,6 +1097,8 @@ function updateSpreadDescription() {
             'Enter the question you most want to understand...';
         choiceInputs.style.display = 'none';
     }
+
+    renderQuestionExamples(false);
 }
 
 // 提交問題
@@ -3669,13 +3766,35 @@ function initializeQuestionExperience() {
         }
     });
 
-    document.querySelectorAll('.example-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            input.value = currentLanguage === 'zh' ? chip.dataset.questionZh : chip.dataset.questionEn;
-            updateCount();
-            input.focus();
-        });
+    document.getElementById('questionExampleChips')?.addEventListener('click', event => {
+        const chip = event.target.closest('.example-chip');
+        if (!chip) return;
+        input.value = chip.dataset.question;
+        updateCount();
+        input.focus();
     });
+}
+
+function renderQuestionExamples(forceRefresh = false) {
+    const container = document.getElementById('questionExampleChips');
+    const pool = questionExamples[currentMode]?.[currentLanguage] || questionExamples.three[currentLanguage];
+    if (!container || !pool) return;
+
+    const cacheKey = `${currentMode}-${currentLanguage}`;
+    const previous = lastQuestionExampleIndexes[cacheKey] || [];
+    let candidates = pool.map((_, index) => index).filter(index => !previous.includes(index));
+    if (candidates.length < 3) candidates = pool.map((_, index) => index);
+
+    for (let index = candidates.length - 1; index > 0; index--) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [candidates[index], candidates[randomIndex]] = [candidates[randomIndex], candidates[index]];
+    }
+
+    const selectedIndexes = candidates.slice(0, 3);
+    lastQuestionExampleIndexes[cacheKey] = selectedIndexes;
+    container.innerHTML = selectedIndexes.map(index => `
+        <button type="button" class="example-chip" data-question="${pool[index]}">${pool[index]}</button>
+    `).join('');
 }
 
 document.addEventListener('DOMContentLoaded', initializeQuestionExperience);

@@ -211,12 +211,14 @@
                 </div>
 
                 <div class="question-examples">
-                    <div class="examples-label" data-zh="不知道怎麼問？試試看：" data-en="Need inspiration? Try:">不知道怎麼問？試試看：</div>
-                    <div class="example-chips">
-                        <button type="button" class="example-chip" data-question-zh="我目前最需要留意的是什麼？" data-question-en="What needs my attention most right now?" data-zh="我目前需要留意什麼？" data-en="What needs my attention?">我目前需要留意什麼？</button>
-                        <button type="button" class="example-chip" data-question-zh="接下來三個月，我的工作重點是什麼？" data-question-en="What should I focus on in my work over the next three months?" data-zh="未來三個月的工作重點" data-en="My next three months at work">未來三個月的工作重點</button>
-                        <button type="button" class="example-chip" data-question-zh="面對目前的選擇，我忽略了什麼？" data-question-en="What am I overlooking in the choice before me?" data-zh="這個選擇中忽略了什麼？" data-en="What am I overlooking?">這個選擇中忽略了什麼？</button>
+                    <div class="examples-heading">
+                        <div class="examples-label" data-zh="不知道怎麼問？試試看：" data-en="Need inspiration? Try:">不知道怎麼問？試試看：</div>
+                        <button type="button" class="refresh-examples" onclick="renderQuestionExamples(true)" aria-label="換一組問題範例">
+                            <span aria-hidden="true">↻</span>
+                            <span data-zh="換一組" data-en="Refresh">換一組</span>
+                        </button>
                     </div>
+                    <div class="example-chips" id="questionExampleChips"></div>
                 </div>
                 
                 <div id="choiceInputs" style="display: none;">
