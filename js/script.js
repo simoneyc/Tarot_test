@@ -331,17 +331,31 @@ const spreadInfo = {
     },
     career: {
         name: { zh: "職涯發展", en: "Career Path" },
-        description: { zh: "聚焦工作與職涯，辨識目前位置、可運用的能力、挑戰、機會與下一步。", en: "Explore your current career position, strengths, challenges, opportunities, and most useful next step." },
+        description: { zh: "以常見的五張職涯分析，檢視自身定位、外在因素、可行建議、挑戰策略與未來發展。", en: "Use a practical five-card career analysis to examine your position, external factors, advice, challenges, and emerging developments." },
         cards: 5,
-        positions: { zh: ["目前位置", "可用優勢", "主要挑戰", "潛在機會", "下一步行動"], en: ["Current Position", "Available Strength", "Main Challenge", "Potential Opportunity", "Next Action"] },
+        positions: { zh: ["我的職涯狀態", "外在影響", "可行建議", "挑戰的應對", "發展趨勢"], en: ["Career Self", "External Factors", "Aligned Advice", "Approach to Challenges", "Emerging Development"] },
         title: { zh: "請選擇五張職涯指引牌", en: "Please choose five career cards" }
     },
     growth: {
-        name: { zh: "自我成長", en: "Personal Growth" },
-        description: { zh: "回到自身，理解現在的內在狀態、需要放下的模式、既有力量、課題與成長方向。", en: "Turn inward to understand your present self, patterns to release, inner strength, lesson, and path forward." },
-        cards: 5,
-        positions: { zh: ["現在的我", "需要放下", "內在力量", "正在學習", "成長方向"], en: ["Present Self", "What to Release", "Inner Strength", "Current Lesson", "Growth Direction"] },
-        title: { zh: "請選擇五張自我成長牌", en: "Please choose five growth cards" }
+        name: { zh: "身心靈", en: "Mind Body Spirit" },
+        description: { zh: "常見的三張牌陣，分別觀察心智、身體與精神層面的狀態及彼此平衡。", en: "A widely used three-card spread for checking the balance between mind, body, and spirit." },
+        cards: 3,
+        positions: { zh: ["心智", "身體", "精神"], en: ["Mind", "Body", "Spirit"] },
+        title: { zh: "請選擇三張身心靈牌", en: "Please choose three mind-body-spirit cards" }
+    },
+    yesno: {
+        name: { zh: "Yes or No", en: "Yes or No" },
+        description: { zh: "以支持因素、反對因素與關鍵提醒判斷整體傾向，結果可能是偏向 Yes、偏向 No 或尚不明朗。", en: "Read the overall tendency through supporting factors, opposing factors, and what matters most: leaning Yes, leaning No, or unclear." },
+        cards: 3,
+        positions: { zh: ["支持因素", "反對因素", "關鍵提醒"], en: ["Supporting Factors", "Opposing Factors", "What You Need to Know"] },
+        title: { zh: "請選擇三張 Yes or No 指引牌", en: "Please choose three Yes or No cards" }
+    },
+    daily: {
+        name: { zh: "每日之牌", en: "Daily Card" },
+        description: { zh: "每天抽一張牌，作為今日主題、值得留意的能量與可實踐的提醒。", en: "Draw one card as the theme, energy, and practical reflection for your day." },
+        cards: 1,
+        positions: { zh: ["今日之牌"], en: ["Card of the Day"] },
+        title: { zh: "請選擇一張今日之牌", en: "Please choose your card of the day" }
     }
 };
 
@@ -445,8 +459,16 @@ const questionExamples = {
         en: ['What most needs adjustment in my career right now?', 'What next step could help my work develop more smoothly?', 'Which professional strength am I not fully using?', 'What opportunity may be hidden in my current challenge?', 'Does this career direction support my long-term growth?', 'How can I prepare for the next change in my work life?']
     },
     growth: {
-        zh: ['我現在正處於什麼樣的成長階段？', '有哪些舊模式是我需要放下的？', '我可以如何更信任自己的力量？', '最近反覆出現的課題想教會我什麼？', '我該如何照顧目前的內在需求？', '接下來最值得培養的是哪一部分自己？'],
-        en: ['What stage of personal growth am I in now?', 'Which old pattern am I ready to release?', 'How can I trust my own strength more deeply?', 'What is this recurring lesson trying to teach me?', 'How can I care for my present inner needs?', 'Which part of myself is most worth developing next?']
+        zh: ['我的身心靈目前處於什麼狀態？', '我該如何恢復內在的平衡？', '我的心智、身體與精神各需要什麼照顧？', '最近的疲憊主要來自哪個層面？', '我可以如何讓自己重新穩定下來？', '哪個層面的需求正被我忽略？'],
+        en: ['What is the current state of my mind, body, and spirit?', 'How can I restore my inner balance?', 'What care does each part of me need?', 'Which part of me is behind my recent exhaustion?', 'How can I become grounded again?', 'Which need am I currently overlooking?']
+    },
+    yesno: {
+        zh: ['這件事目前是否值得我繼續推進？', '接受這個機會對我有利嗎？', '現在是採取這項行動的好時機嗎？', '這個方向符合我的真正需要嗎？', '我是否應該主動聯絡對方？', '目前的條件支持我做出這個決定嗎？'],
+        en: ['Is this worth pursuing right now?', 'Would accepting this opportunity benefit me?', 'Is this a good time to take this action?', 'Does this direction align with what I truly need?', 'Should I reach out to this person?', 'Do the current conditions support this decision?']
+    },
+    daily: {
+        zh: ['今天的主題與提醒是什麼？', '今天有什麼能量值得我留意？', '我今天最適合抱持什麼態度？', '今天的我需要記得什麼？', '我可以如何善用今天的能量？', '今天有什麼值得反思的訊息？'],
+        en: ["What is today's theme and reminder?", 'What energy deserves my attention today?', 'What attitude would serve me best today?', 'What do I need to remember today?', "How can I work with today's energy?", 'What message is worth reflecting on today?']
     }
 };
 
@@ -1541,7 +1563,8 @@ async function fetchReadingWithRetry(requestBody, maxAttempts = 3) {
                 signal: readingAbortController.signal
             }, 120000);
 
-            if ((response.status === 429 || response.status === 503) && attempt < maxAttempts) continue;
+            // 429 is the site's usage limit; retrying would only consume another attempt.
+            if (response.status === 503 && attempt < maxAttempts) continue;
             return response;
         } catch (error) {
             lastError = error;
@@ -2895,7 +2918,9 @@ class HistoryUI {
             love: currentLanguage === 'zh' ? '感情' : 'Love',
             insight: currentLanguage === 'zh' ? '釐清' : 'Clarity',
             career: currentLanguage === 'zh' ? '職涯' : 'Career',
-            growth: currentLanguage === 'zh' ? '成長' : 'Growth'
+            growth: currentLanguage === 'zh' ? '身心靈' : 'Mind Body Spirit',
+            yesno: 'Yes or No',
+            daily: currentLanguage === 'zh' ? '每日' : 'Daily'
         };
         return modeNames[mode] || mode;
     }
