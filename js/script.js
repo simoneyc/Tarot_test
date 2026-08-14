@@ -2639,73 +2639,63 @@ class HistoryUI {
      */
     createRecordCard(record) {
         const date = new Date(record.timestamp);
-        const formattedDate = `${date.getMonth() + 1}/${date.getDate()}`;
-        const formattedTime = date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+        const formattedDate = date.toLocaleDateString(currentLanguage === 'zh' ? 'zh-TW' : 'en-US', { month: 'short', day: 'numeric' });
+        const formattedTime = date.toLocaleTimeString(currentLanguage === 'zh' ? 'zh-TW' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+        const safeQuestion = escapeHtml(this.truncateText(record.question, 86));
+        const safeSummary = escapeHtml(this.truncateText(record.interpretationSummary || record.interpretation || '', 125));
+        const modeName = escapeHtml(this.getModeDisplayName(record.mode));
+        const typeName = escapeHtml(this.getTypeDisplayName(record.questionType));
         
         return `
             <div class="record-card" role="button" tabindex="0" onclick="openRecordModal('${record.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRecordModal('${record.id}');}">
-                <!-- 卡片頭部 -->
+                <div class="record-card-accent" aria-hidden="true"></div>
                 <div class="record-header">
-                    <div class="record-date">${formattedDate} ${formattedTime}</div>
+                    <div>
+                        <div class="record-date">${formattedDate}<span>${formattedTime}</span></div>
+                        <div class="record-mode-badge">${modeName}</div>
+                    </div>
                     <div class="record-actions" onclick="event.stopPropagation();">
                         <button class="action-btn favorite-btn ${record.isFavorite ? 'active' : ''}" 
                                 onclick="toggleFavorite('${record.id}')" 
-                                title="${record.isFavorite ? '取消收藏' : '加入收藏'}">
-                            ${record.isFavorite ? '⭐' : '☆'}
+                                title="${record.isFavorite ? '取消收藏' : '加入收藏'}" aria-label="${record.isFavorite ? '取消收藏' : '加入收藏'}">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.47 6.03.88-4.36 4.25 1.03 6L12 16.77 6.6 19.6l1.03-6-4.36-4.25 6.03-.88L12 3Z"/></svg>
                         </button>
-                        <button class="action-btn" onclick="shareRecord('${record.id}')" title="分享">📤</button>
-                        <button class="action-btn" onclick="deleteRecord('${record.id}')" title="刪除">🗑️</button>
+                        <button class="action-btn" onclick="shareRecord('${record.id}')" title="分享" aria-label="分享記錄"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg></button>
+                        <button class="action-btn delete-btn" onclick="deleteRecord('${record.id}')" title="刪除" aria-label="刪除記錄"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></svg></button>
                     </div>
                 </div>
-                
-                <!-- 問題標題 -->
-                <div class="record-question">${this.truncateText(record.question, 80)}</div>
-                
-                <!-- 卡牌預覽 -->
+
+                <div class="record-eyebrow">${currentLanguage === 'zh' ? '本次提問' : 'Your question'}</div>
+                <div class="record-question">${safeQuestion}</div>
+
                 <div class="record-cards-preview">
                     ${record.cards.slice(0, 5).map(card => `
                         <div class="card-mini ${card.orientation === 'reversed' ? 'reversed' : ''}" 
-                            title="${card.name} (${card.orientation})">
+                            title="${escapeHtml(card.name)} (${card.orientation})">
                             <img src="${getTarotImagePath(card.name)}" 
-                                alt="${card.name}"
-                                style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}"
+                                alt="${escapeHtml(card.name)}"
+                                class="${card.orientation === 'reversed' ? 'is-reversed' : ''}"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                            <div style="width: 100%; height: 100%; display: none; align-items: center; justify-content: center; font-size: 1rem; ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}">
-                                ${card.symbol}
+                            <div class="card-mini-fallback ${card.orientation === 'reversed' ? 'is-reversed' : ''}">
+                                ${escapeHtml(card.symbol)}
                             </div>
                         </div>
                     `).join('')}
-                    ${record.cards.length > 5 ? '<span style="color: rgba(212, 175, 55, 0.7);">...</span>' : ''}
+                    ${record.cards.length > 5 ? '<span class="record-more-cards">+' + (record.cards.length - 5) + '</span>' : ''}
                 </div>
-                
-                <!-- 解讀摘要 -->
-                <div class="record-summary">${record.interpretationSummary}</div>
-                
-                <!-- 標籤 -->
+
+                <div class="record-summary"><span>${currentLanguage === 'zh' ? '解讀摘要' : 'Reading summary'}</span><p>${safeSummary}</p></div>
+
                 ${record.tags.length > 0 ? `
                     <div class="record-tags">
-                        ${record.tags.slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}
-                        ${record.tags.length > 3 ? '<span class="tag">...</span>' : ''}
+                        ${record.tags.slice(0, 3).map(tag => `<span class="tag"># ${escapeHtml(tag)}</span>`).join('')}
+                        ${record.tags.length > 3 ? `<span class="tag">+${record.tags.length - 3}</span>` : ''}
                     </div>
                 ` : ''}
-                
-                <!-- 元數據 -->
+
                 <div class="record-meta">
-                    <div class="record-stats">
-                        <div class="stat-item">
-                            <span>👁️</span>
-                            <span>${record.readCount}</span>
-                        </div>
-                        ${record.userRating ? `
-                            <div class="stat-item">
-                                <span>⭐</span>
-                                <span>${record.userRating}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div style="color: rgba(212, 175, 55, 0.6); font-size: 0.7rem;">
-                        ${this.getModeDisplayName(record.mode)} · ${this.getTypeDisplayName(record.questionType)}
-                    </div>
+                    <span class="record-type">${typeName}</span>
+                    <div class="record-stats"><span>${record.readCount || 0} ${currentLanguage === 'zh' ? '次查看' : 'views'}</span>${record.userRating ? `<span>${record.userRating} / 5</span>` : ''}</div>
                 </div>
             </div>
         `;
@@ -2941,9 +2931,10 @@ function toggleFavorite(recordId) {
     // 立即更新所有視圖中的 UI（樂觀更新）
     favoriteButtons.forEach(btn => {
         if (btn) {
-            btn.textContent = newStatus ? '⭐' : '☆';
+            if (!btn.querySelector('svg')) btn.textContent = newStatus ? '⭐' : '☆';
             btn.classList.toggle('active', newStatus);
             btn.title = newStatus ? '取消收藏' : '加入收藏';
+            btn.setAttribute('aria-label', btn.title);
             
             // 添加立即視覺回饋動畫
             btn.style.transform = 'scale(1.3)';
@@ -2962,9 +2953,10 @@ function toggleFavorite(recordId) {
         if (actualNewStatus !== newStatus) {
             favoriteButtons.forEach(btn => {
                 if (btn) {
-                    btn.textContent = actualNewStatus ? '⭐' : '☆';
+                    if (!btn.querySelector('svg')) btn.textContent = actualNewStatus ? '⭐' : '☆';
                     btn.classList.toggle('active', actualNewStatus);
                     btn.title = actualNewStatus ? '取消收藏' : '加入收藏';
+                    btn.setAttribute('aria-label', btn.title);
                 }
             });
         }
@@ -2982,9 +2974,10 @@ function toggleFavorite(recordId) {
         // 回滾 UI 到原始狀態
         favoriteButtons.forEach(btn => {
             if (btn) {
-                btn.textContent = record.isFavorite ? '⭐' : '☆';
+                if (!btn.querySelector('svg')) btn.textContent = record.isFavorite ? '⭐' : '☆';
                 btn.classList.toggle('active', record.isFavorite);
                 btn.title = record.isFavorite ? '取消收藏' : '加入收藏';
+                btn.setAttribute('aria-label', btn.title);
             }
         });
         

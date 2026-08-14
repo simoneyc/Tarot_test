@@ -2858,6 +2858,176 @@ body {
     .spread-selection, .question-form { border-radius: 17px; }
 }
 
+/* ========== Refined tarot archive cards ========== */
+.records-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+    gap: 22px;
+    align-items: stretch;
+}
+
+.record-card {
+    display: flex;
+    min-height: 440px;
+    max-width: 360px;
+    padding: 22px;
+    flex-direction: column;
+    color: #d9cfbd;
+    background:
+        radial-gradient(circle at 92% 4%, rgba(123,31,45,.16), transparent 10rem),
+        linear-gradient(150deg, rgba(20,20,39,.98), rgba(9,10,21,.96));
+    border: 1px solid rgba(201,165,92,.2);
+    border-radius: 18px;
+    box-shadow: 0 16px 42px rgba(0,0,0,.2);
+}
+
+.record-card::before {
+    inset: 10px;
+    width: auto;
+    height: auto;
+    background: none;
+    border: 1px solid rgba(201,165,92,.07);
+    border-radius: 12px;
+    pointer-events: none;
+}
+
+.record-card-accent {
+    position: absolute;
+    top: 0;
+    left: 22px;
+    width: 54px;
+    height: 2px;
+    background: linear-gradient(90deg, #7b1f2d, #c9a55c);
+    box-shadow: 0 0 12px rgba(201,165,92,.24);
+}
+
+.record-header { position: relative; z-index: 2; margin-bottom: 20px; }
+.record-date {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: #d5c49c;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: .82rem;
+    font-weight: 500;
+}
+.record-date span { color: #746e64; font-size: .68rem; font-weight: 400; }
+.record-mode-badge {
+    display: inline-flex;
+    margin-top: 7px;
+    padding: 4px 8px;
+    color: #bda56d;
+    background: rgba(201,165,92,.055);
+    border: 1px solid rgba(201,165,92,.15);
+    border-radius: 999px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: .64rem;
+}
+
+.record-actions { gap: 5px; }
+.record-actions .action-btn {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    place-items: center;
+    color: #8d8578;
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(201,165,92,.1);
+    border-radius: 9px;
+}
+.record-actions .action-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.record-actions .favorite-btn.active { color: #ddbf76; background: rgba(201,165,92,.09); text-shadow: none; }
+.record-actions .favorite-btn.active svg { fill: rgba(201,165,92,.34); }
+.record-actions .delete-btn { color: #9d6970; }
+
+.record-eyebrow {
+    margin-bottom: 7px;
+    color: #827b70;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: .66rem;
+    font-weight: 500;
+    letter-spacing: .12em;
+}
+.record-question {
+    min-height: 58px;
+    margin-bottom: 18px;
+    color: #ece1ca;
+    font-family: var(--font-subtitle);
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.65;
+}
+
+.record-cards-preview {
+    min-height: 78px;
+    margin: 0 -5px 18px;
+    padding: 11px 8px;
+    align-items: center;
+    background: rgba(0,0,0,.15);
+    border-top: 1px solid rgba(201,165,92,.08);
+    border-bottom: 1px solid rgba(201,165,92,.08);
+}
+.record-cards-preview .card-mini {
+    width: 36px;
+    height: 58px;
+    overflow: hidden;
+    border-color: rgba(201,165,92,.4);
+    border-radius: 4px;
+    box-shadow: 0 5px 12px rgba(0,0,0,.24);
+}
+.record-cards-preview .card-mini img { width: 100%; height: 100%; object-fit: cover; }
+.record-cards-preview .card-mini img.is-reversed,
+.record-cards-preview .card-mini-fallback.is-reversed { transform: rotate(180deg); }
+.card-mini-fallback { display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 1rem; }
+.card-mini.reversed::after {
+    content: '↻';
+    top: -3px;
+    right: -3px;
+    width: 13px;
+    height: 13px;
+    color: #2a180f;
+    background: #c99a5c;
+    font-size: .55rem;
+}
+.record-more-cards { color: #9f8a5e; font-family: 'Noto Sans TC', sans-serif; font-size: .7rem; }
+
+.record-summary {
+    display: block;
+    margin-bottom: 16px;
+    color: #aaa092;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: .79rem;
+    line-height: 1.65;
+}
+.record-summary > span { display: block; margin-bottom: 5px; color: #9d854e; font-size: .62rem; font-weight: 600; letter-spacing: .1em; }
+.record-summary p { margin: 0; display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.record-tags { margin: auto 0 14px; }
+.record-tags .tag { padding: 3px 7px; color: #a99465; background: rgba(201,165,92,.05); border-color: rgba(201,165,92,.12); font-family: 'Noto Sans TC', sans-serif; }
+.record-meta { padding-top: 13px; border-top: 1px solid rgba(201,165,92,.1); color: #777166; font-family: 'Noto Sans TC', sans-serif; }
+.record-type { color: #9b8d71; }
+.record-stats { gap: 12px; font-size: .7rem; }
+
+@media (min-width: 769px) and (hover: hover) {
+    .record-card:hover { border-color: rgba(201,165,92,.48); transform: translateY(-5px); box-shadow: 0 22px 55px rgba(0,0,0,.32); }
+    .record-card:hover::before { left: 10px; }
+    .record-actions .action-btn:hover { color: #d8c28b; background: rgba(201,165,92,.08); border-color: rgba(201,165,92,.28); transform: translateY(-1px); }
+    .record-actions .delete-btn:hover { color: #db8994; background: rgba(170,64,78,.09); border-color: rgba(200,89,103,.28); }
+}
+
+@media (max-width: 600px) {
+    .records-grid { grid-template-columns: 1fr; padding: 0; }
+    .record-card { min-height: 420px; max-width: none; padding: 20px; }
+    .record-actions .action-btn { min-width: 38px; min-height: 38px; }
+}
+
 /* ========== Results, history tools, network and accessibility ========== */
 .sr-only {
     position: absolute !important;
