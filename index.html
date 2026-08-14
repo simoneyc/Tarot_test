@@ -12,6 +12,11 @@
 </head>
 <body>
     <div class="magic-particles" id="particles"></div>
+    <div class="celestial-backdrop" aria-hidden="true">
+        <span class="orbit orbit-one"></span>
+        <span class="orbit orbit-two"></span>
+        <span class="celestial-moon"></span>
+    </div>
     
     <!-- 固定導航列 -->
     <nav class="navbar-fixed">
@@ -70,19 +75,19 @@
 
         <!-- 步驟1: 歡迎頁 -->
         <div id="step1" class="step active">
-            <div style="text-align: center;">
-                <div class="ornament">☽ ✦ ☾</div>
-                <h2 style="margin: 40px 0; font-size: 2.2rem; font-family: 'Philosopher', serif;" 
+            <div class="welcome-hero">
+                <div class="hero-copy">
+                <div class="hero-eyebrow" data-zh="給此刻的你，一份來自牌卡的指引" data-en="A message from the cards, for this very moment">給此刻的你，一份來自牌卡的指引</div>
+                <div class="hero-symbol" aria-hidden="true"><span>☾</span><i>✦</i><span>☽</span></div>
+                <h2 class="hero-title"
                     data-zh="歡迎來到神秘的塔羅世界" 
                     data-en="Welcome to the Mystical World of Tarot">歡迎來到神秘的塔羅世界</h2>
-                <p style="margin: 30px 0; font-size: 1.3rem; opacity: 0.9; line-height: 1.6;"
+                <p class="hero-description"
                    data-zh="在這裡，時間的界限模糊不清<br>讓古老的智慧為你指引方向"
                    data-en="Here, the boundaries of time blur<br>Let ancient wisdom guide your path">
                     在這裡，時間的界限模糊不清<br>
                     讓古老的智慧為你指引方向
                 </p>
-                <div class="ornament">◊ ✧ ◊</div>
-                <br><br>
 
                 <!-- 預加載進度指示器 -->
                 <div id="preloadIndicator" style="display: none; text-align: center; margin: 20px 0;">
@@ -99,12 +104,25 @@
                 <button class="btn" onclick="startDivination()" 
                         data-zh="開始神秘之旅" 
                         data-en="Begin Mystical Journey">開始神秘之旅</button>
+                <div class="hero-assurances" aria-label="Service information">
+                    <span data-zh="✦ 無需註冊" data-en="✦ No sign-up">✦ 無需註冊</span>
+                    <span data-zh="✦ 五種牌陣" data-en="✦ Five spreads">✦ 五種牌陣</span>
+                    <span data-zh="✦ 紀錄僅存於裝置" data-en="✦ Records stay on device">✦ 紀錄僅存於裝置</span>
+                </div>
+                </div>
+                <div class="hero-oracle" aria-hidden="true">
+                    <div class="oracle-halo"></div>
+                    <div class="oracle-card oracle-card-left"></div>
+                    <div class="oracle-card oracle-card-center"><span class="oracle-star">✦</span><span class="oracle-moon">☾</span></div>
+                    <div class="oracle-card oracle-card-right"></div>
+                </div>
             </div>
         </div>
 
         <!-- 步驟2: 牌陣選擇頁 -->
         <div id="step2" class="step">
             <div class="spread-selection">
+                <div class="section-kicker" data-zh="選擇你的占卜方式" data-en="Choose your reading">選擇你的占卜方式</div>
                 <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
                     data-zh="選擇你的命運牌陣" 
                     data-en="Choose Your Destiny Spread">選擇你的命運牌陣</h2>
@@ -169,6 +187,7 @@
         <!-- 步驟3: 問題輸入頁 -->
         <div id="step3" class="step">
             <div class="question-form">
+                <div class="section-kicker" data-zh="專注於一個問題" data-en="Focus on one question">專注於一個問題</div>
                 <h2 style="margin-bottom: 25px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
                     data-zh="傾訴你心中的疑問" 
                     data-en="Share Your Heart's Question">傾訴你心中的疑問</h2>
