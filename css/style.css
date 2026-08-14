@@ -3110,6 +3110,14 @@ body {
 .result-reading-body p { margin: 0 0 1.35em; }
 .result-reading-body p:last-child { margin-bottom: 0; }
 .result-reading-body strong { color: #e5ca8c; font-weight: 600; }
+.result-reading-body ul,
+.result-reading-body ol,
+#modalContent ul,
+#modalContent ol { margin: .35em 0 1.35em; padding-left: 1.55em; }
+.result-reading-body li,
+#modalContent li { margin-bottom: .7em; padding-left: .25em; }
+.result-reading-body li::marker,
+#modalContent li::marker { color: #c9a55c; font-weight: 700; }
 .result-action-bar {
     position: sticky;
     z-index: 100;

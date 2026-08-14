@@ -321,6 +321,27 @@ const spreadInfo = {
         cards: 5,
         positions: { zh: ["我的狀態", "我對對方態度", "對方狀態", "對方對我態度", "可能結果"], en: ["My State", "My Feelings Toward Them", "Their State", "Their Feelings Toward Me", "Potential Outcome"] },
         title: { zh: "請選擇五張感情萬用之牌", en: "Please choose five love reading cards" }
+    },
+    insight: {
+        name: { zh: "釐清現況", en: "Situation Clarity" },
+        description: { zh: "從眼前現況、尚未察覺的影響與可採取的方向，快速整理一件讓你困惑的事。", en: "Clarify a confusing situation through what is visible, what remains unseen, and the direction available to you." },
+        cards: 3,
+        positions: { zh: ["眼前現況", "隱藏影響", "行動指引"], en: ["Current Situation", "Hidden Influence", "Guidance"] },
+        title: { zh: "請選擇三張釐清現況牌", en: "Please choose three clarity cards" }
+    },
+    career: {
+        name: { zh: "職涯發展", en: "Career Path" },
+        description: { zh: "聚焦工作與職涯，辨識目前位置、可運用的能力、挑戰、機會與下一步。", en: "Explore your current career position, strengths, challenges, opportunities, and most useful next step." },
+        cards: 5,
+        positions: { zh: ["目前位置", "可用優勢", "主要挑戰", "潛在機會", "下一步行動"], en: ["Current Position", "Available Strength", "Main Challenge", "Potential Opportunity", "Next Action"] },
+        title: { zh: "請選擇五張職涯指引牌", en: "Please choose five career cards" }
+    },
+    growth: {
+        name: { zh: "自我成長", en: "Personal Growth" },
+        description: { zh: "回到自身，理解現在的內在狀態、需要放下的模式、既有力量、課題與成長方向。", en: "Turn inward to understand your present self, patterns to release, inner strength, lesson, and path forward." },
+        cards: 5,
+        positions: { zh: ["現在的我", "需要放下", "內在力量", "正在學習", "成長方向"], en: ["Present Self", "What to Release", "Inner Strength", "Current Lesson", "Growth Direction"] },
+        title: { zh: "請選擇五張自我成長牌", en: "Please choose five growth cards" }
     }
 };
 
@@ -414,6 +435,18 @@ const questionExamples = {
             'How can I help this relationship develop in a healthier way?',
             'What is the greatest lesson in this relationship right now?'
         ]
+    },
+    insight: {
+        zh: ['這件事真正需要我看清的是什麼？', '目前有哪些我尚未察覺的影響？', '我該如何整理眼前的混亂？', '這個困境背後隱藏著什麼關鍵？', '我現在最適合採取什麼方向？', '要突破目前狀態，我需要先理解什麼？'],
+        en: ['What do I most need to see clearly in this situation?', 'What influence have I not yet noticed?', 'How can I make sense of the confusion in front of me?', 'What key factor is hidden beneath this difficulty?', 'What direction would serve me best right now?', 'What must I understand before I can move forward?']
+    },
+    career: {
+        zh: ['我目前的職涯最需要調整什麼？', '下一步怎麼做能讓工作發展更順利？', '我有哪些尚未充分運用的職場優勢？', '目前工作中的挑戰會帶來什麼機會？', '這個職涯選擇適合我的長期發展嗎？', '我該如何準備接下來的工作轉變？'],
+        en: ['What most needs adjustment in my career right now?', 'What next step could help my work develop more smoothly?', 'Which professional strength am I not fully using?', 'What opportunity may be hidden in my current challenge?', 'Does this career direction support my long-term growth?', 'How can I prepare for the next change in my work life?']
+    },
+    growth: {
+        zh: ['我現在正處於什麼樣的成長階段？', '有哪些舊模式是我需要放下的？', '我可以如何更信任自己的力量？', '最近反覆出現的課題想教會我什麼？', '我該如何照顧目前的內在需求？', '接下來最值得培養的是哪一部分自己？'],
+        en: ['What stage of personal growth am I in now?', 'Which old pattern am I ready to release?', 'How can I trust my own strength more deeply?', 'What is this recurring lesson trying to teach me?', 'How can I care for my present inner needs?', 'Which part of myself is most worth developing next?']
     }
 };
 
@@ -2859,7 +2892,10 @@ class HistoryUI {
             three: currentLanguage === 'zh' ? '三張' : 'Three',
             core: currentLanguage === 'zh' ? '核心' : 'Core',
             choice: currentLanguage === 'zh' ? '選擇' : 'Choice',
-            love: currentLanguage === 'zh' ? '感情' : 'Love'
+            love: currentLanguage === 'zh' ? '感情' : 'Love',
+            insight: currentLanguage === 'zh' ? '釐清' : 'Clarity',
+            career: currentLanguage === 'zh' ? '職涯' : 'Career',
+            growth: currentLanguage === 'zh' ? '成長' : 'Growth'
         };
         return modeNames[mode] || mode;
     }
@@ -4022,12 +4058,53 @@ function escapeHtml(value = '') {
 }
 
 function formatReadingText(text) {
-    return escapeHtml(text)
-        .replace(/^#{1,6}\s*/gm, '')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .split(/\n{2,}/)
-        .map(paragraph => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
-        .join('');
+    const lines = escapeHtml(text).replace(/^#{1,6}\s*/gm, '').split(/\r?\n/);
+    const output = [];
+    let paragraph = [];
+    let listType = null;
+
+    const formatInline = value => value.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    const flushParagraph = () => {
+        if (!paragraph.length) return;
+        output.push(`<p>${paragraph.map(formatInline).join('<br>')}</p>`);
+        paragraph = [];
+    };
+    const closeList = () => {
+        if (!listType) return;
+        output.push(`</${listType}>`);
+        listType = null;
+    };
+
+    lines.forEach(line => {
+        const unordered = line.match(/^\s*[-*+]\s+(.+)$/);
+        const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        const item = unordered || ordered;
+
+        if (item) {
+            flushParagraph();
+            const nextType = ordered ? 'ol' : 'ul';
+            if (listType !== nextType) {
+                closeList();
+                output.push(`<${nextType}>`);
+                listType = nextType;
+            }
+            output.push(`<li>${formatInline(item[1])}</li>`);
+            return;
+        }
+
+        if (!line.trim()) {
+            flushParagraph();
+            closeList();
+            return;
+        }
+
+        closeList();
+        paragraph.push(line);
+    });
+
+    flushParagraph();
+    closeList();
+    return output.join('');
 }
 
 async function displayFinalResults(interpretation) {
