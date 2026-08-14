@@ -41,20 +41,24 @@
             <div class="navbar-controls">
                 <!-- 歷史記錄按鈕 -->
                 <button class="nav-history-btn" onclick="showHistoryPage()" title="查看占卜記錄">
-                    <span class="history-icon">📚</span>
+                    <span class="history-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M5 4.75h10.25A2.75 2.75 0 0 1 18 7.5v11.75H7.5A2.5 2.5 0 0 1 5 16.75v-12Z"/>
+                            <path d="M5 16.75a2.5 2.5 0 0 1 2.5-2.5H18M9 8h5"/>
+                        </svg>
+                    </span>
                     <span class="history-text" data-zh="記錄" data-en="History">記錄</span>
                     <span class="history-badge" id="recordsBadge" style="display: none;">0</span>
                 </button>
                 
-                <!-- 新增：主題切換按鈕 -->
-                <button class="theme-toggle-btn" onclick="toggleTheme()" title="切換主題風格">
-                    <span class="theme-icon">🎨</span>
-                    <span class="theme-text" data-zh="模式" data-en="Mode">模式</span>
-                </button>
-                
                 <!-- 語言切換按鈕 -->
                 <button class="lang-toggle-btn" onclick="toggleLanguage()" title="切換語言 / Switch Language">
-                    <span class="lang-icon">🌍</span>
+                    <span class="lang-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <circle cx="12" cy="12" r="8.5"/>
+                            <path d="M3.8 12h16.4M12 3.5c2.3 2.35 3.45 5.18 3.45 8.5S14.3 18.15 12 20.5C9.7 18.15 8.55 15.32 8.55 12S9.7 5.85 12 3.5Z"/>
+                        </svg>
+                    </span>
                     <span class="lang-text" data-current="zh">中文</span>
                 </button>
             </div>

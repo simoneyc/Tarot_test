@@ -605,9 +605,13 @@ let currentTheme = 'classic';
  * 初始化主題
  */
 function initializeTheme() {
-    // 從 localStorage 讀取主題偏好
-    const savedTheme = localStorage.getItem('tarot_theme') || 'classic';
-    setTheme(savedTheme, false); // false 表示不需要動畫
+    // 網站固定使用經典暗黑主題，並清除舊版儲存的明亮模式偏好
+    try {
+        localStorage.removeItem('tarot_theme');
+    } catch (e) {
+        console.warn('⚠️ 無法清除舊版主題偏好');
+    }
+    setTheme('classic', false);
 }
 
 /**
