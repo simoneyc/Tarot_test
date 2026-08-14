@@ -597,6 +597,11 @@ let selectedCards = [];
 let currentQuestion = "";
 let currentMode = "three";
 let focusGuideTimer = null;
+let readingAbortController = null;
+let readingElapsedTimer = null;
+let readingStartedAt = 0;
+let readingPhase = 'idle';
+let readingInFlight = false;
 
 
 // 主題管理
@@ -1248,8 +1253,17 @@ async function selectCard(cardElement) {
 // 增強的載入訊息顯示
 function showEnhancedLoading() {
     const container = document.getElementById('resultsContainer');
+    const positions = spreadInfo[currentMode].positions[currentLanguage];
+    const cardsPreview = selectedCards.map((card, index) => `
+        <div class="waiting-card">
+            <img src="${getTarotImagePath(card.name)}" alt="${card.name}" class="${card.orientation === 'reversed' ? 'is-reversed' : ''}">
+            <span>${positions[index]}</span>
+        </div>
+    `).join('');
+
     container.innerHTML = `
-        <div class="enhanced-loading">
+        <div class="enhanced-loading honest-loading">
+            <div class="waiting-cards" aria-label="${currentLanguage === 'zh' ? '本次抽到的牌' : 'Your selected cards'}">${cardsPreview}</div>
             <div class="mystic-symbols">
                 <div class="energy-circle"></div>
                 <div class="symbol">☯</div>
@@ -1257,69 +1271,79 @@ function showEnhancedLoading() {
                 <div class="symbol">☽</div>
             </div>
             
-            <div class="progress-container">
-                <div class="progress-text" id="progressText">${t('connecting-energy')}</div>
-                <div class="enhanced-progress-bar">
-                    <div class="enhanced-progress-fill" id="enhancedProgressFill" style="width: 0%"></div>
-                </div>
+            <div class="reading-wait-copy" aria-live="polite">
+                <div class="progress-text" id="progressText"></div>
+                <div class="reading-elapsed"><span data-zh="已等待" data-en="Waiting">${currentLanguage === 'zh' ? '已等待' : 'Waiting'}</span> <strong id="readingElapsed">0</strong> <span data-zh="秒" data-en="seconds">${currentLanguage === 'zh' ? '秒' : 'seconds'}</span></div>
+                <p class="reading-wait-detail" id="readingWaitDetail"></p>
             </div>
-            
-            <div class="mystical-quotes">
-                <div class="quote-fade" id="mysticalQuote">${mysticalQuotes[currentLanguage][0]}</div>
+
+            <div class="reading-tip">
+                <span class="reading-tip-label">${currentLanguage === 'zh' ? '牌卡小知識' : 'Tarot note'}</span>
+                <p id="readingTip">${currentLanguage === 'zh' ? '正逆位不代表單純的好壞，而是能量展現方式的不同。' : 'Upright and reversed cards are different expressions of energy, not simply good or bad.'}</p>
             </div>
+            <button class="cancel-reading-btn" type="button" onclick="cancelReadingRequest()">${currentLanguage === 'zh' ? '取消等待' : 'Cancel request'}</button>
         </div>
     `;
-    
-    startLoadingAnimation();
+    startReadingTimer();
 }
 
-// 載入動畫控制
-function startLoadingAnimation() {
-    let currentStage = 0;
-    let quoteIndex = 0;
-    const stages = progressStages[currentLanguage];
-    const quotes = mysticalQuotes[currentLanguage];
-    
-    const progressInterval = setInterval(() => {
-        if (currentStage < stages.length) {
-            const stage = stages[currentStage];
-            const progressFill = document.getElementById('enhancedProgressFill');
-            const progressText = document.getElementById('progressText');
-            
-            if (progressFill && progressText) {
-                progressFill.style.width = stage.percent + '%';
-                progressText.textContent = stage.text;
-            }
-            
-            currentStage++;
+function updateReadingStatus(phase) {
+    readingPhase = phase;
+    const text = document.getElementById('progressText');
+    const detail = document.getElementById('readingWaitDetail');
+    if (!text || !detail) return;
+
+    const messages = {
+        waking: {
+            zh: ['正在連結解讀服務', '免費服務首次啟動可能需要稍候'],
+            en: ['Connecting to the reading service', 'The free service may need a moment to wake up']
+        },
+        submitting: {
+            zh: ['正在安全送出你的問題與牌卡', '你的抽牌結果會保留在這個頁面'],
+            en: ['Securely sending your question and cards', 'Your selected cards will remain on this page']
+        },
+        interpreting: {
+            zh: ['正在等待牌意解讀', 'AI 正在整理這組牌之間的關係'],
+            en: ['Waiting for your tarot interpretation', 'AI is organizing the relationships between your cards']
         }
-    }, 800);
-    
-    const quoteInterval = setInterval(() => {
-        const quoteElement = document.getElementById('mysticalQuote');
-        if (quoteElement) {
-            quoteIndex = (quoteIndex + 1) % quotes.length;
-            quoteElement.textContent = quotes[quoteIndex];
-        }
-    }, 3000);
-    
-    window.loadingIntervals = { progressInterval, quoteInterval };
+    };
+    const message = messages[phase]?.[currentLanguage] || messages.waking[currentLanguage];
+    text.textContent = message[0];
+    detail.textContent = message[1];
 }
 
-// 清理載入動畫
+function startReadingTimer() {
+    clearLoadingAnimation();
+    readingStartedAt = Date.now();
+    const updateElapsed = () => {
+        const seconds = Math.floor((Date.now() - readingStartedAt) / 1000);
+        const elapsed = document.getElementById('readingElapsed');
+        const detail = document.getElementById('readingWaitDetail');
+        if (elapsed) elapsed.textContent = seconds;
+        if (detail && seconds >= 20) {
+            detail.textContent = currentLanguage === 'zh'
+                ? '服務目前較繁忙；你的問題與牌卡都已保留，不需要重新抽牌。'
+                : 'The service is busy. Your question and cards are preserved, so you do not need to draw again.';
+        }
+    };
+    updateElapsed();
+    readingElapsedTimer = setInterval(updateElapsed, 1000);
+}
+
 function clearLoadingAnimation() {
-    if (window.loadingIntervals) {
-        clearInterval(window.loadingIntervals.progressInterval);
-        clearInterval(window.loadingIntervals.quoteInterval);
-        window.loadingIntervals = null;
-    }
+    clearInterval(readingElapsedTimer);
+    readingElapsedTimer = null;
 }
 
 // API 調用和結果顯示
 async function showLoadingAndGetResults() {
+    if (readingInFlight) return;
+    readingInFlight = true;
+    readingAbortController = new AbortController();
     try {
         showEnhancedLoading();
-        
+        updateReadingStatus('waking');
+
         const cardsData = selectedCards.map(card => ({
             name: card.name,
             orientation: card.orientation,
@@ -1334,12 +1358,23 @@ async function showLoadingAndGetResults() {
             language: currentLanguage // 新增語言參數
         };
 
+        const healthResponse = await fetch(`${API_BASE_URL}/api/health`, {
+            cache: 'no-store',
+            signal: readingAbortController.signal
+        });
+        if (!healthResponse.ok) throw new Error(`Health check failed: ${healthResponse.status}`);
+
+        updateReadingStatus('submitting');
+        await new Promise(resolve => setTimeout(resolve, 250));
+        updateReadingStatus('interpreting');
+
         const response = await fetch(`${API_BASE_URL}/api/tarot-reading`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(requestBody),
+            signal: readingAbortController.signal
         });
 
         if (!response.ok) {
@@ -1350,6 +1385,7 @@ async function showLoadingAndGetResults() {
         const interpretation = data.interpretation;
         
         clearLoadingAnimation();
+        readingInFlight = false;
         displayFinalResults(interpretation);
 
         // 🆕 保存占卜記錄
@@ -1364,7 +1400,14 @@ async function showLoadingAndGetResults() {
     } catch (error) {
         console.error('API 調用錯誤:', error);
         clearLoadingAnimation();
-        showAPIError();
+        readingInFlight = false;
+        if (error.name === 'AbortError') {
+            showReadingCancelled();
+        } else {
+            showAPIError(error);
+        }
+    } finally {
+        readingAbortController = null;
     }
 }
 
@@ -1524,13 +1567,40 @@ async function displayFinalResults(interpretation) {
 }
 
 // 顯示 API 錯誤
-function showAPIError() {
+function cancelReadingRequest() {
+    if (readingAbortController) readingAbortController.abort();
+}
+
+function showReadingCancelled() {
     const container = document.getElementById('resultsContainer');
     container.innerHTML = `
-        <div style="text-align: center; padding: 50px; color: #ff6b6b;">
-            <div style="font-size: 1.5rem; margin-bottom: 20px;">⚠️</div>
-            <div>${t('api-error')}</div>
-            <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.8;">${t('api-error-detail')}</div>
+        <div class="reading-message-card">
+            <div class="reading-message-icon">☾</div>
+            <h3>${currentLanguage === 'zh' ? '已取消這次解讀請求' : 'Reading request cancelled'}</h3>
+            <p>${currentLanguage === 'zh' ? '你的問題與抽到的牌都還在，可以直接重新嘗試。' : 'Your question and selected cards are still here. You can retry without drawing again.'}</p>
+            <div class="flow-actions">
+                <button class="btn btn-secondary" onclick="returnToQuestion()">${currentLanguage === 'zh' ? '修改問題' : 'Edit question'}</button>
+                <button class="btn" onclick="retryReading()">${currentLanguage === 'zh' ? '重新嘗試解讀' : 'Retry reading'}</button>
+            </div>
+        </div>`;
+}
+
+function retryReading() {
+    if (!readingInFlight) showLoadingAndGetResults();
+}
+
+function showAPIError(error) {
+    const container = document.getElementById('resultsContainer');
+    container.innerHTML = `
+        <div class="reading-message-card is-error">
+            <div class="reading-message-icon">!</div>
+            <h3>${t('api-error')}</h3>
+            <p>${t('api-error-detail')}</p>
+            <p class="reading-preserved-note">${currentLanguage === 'zh' ? '你的問題與抽到的牌已保留，不需要重新抽牌。' : 'Your question and cards are preserved; you do not need to draw again.'}</p>
+            <div class="flow-actions">
+                <button class="btn btn-secondary" onclick="returnToQuestion()">${currentLanguage === 'zh' ? '修改問題' : 'Edit question'}</button>
+                <button class="btn" onclick="retryReading()">${currentLanguage === 'zh' ? '重新嘗試' : 'Try again'}</button>
+            </div>
         </div>
     `;
 }
