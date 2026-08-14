@@ -2707,6 +2707,9 @@ class HistoryUI {
     createRecordListItem(record) {
         const date = new Date(record.timestamp);
         const formattedDate = date.toLocaleDateString('zh-TW');
+        const safeQuestion = escapeHtml(this.truncateText(record.question, 100));
+        const safeMode = escapeHtml(this.getModeDisplayName(record.mode));
+        const safeType = escapeHtml(this.getTypeDisplayName(record.questionType));
         
         return `
             <div style="display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer;" 
@@ -2720,11 +2723,11 @@ class HistoryUI {
                 <!-- 問題和模式 -->
                 <div style="flex: 1; margin: 0 20px;">
                     <div style="color: var(--primary-gold); font-weight: 600; margin-bottom: 5px;">
-                        ${this.truncateText(record.question, 100)}
+                        ${safeQuestion}
                     </div>
                     <div style="color: rgba(212, 175, 55, 0.7); font-size: 0.8rem;">
-                        ${this.getModeDisplayName(record.mode)} · ${this.getTypeDisplayName(record.questionType)}
-                        ${record.tags.length > 0 ? ` · ${record.tags.slice(0, 2).join(', ')}` : ''}
+                        ${safeMode} · ${safeType}
+                        ${record.tags.length > 0 ? ` · ${record.tags.slice(0, 2).map(escapeHtml).join(', ')}` : ''}
                     </div>
                 </div>
                 
@@ -3080,11 +3083,20 @@ async function importHistoryRecords(event) {
             .map(record => ({
                 ...record,
                 id: record.id.replace(/[^a-zA-Z0-9_-]/g, ''),
-                question: record.question.replace(/[<>]/g, ''),
-                interpretation: String(record.interpretation || '').replace(/[<>]/g, ''),
-                interpretationSummary: String(record.interpretationSummary || '').replace(/[<>]/g, ''),
-                tags: Array.isArray(record.tags) ? record.tags.map(tag => String(tag).replace(/[<>'"]/g, '')).slice(0, 20) : [],
-                cards: record.cards.filter(card => card && typeof card.name === 'string').slice(0, 10)
+                question: record.question.slice(0, 500),
+                interpretation: String(record.interpretation || '').slice(0, 20000),
+                interpretationSummary: String(record.interpretationSummary || '').slice(0, 500),
+                userNotes: String(record.userNotes || '').slice(0, 2000),
+                tags: Array.isArray(record.tags) ? record.tags.map(tag => String(tag).slice(0, 40)).slice(0, 20) : [],
+                cards: record.cards
+                    .filter(card => card && typeof card.name === 'string' && ['upright', 'reversed'].includes(card.orientation))
+                    .map(card => ({
+                        name: card.name.slice(0, 100),
+                        orientation: card.orientation,
+                        position: String(card.position || '').slice(0, 100),
+                        symbol: String(card.symbol || '').slice(0, 10)
+                    }))
+                    .slice(0, 5)
             }))
             .filter(record => record.id && record.cards.length);
         if (!validRecords.length) throw new Error('EMPTY_BACKUP');
@@ -3141,6 +3153,12 @@ function openRecordModal(recordId) {
         return;
     }
 
+    const safeRecordId = String(record.id).replace(/[^a-zA-Z0-9_-]/g, '');
+    if (!safeRecordId || safeRecordId !== record.id) {
+        showNotification(currentLanguage === 'zh' ? '這筆紀錄格式不安全，無法開啟' : 'This record cannot be opened safely', 'error');
+        return;
+    }
+
     // 增加查看次數並獲取新的計數
     const newViewCount = divinationManager.incrementViewCount(recordId);
     
@@ -3180,7 +3198,7 @@ function openRecordModal(recordId) {
                     ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
                 ">
                     <img src="${getTarotImagePath(card.name)}" 
-                        alt="${card.name}"
+                        alt="${escapeHtml(card.name)}"
                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div style="
@@ -3192,7 +3210,7 @@ function openRecordModal(recordId) {
                         justify-content: center;
                         font-size: 3rem;
                         color: var(--primary-gold);
-                    ">${card.symbol}</div>
+                    ">${escapeHtml(card.symbol || '')}</div>
                 </div>
                 ${card.orientation === 'reversed' ? `
                     <div style="
@@ -3209,10 +3227,10 @@ function openRecordModal(recordId) {
                 ` : ''}
             </div>
             <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 8px; font-size: 0.9rem;">
-                ${card.position}
+                ${escapeHtml(card.position || '')}
             </div>
             <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 5px;">
-                ${card.name}
+                ${escapeHtml(card.name)}
             </div>
             <div style="font-size: 0.8rem; color: ${card.orientation === 'upright' ? '#90ee90' : '#ffa500'};">
                 (${card.orientation === 'upright' ? t('upright') : t('reversed')})
@@ -3235,7 +3253,7 @@ function openRecordModal(recordId) {
                 ${t('question-label')}
             </h3>
             <p style="font-size: 1.2rem; line-height: 1.6; color: rgba(212, 175, 55, 0.9);">
-                "${record.question}"
+                "${escapeHtml(record.question)}"
             </p>
         </div>
 
@@ -3255,7 +3273,7 @@ function openRecordModal(recordId) {
                 ${t('oracle-reading')}
             </h3>
             <div style="line-height: 1.8; color: rgba(212, 175, 55, 0.9); white-space: pre-line;">
-                ${record.interpretation.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--primary-gold);">$1</strong>')}
+                ${formatReadingText(record.interpretation || '')}
             </div>
         </div>
 
@@ -3289,7 +3307,8 @@ function openRecordModal(recordId) {
                 <textarea id="recordNotes_${record.id}" 
                           style="width: 100%; height: 100px; background: var(--black-alpha-80); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 10px; padding: 15px; font-family: 'Cinzel', serif; font-size: 0.9rem; resize: vertical;"
                           placeholder="${currentLanguage === 'zh' ? '在此記錄你的想法、感受或後續發展...' : 'Record your thoughts, feelings, or follow-up developments...'}"
-                          onchange="updateNotes('${record.id}', this.value)">${record.userNotes || ''}</textarea>
+                          maxlength="2000"
+                          onchange="updateNotes('${safeRecordId}', this.value)">${escapeHtml(record.userNotes || '')}</textarea>
             </div>
         </div>
 
@@ -3301,8 +3320,8 @@ function openRecordModal(recordId) {
             <div id="currentTags_${record.id}" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
                 ${record.tags.map(tag => `
                     <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
-                        ${tag}
-                        <span onclick="removeTag('${record.id}', '${tag}')" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
+                        ${escapeHtml(tag)}
+                        <span onclick="removeTag('${safeRecordId}', decodeURIComponent('${encodeURIComponent(tag)}'))" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
                     </span>
                 `).join('')}
             </div>
@@ -3504,8 +3523,8 @@ function addTag(recordId) {
         if (tagsContainer) {
             tagsContainer.innerHTML = record.tags.map(tag => `
                 <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
-                    ${tag}
-                    <span onclick="removeTag('${recordId}', '${tag}')" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
+                    ${escapeHtml(tag)}
+                    <span onclick="removeTag('${recordId}', decodeURIComponent('${encodeURIComponent(tag)}'))" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
                 </span>
             `).join('');
         }
@@ -3554,8 +3573,8 @@ function removeTag(recordId, tagToRemove) {
         if (tagsContainer) {
             tagsContainer.innerHTML = record.tags.map(tag => `
                 <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
-                    ${tag}
-                    <span onclick="removeTag('${recordId}', '${tag}')" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
+                    ${escapeHtml(tag)}
+                    <span onclick="removeTag('${recordId}', decodeURIComponent('${encodeURIComponent(tag)}'))" style="cursor: pointer; color: #ff6b6b; font-weight: bold;">×</span>
                 </span>
             `).join('');
         }
@@ -4064,6 +4083,7 @@ async function copyTextToClipboard(text) {
         await navigator.clipboard.writeText(text);
         return;
     }
+
     const textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.style.position = 'fixed';
