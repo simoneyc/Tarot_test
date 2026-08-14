@@ -1,5 +1,3 @@
-# Local-only files
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+*.jpg
+package.json
+server.js
