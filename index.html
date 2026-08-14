@@ -26,11 +26,11 @@
                     <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" style="stop-color:#d4af37;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#8b0000;stop-opacity:1" />
+                                <stop offset="0%" style="stop-color:#6f9d91;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#254e48;stop-opacity:1" />
                             </linearGradient>
                         </defs>
-                        <rect width="60" height="85" x="20" y="7" rx="8" fill="url(#logoGrad)" stroke="#d4af37" stroke-width="2"/>
+                        <rect width="60" height="85" x="20" y="7" rx="8" fill="url(#logoGrad)" stroke="#d1b878" stroke-width="2"/>
                         <circle cx="50" cy="30" r="8" fill="none" stroke="#ffffff" stroke-width="2"/>
                         <path d="M35 45 L50 60 L65 45" fill="none" stroke="#ffffff" stroke-width="2"/>
                         <circle cx="50" cy="75" r="4" fill="#ffffff"/>
@@ -46,20 +46,20 @@
             <div class="navbar-controls">
                 <!-- 歷史記錄按鈕 -->
                 <button class="nav-history-btn" onclick="showHistoryPage()" title="查看占卜記錄">
-                    <span class="history-icon">📚</span>
+                    <span class="history-icon" aria-hidden="true">▣</span>
                     <span class="history-text" data-zh="記錄" data-en="History">記錄</span>
                     <span class="history-badge" id="recordsBadge" style="display: none;">0</span>
                 </button>
                 
                 <!-- 新增：主題切換按鈕 -->
                 <button class="theme-toggle-btn" onclick="toggleTheme()" title="切換主題風格">
-                    <span class="theme-icon">🎨</span>
+                    <span class="theme-icon" aria-hidden="true">◐</span>
                     <span class="theme-text" data-zh="模式" data-en="Mode">模式</span>
                 </button>
                 
                 <!-- 語言切換按鈕 -->
                 <button class="lang-toggle-btn" onclick="toggleLanguage()" title="切換語言 / Switch Language">
-                    <span class="lang-icon">🌍</span>
+                    <span class="lang-icon" aria-hidden="true">文</span>
                     <span class="lang-text" data-current="zh">中文</span>
                 </button>
             </div>
