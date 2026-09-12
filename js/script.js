@@ -1581,7 +1581,7 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
     }
 }
 
-async function fetchReadingWithRetry(requestBody, maxAttempts = 3) {
+async function fetchReadingWithRetry(requestBody, maxAttempts = 1) {
     let lastError;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
@@ -1599,8 +1599,6 @@ async function fetchReadingWithRetry(requestBody, maxAttempts = 3) {
                 signal: readingAbortController.signal
             }, 120000);
 
-            // 429 is the site's usage limit; retrying would only consume another attempt.
-            if (response.status === 503 && attempt < maxAttempts) continue;
             return response;
         } catch (error) {
             lastError = error;
@@ -1646,7 +1644,11 @@ async function showLoadingAndGetResults() {
         const response = await fetchReadingWithRetry(requestBody);
 
         if (!response.ok) {
-            throw new Error(`API 請求失敗: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            const requestError = new Error(errorData.error || `API 請求失敗: ${response.status}`);
+            requestError.status = response.status;
+            requestError.code = errorData.code;
+            throw requestError;
         }
 
         const data = await response.json();
@@ -1861,11 +1863,12 @@ function retryReading() {
 
 function showAPIError(error) {
     const container = document.getElementById('resultsContainer');
+    const detail = error?.message || t('api-error-detail');
     container.innerHTML = `
         <div class="reading-message-card is-error">
             <div class="reading-message-icon">!</div>
             <h3>${t('api-error')}</h3>
-            <p>${t('api-error-detail')}</p>
+            <p>${escapeHtml(detail)}</p>
             <p class="reading-preserved-note">${currentLanguage === 'zh' ? '你的問題與抽到的牌已保留，不需要重新抽牌。' : 'Your question and cards are preserved; you do not need to draw again.'}</p>
             <div class="flow-actions">
                 <button class="btn btn-secondary" onclick="returnToQuestion()">${currentLanguage === 'zh' ? '修改問題' : 'Edit question'}</button>
