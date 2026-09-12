@@ -475,10 +475,10 @@
         </div>
 
         <!-- 記錄詳情模態框 -->
-        <div id="recordModal" role="dialog" aria-modal="true" aria-label="占卜記錄詳情" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; overflow-y: auto;">
-            <div style="max-width: 800px; margin: 120px auto 50px auto; background: linear-gradient(135deg, var(--deep-purple), var(--mystic-blue)); border: 2px solid var(--primary-gold); border-radius: 20px; position: relative;">
-                <button onclick="closeRecordModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: var(--primary-gold); font-size: 2rem; cursor: pointer;">×</button>
-                <div id="modalContent" style="padding: 40px;">
+        <div id="recordModal" class="archive-modal" role="dialog" aria-modal="true" aria-label="占卜記錄詳情" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; overflow-y: auto;">
+            <div class="archive-modal-shell" style="max-width: 800px; margin: 120px auto 50px auto; background: linear-gradient(135deg, var(--deep-purple), var(--mystic-blue)); border: 2px solid var(--primary-gold); border-radius: 20px; position: relative;">
+                <button class="archive-modal-close" onclick="closeRecordModal()" style="position: absolute; top: 15px; right: 20px; background: none; border: none; color: var(--primary-gold); font-size: 2rem; cursor: pointer;" aria-label="關閉記錄詳情">×</button>
+                <div id="modalContent" class="archive-modal-content" style="padding: 40px;">
                     <!-- 動態填充詳情內容 -->
                 </div>
             </div>
