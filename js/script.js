@@ -2716,7 +2716,7 @@ class HistoryUI {
                                 title="${record.isFavorite ? '取消收藏' : '加入收藏'}" aria-label="${record.isFavorite ? '取消收藏' : '加入收藏'}">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.47 6.03.88-4.36 4.25 1.03 6L12 16.77 6.6 19.6l1.03-6-4.36-4.25 6.03-.88L12 3Z"/></svg>
                         </button>
-                        <button class="action-btn" onclick="shareRecord('${record.id}')" title="分享" aria-label="分享記錄"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg></button>
+                        <button class="action-btn" onclick="shareRecord('${record.id}')" title="下載分享圖" aria-label="將問題與牌卡下載為 PNG"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg></button>
                         <button class="action-btn delete-btn" onclick="deleteRecord('${record.id}')" title="刪除" aria-label="刪除記錄"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5"/></svg></button>
                     </div>
                 </div>
@@ -3073,15 +3073,234 @@ function deleteRecord(recordId, skipConfirm = false) {
 /**
  * 分享記錄
  */
-function shareRecord(recordId) {
+function loadShareImage(source) {
+    return new Promise(resolve => {
+        const image = new Image();
+        const timeout = setTimeout(() => resolve(null), 8000);
+        image.onload = () => {
+            clearTimeout(timeout);
+            resolve(image);
+        };
+        image.onerror = () => {
+            clearTimeout(timeout);
+            resolve(null);
+        };
+        image.src = source;
+    });
+}
+
+function getWrappedCanvasLines(context, text, maxWidth, maxLines = Infinity) {
+    const lines = [];
+    let currentLine = '';
+    for (const character of String(text || '')) {
+        if (character === '\n') {
+            if (currentLine) lines.push(currentLine);
+            currentLine = '';
+            continue;
+        }
+        const nextLine = currentLine + character;
+        if (currentLine && context.measureText(nextLine).width > maxWidth) {
+            lines.push(currentLine);
+            currentLine = character;
+        } else {
+            currentLine = nextLine;
+        }
+        if (lines.length >= maxLines) break;
+    }
+    if (currentLine && lines.length < maxLines) lines.push(currentLine);
+    if (lines.length === maxLines && String(text || '').length > lines.join('').length) {
+        lines[maxLines - 1] = `${lines[maxLines - 1].replace(/[.…]*$/, '')}…`;
+    }
+    return lines;
+}
+
+function drawRoundedRect(context, x, y, width, height, radius) {
+    const safeRadius = Math.min(radius, width / 2, height / 2);
+    context.beginPath();
+    context.moveTo(x + safeRadius, y);
+    context.arcTo(x + width, y, x + width, y + height, safeRadius);
+    context.arcTo(x + width, y + height, x, y + height, safeRadius);
+    context.arcTo(x, y + height, x, y, safeRadius);
+    context.arcTo(x, y, x + width, y, safeRadius);
+    context.closePath();
+}
+
+async function createRecordShareImage(record) {
+    await document.fonts?.ready;
+    const width = 1200;
+    const margin = 90;
+    const cardWidth = 170;
+    const cardHeight = 338;
+    const cardGap = 24;
+    const columns = Math.min(5, Math.max(1, record.cards.length));
+    const rows = Math.ceil(record.cards.length / columns);
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    context.font = '500 34px "Noto Sans TC", sans-serif';
+    const questionLines = getWrappedCanvasLines(context, record.question, width - margin * 2 - 80, 6);
+    const questionHeight = Math.max(118, 58 + questionLines.length * 50);
+    const cardsTop = 245 + questionHeight + 105;
+    canvas.width = width;
+    canvas.height = cardsTop + rows * cardHeight + Math.max(0, rows - 1) * 28 + 125;
+
+    const background = context.createLinearGradient(0, 0, width, canvas.height);
+    background.addColorStop(0, '#151528');
+    background.addColorStop(.62, '#0d0e1d');
+    background.addColorStop(1, '#080913');
+    context.fillStyle = background;
+    context.fillRect(0, 0, width, canvas.height);
+
+    context.fillStyle = 'rgba(201, 165, 92, .16)';
+    for (let i = 0; i < 42; i++) {
+        const x = (i * 197 + 83) % width;
+        const y = (i * 137 + 51) % canvas.height;
+        context.beginPath();
+        context.arc(x, y, i % 5 === 0 ? 2.3 : 1.2, 0, Math.PI * 2);
+        context.fill();
+    }
+
+    const topRule = context.createLinearGradient(margin, 0, width - margin, 0);
+    topRule.addColorStop(0, 'rgba(201,165,92,0)');
+    topRule.addColorStop(.5, 'rgba(201,165,92,.8)');
+    topRule.addColorStop(1, 'rgba(201,165,92,0)');
+    context.fillStyle = topRule;
+    context.fillRect(margin, 62, width - margin * 2, 2);
+
+    context.textAlign = 'center';
+    context.fillStyle = '#e6cd91';
+    context.font = '600 42px Philosopher, "Noto Sans TC", serif';
+    context.fillText('TAROTVISION', width / 2, 128);
+    context.fillStyle = '#92886f';
+    context.font = '500 18px "Noto Sans TC", sans-serif';
+    context.fillText(currentLanguage === 'zh' ? '一份來自牌卡的指引' : 'A message from the cards', width / 2, 164);
+
+    const date = new Date(record.timestamp);
+    const dateText = date.toLocaleDateString(currentLanguage === 'zh' ? 'zh-TW' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const modeText = historyUI?.getModeDisplayName(record.mode) || record.mode;
+    context.fillStyle = '#a69368';
+    context.font = '500 18px "Noto Sans TC", sans-serif';
+    context.fillText(`${modeText}  ·  ${dateText}`, width / 2, 207);
+
+    const questionTop = 245;
+    drawRoundedRect(context, margin, questionTop, width - margin * 2, questionHeight, 22);
+    context.fillStyle = 'rgba(255,255,255,.025)';
+    context.fill();
+    context.strokeStyle = 'rgba(201,165,92,.3)';
+    context.lineWidth = 2;
+    context.stroke();
+    context.textAlign = 'left';
+    context.fillStyle = '#a89059';
+    context.font = '600 18px "Noto Sans TC", sans-serif';
+    context.fillText(currentLanguage === 'zh' ? '我的問題' : 'MY QUESTION', margin + 38, questionTop + 39);
+    context.fillStyle = '#e4dbcd';
+    context.font = '500 34px "Noto Sans TC", sans-serif';
+    questionLines.forEach((line, index) => context.fillText(line, margin + 38, questionTop + 86 + index * 50));
+
+    context.textAlign = 'center';
+    context.fillStyle = '#c7ab6c';
+    context.font = '500 25px "Noto Sans TC", sans-serif';
+    context.fillText(currentLanguage === 'zh' ? '✦  本次抽到的牌  ✦' : '✦  CARDS DRAWN  ✦', width / 2, cardsTop - 45);
+
+    const images = await Promise.all(record.cards.map(card => loadShareImage(getTarotImagePath(card.name))));
+    record.cards.forEach((card, index) => {
+        const row = Math.floor(index / columns);
+        const itemsInRow = Math.min(columns, record.cards.length - row * columns);
+        const rowWidth = itemsInRow * cardWidth + (itemsInRow - 1) * cardGap;
+        const column = index - row * columns;
+        const x = (width - rowWidth) / 2 + column * (cardWidth + cardGap);
+        const y = cardsTop + row * (cardHeight + 28);
+
+        drawRoundedRect(context, x, y, cardWidth, cardHeight, 16);
+        context.fillStyle = 'rgba(255,255,255,.025)';
+        context.fill();
+        context.strokeStyle = 'rgba(201,165,92,.34)';
+        context.lineWidth = 2;
+        context.stroke();
+
+        const imageX = x + 22;
+        const imageY = y + 20;
+        const imageWidth = cardWidth - 44;
+        const imageHeight = 208;
+        if (images[index]) {
+            context.save();
+            if (card.orientation === 'reversed') {
+                context.translate(imageX + imageWidth / 2, imageY + imageHeight / 2);
+                context.rotate(Math.PI);
+                context.drawImage(images[index], -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
+            } else {
+                context.drawImage(images[index], imageX, imageY, imageWidth, imageHeight);
+            }
+            context.restore();
+        } else {
+            context.fillStyle = '#24172a';
+            context.fillRect(imageX, imageY, imageWidth, imageHeight);
+            context.fillStyle = '#c5a55e';
+            context.font = '42px serif';
+            context.fillText(card.symbol || '✦', x + cardWidth / 2, imageY + 118);
+        }
+        context.strokeStyle = 'rgba(225,197,132,.58)';
+        context.strokeRect(imageX, imageY, imageWidth, imageHeight);
+
+        context.fillStyle = '#a78c53';
+        context.font = '500 15px "Noto Sans TC", sans-serif';
+        context.fillText(card.position || `${index + 1}`, x + cardWidth / 2, y + 250);
+        context.fillStyle = '#e0d5c3';
+        context.font = '600 16px "Noto Sans TC", sans-serif';
+        const nameLines = getWrappedCanvasLines(context, card.name, cardWidth - 22, 2);
+        nameLines.forEach((line, lineIndex) => context.fillText(line, x + cardWidth / 2, y + 276 + lineIndex * 20));
+        context.fillStyle = card.orientation === 'upright' ? '#9fc0a5' : '#d6a468';
+        context.font = '500 14px "Noto Sans TC", sans-serif';
+        context.fillText(card.orientation === 'upright' ? t('upright') : t('reversed'), x + cardWidth / 2, y + 326);
+    });
+
+    context.fillStyle = '#766f63';
+    context.font = '400 16px "Noto Sans TC", sans-serif';
+    context.fillText(currentLanguage === 'zh' ? '牌卡提供的是反思方向，選擇仍在你手中。' : 'The cards offer reflection; the choice remains yours.', width / 2, canvas.height - 58);
+    return canvas;
+}
+
+function downloadCanvasPng(canvas, filename) {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+            if (!blob) return reject(new Error('PNG_EXPORT_FAILED'));
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            resolve();
+        }, 'image/png');
+    });
+}
+
+async function shareRecord(recordId) {
     const shareBtn = document.querySelector(`[onclick="shareRecord('${recordId}')"]`);
     addButtonFeedback(shareBtn, 'share');
     const record = divinationManager.getRecordById(recordId);
     if (!record) return;
-    const cards = record.cards.map(card => `${card.position}：${card.name}（${card.orientation === 'upright' ? t('upright') : t('reversed')}）`).join('\n');
-    copyTextToClipboard(`${record.question}\n\n${cards}\n\n${record.interpretation}`)
-        .then(() => showNotification(currentLanguage === 'zh' ? '記錄已複製，可貼到其他應用程式分享' : 'Record copied and ready to share', 'success'))
-        .catch(() => showNotification(currentLanguage === 'zh' ? '複製失敗' : 'Copy failed', 'error'));
+    const originalContent = shareBtn?.innerHTML;
+    if (shareBtn) {
+        shareBtn.disabled = true;
+        shareBtn.textContent = currentLanguage === 'zh' ? '產生圖片中…' : 'Creating image…';
+    }
+    try {
+        const canvas = await createRecordShareImage(record);
+        const date = new Date(record.timestamp).toISOString().slice(0, 10);
+        await downloadCanvasPng(canvas, `tarotvision-${date}-${record.id}.png`);
+        showNotification(currentLanguage === 'zh' ? '分享圖片已下載' : 'Share image downloaded', 'success');
+    } catch (error) {
+        console.error('Share image export failed:', error);
+        showNotification(currentLanguage === 'zh' ? '圖片產生失敗，請稍後再試' : 'Could not create the image', 'error');
+    } finally {
+        if (shareBtn) {
+            shareBtn.disabled = false;
+            shareBtn.innerHTML = originalContent;
+        }
+    }
 }
 
 function showUndoDeleteNotice() {
@@ -3432,7 +3651,7 @@ function openRecordModal(recordId) {
             </button>
             <button onclick="shareRecord('${record.id}')" 
                     style="background: transparent; color: var(--primary-gold); border: 2px solid var(--primary-gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
-                📤 ${currentLanguage === 'zh' ? '分享' : 'Share'}
+                📥 ${currentLanguage === 'zh' ? '下載分享圖' : 'Download image'}
             </button>
             <button onclick="if(confirm('${currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?'}')) { deleteRecord('${record.id}', true); closeRecordModal(); }"
                     style="background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
