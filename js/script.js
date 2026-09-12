@@ -2665,6 +2665,7 @@ class HistoryUI {
         document.getElementById('recordsList').style.display = 'none';
         
         container.innerHTML = records.map(record => this.createRecordCard(record)).join('');
+        this.bindRecordOpenHandlers(container);
         
         // 更新視圖按鈕狀態
         this.updateViewButtons('grid');
@@ -2685,6 +2686,7 @@ class HistoryUI {
                 ${records.map(record => this.createRecordListItem(record)).join('')}
             </div>
         `;
+        this.bindRecordOpenHandlers(container);
         
         // 更新視圖按鈕狀態
         this.updateViewButtons('list');
@@ -2703,7 +2705,7 @@ class HistoryUI {
         const typeName = escapeHtml(this.getTypeDisplayName(record.questionType));
         
         return `
-            <div class="record-card" role="button" tabindex="0" onclick="openRecordModal('${record.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRecordModal('${record.id}');}">
+            <div class="record-card" role="button" tabindex="0" data-record-id="${record.id}">
                 <div class="record-card-accent" aria-hidden="true"></div>
                 <div class="record-header">
                     <div>
@@ -2768,8 +2770,7 @@ class HistoryUI {
         const safeType = escapeHtml(this.getTypeDisplayName(record.questionType));
         
         return `
-            <div style="display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer;" 
-                 onclick="openRecordModal('${record.id}')">
+            <div class="record-list-item" data-record-id="${record.id}" role="button" tabindex="0" style="display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer;">
                 
                 <!-- 日期 -->
                 <div style="min-width: 100px; color: rgba(212, 175, 55, 0.8); font-size: 0.9rem;">
@@ -2937,6 +2938,21 @@ class HistoryUI {
             general: currentLanguage === 'zh' ? '一般' : 'General'
         };
         return typeNames[type] || type;
+    }
+
+    bindRecordOpenHandlers(container) {
+        container.querySelectorAll('[data-record-id]').forEach(item => {
+            const openRecord = event => {
+                if (event.target.closest('.record-actions, .action-btn, button')) return;
+                openRecordModal(item.dataset.recordId);
+            };
+            item.addEventListener('click', openRecord);
+            item.addEventListener('keydown', event => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                openRecord(event);
+            });
+        });
     }
 }
 
@@ -3107,6 +3123,7 @@ function undoDeleteRecord() {
         records.unshift(recentlyDeletedRecord);
         localStorage.setItem(divinationManager.storageKeys.RECORDS, JSON.stringify(records.slice(0, divinationManager.maxRecords)));
     }
+
     recentlyDeletedRecord = null;
     clearTimeout(undoDeleteTimer);
     document.querySelector('.undo-delete-notice')?.remove();
