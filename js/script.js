@@ -356,6 +356,20 @@ const spreadInfo = {
         cards: 1,
         positions: { zh: ["今日之牌"], en: ["Card of the Day"] },
         title: { zh: "請選擇一張今日之牌", en: "Please choose your card of the day" }
+    },
+    horseshoe: {
+        name: { zh: "馬蹄鐵牌陣", en: "Horseshoe Spread" },
+        description: { zh: "經典七張牌陣，從過去、現在、隱藏影響、障礙與外在環境，推進到建議及可能結果。", en: "A classic seven-card spread moving from past and present influences through obstacles and external factors to advice and a likely outcome." },
+        cards: 7,
+        positions: { zh: ["過去", "現在", "隱藏影響", "主要障礙", "外在環境", "行動建議", "可能結果"], en: ["Past", "Present", "Hidden Influences", "Main Obstacle", "External Environment", "Advice", "Likely Outcome"] },
+        title: { zh: "請選擇七張馬蹄鐵牌陣的牌", en: "Please choose seven cards for the Horseshoe spread" }
+    },
+    celtic: {
+        name: { zh: "凱爾特十字", en: "Celtic Cross" },
+        description: { zh: "經典十張深度牌陣，從現況與挑戰開始，整合過去、未來、意識、潛意識及內外在影響。", en: "A classic ten-card in-depth spread integrating the present challenge, past and future, conscious and subconscious influences, and the surrounding context." },
+        cards: 10,
+        positions: { zh: ["當下現況", "眼前挑戰", "過去影響", "近期未來", "目標與可能性", "潛意識根源", "你的立場與建議", "外在影響", "希望與恐懼", "可能結果"], en: ["Present", "Challenge", "Past", "Near Future", "Goal and Possibility", "Subconscious Foundation", "Your Position and Advice", "External Influences", "Hopes and Fears", "Likely Outcome"] },
+        title: { zh: "請選擇十張凱爾特十字的牌", en: "Please choose ten cards for the Celtic Cross" }
     }
 };
 
@@ -469,6 +483,14 @@ const questionExamples = {
     daily: {
         zh: ['今天的主題與提醒是什麼？', '今天有什麼能量值得我留意？', '我今天最適合抱持什麼態度？', '今天的我需要記得什麼？', '我可以如何善用今天的能量？', '今天有什麼值得反思的訊息？'],
         en: ["What is today's theme and reminder?", 'What energy deserves my attention today?', 'What attitude would serve me best today?', 'What do I need to remember today?', "How can I work with today's energy?", 'What message is worth reflecting on today?']
+    },
+    horseshoe: {
+        zh: ['這個局勢是如何形成的，接下來可能如何發展？', '目前有哪些隱藏因素正在影響這件事？', '面對這個複雜局面，我最需要克服什麼？', '外在環境如何影響我目前的選擇？', '我可以採取什麼行動，讓事情往更好的方向發展？', '關於這件事，我需要看見哪些完整脈絡？'],
+        en: ['How did this situation develop, and where might it lead?', 'What hidden factors are influencing this situation?', 'What must I overcome in this complex situation?', 'How is my environment affecting my current choices?', 'What action could move this situation in a healthier direction?', 'What broader context do I need to understand about this matter?']
+    },
+    celtic: {
+        zh: ['我該如何完整理解目前面對的複雜課題？', '這件事的表面情況與深層根源分別是什麼？', '哪些內在與外在力量正在影響我的處境？', '面對人生的這個轉折，我有哪些可能性與限制？', '這段重要關係目前的全貌與發展潛力是什麼？', '我要如何整合過去經驗，做出更成熟的下一步？'],
+        en: ['How can I fully understand the complex issue I am facing?', 'What are the visible situation and deeper roots of this matter?', 'What internal and external forces are shaping my circumstances?', 'What possibilities and limitations surround this turning point?', 'What is the full picture and potential of this important relationship?', 'How can I integrate past experience into a wiser next step?']
     }
 };
 
@@ -2920,7 +2942,9 @@ class HistoryUI {
             career: currentLanguage === 'zh' ? '職涯' : 'Career',
             growth: currentLanguage === 'zh' ? '身心靈' : 'Mind Body Spirit',
             yesno: 'Yes or No',
-            daily: currentLanguage === 'zh' ? '每日' : 'Daily'
+            daily: currentLanguage === 'zh' ? '每日' : 'Daily',
+            horseshoe: currentLanguage === 'zh' ? '馬蹄鐵' : 'Horseshoe',
+            celtic: currentLanguage === 'zh' ? '凱爾特十字' : 'Celtic Cross'
         };
         return modeNames[mode] || mode;
     }
