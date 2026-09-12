@@ -1157,7 +1157,16 @@ function confirmSpreadSelection() {
         return;
     }
     
-    currentMode = selectedSpread.dataset.mode;
+    const selectedMode = selectedSpread.dataset.mode;
+    if (!spreadInfo[selectedMode]) {
+        showNotification(
+            currentLanguage === 'zh' ? '牌陣資料尚未載入，請重新整理頁面後再試一次' : 'Spread data is not loaded yet. Please refresh the page and try again.',
+            'warning'
+        );
+        return;
+    }
+
+    currentMode = selectedMode;
     updateSpreadDescription();
     showStep(3);
 }
@@ -1166,6 +1175,11 @@ function confirmSpreadSelection() {
 function updateSpreadDescription() {
     const info = spreadInfo[currentMode];
     const descContainer = document.getElementById('spreadDescription');
+
+    if (!info || !descContainer) {
+        console.error('Unable to display spread description:', currentMode);
+        return;
+    }
     
     descContainer.innerHTML = `
         <h3 style="color: var(--primary-gold); margin-bottom: 15px;">
