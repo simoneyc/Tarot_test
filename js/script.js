@@ -3468,7 +3468,9 @@ function openRecordModal(recordId) {
     // 顯示模態框
     modal.style.zIndex = '10001';
     modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    modal.scrollTop = 0;
+    document.documentElement.classList.add('record-modal-open');
+    document.body.classList.add('record-modal-open');
     modal.querySelector('button')?.focus();
 
     // 即時更新查看次數顯示
@@ -3486,11 +3488,23 @@ function closeRecordModal() {
     const modal = document.getElementById('recordModal');
     if (modal) {
         modal.style.display = 'none';
-        document.body.style.overflow = ''; // 恢復背景滾動
-        modalTriggerElement?.focus();
-        modalTriggerElement = null;
     }
+    document.documentElement.classList.remove('record-modal-open');
+    document.body.classList.remove('record-modal-open');
+    document.body.style.overflow = '';
+    modalTriggerElement?.focus();
+    modalTriggerElement = null;
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('recordModal');
+    // A fixed dialog should live directly under body to avoid transformed
+    // ancestors interfering with scrolling on mobile browsers.
+    if (modal && modal.parentElement !== document.body) document.body.appendChild(modal);
+    document.documentElement.classList.remove('record-modal-open');
+    document.body.classList.remove('record-modal-open');
+    document.body.style.overflow = '';
+});
 
 /**
  * 更新所有位置的查看次數顯示

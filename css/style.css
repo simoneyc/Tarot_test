@@ -3125,10 +3125,16 @@ body {
     inset: 0;
     z-index: 10000;
     overflow-y: auto;
+    height: 100dvh;
     padding: 72px 20px 40px;
     background: rgba(5, 5, 15, .86);
     backdrop-filter: blur(12px);
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
 }
+html.record-modal-open,
+body.record-modal-open { overflow: hidden; }
 .record-modal-shell {
     position: relative;
     width: min(100%, 980px);
