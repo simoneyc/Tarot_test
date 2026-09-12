@@ -2665,7 +2665,6 @@ class HistoryUI {
         document.getElementById('recordsList').style.display = 'none';
         
         container.innerHTML = records.map(record => this.createRecordCard(record)).join('');
-        this.bindRecordOpenHandlers(container);
         
         // 更新視圖按鈕狀態
         this.updateViewButtons('grid');
@@ -2686,7 +2685,6 @@ class HistoryUI {
                 ${records.map(record => this.createRecordListItem(record)).join('')}
             </div>
         `;
-        this.bindRecordOpenHandlers(container);
         
         // 更新視圖按鈕狀態
         this.updateViewButtons('list');
@@ -2705,7 +2703,7 @@ class HistoryUI {
         const typeName = escapeHtml(this.getTypeDisplayName(record.questionType));
         
         return `
-            <div class="record-card" role="button" tabindex="0" data-record-id="${record.id}">
+            <div class="record-card" role="button" tabindex="0" onclick="openRecordModal('${record.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openRecordModal('${record.id}');}">
                 <div class="record-card-accent" aria-hidden="true"></div>
                 <div class="record-header">
                     <div>
@@ -2770,7 +2768,8 @@ class HistoryUI {
         const safeType = escapeHtml(this.getTypeDisplayName(record.questionType));
         
         return `
-            <div class="record-list-item" data-record-id="${record.id}" role="button" tabindex="0" style="display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer;">
+            <div style="display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); cursor: pointer;" 
+                 onclick="openRecordModal('${record.id}')">
                 
                 <!-- 日期 -->
                 <div style="min-width: 100px; color: rgba(212, 175, 55, 0.8); font-size: 0.9rem;">
@@ -2938,21 +2937,6 @@ class HistoryUI {
             general: currentLanguage === 'zh' ? '一般' : 'General'
         };
         return typeNames[type] || type;
-    }
-
-    bindRecordOpenHandlers(container) {
-        container.querySelectorAll('[data-record-id]').forEach(item => {
-            const openRecord = event => {
-                if (event.target.closest('.record-actions, .action-btn, button')) return;
-                openRecordModal(item.dataset.recordId);
-            };
-            item.addEventListener('click', openRecord);
-            item.addEventListener('keydown', event => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                event.preventDefault();
-                openRecord(event);
-            });
-        });
     }
 }
 
@@ -3123,7 +3107,6 @@ function undoDeleteRecord() {
         records.unshift(recentlyDeletedRecord);
         localStorage.setItem(divinationManager.storageKeys.RECORDS, JSON.stringify(records.slice(0, divinationManager.maxRecords)));
     }
-
     recentlyDeletedRecord = null;
     clearTimeout(undoDeleteTimer);
     document.querySelector('.undo-delete-notice')?.remove();
@@ -3264,9 +3247,9 @@ function openRecordModal(recordId) {
 
     // 生成卡牌展示
     const cardsDisplay = record.cards.map((card, index) => `
-        <article class="record-detail-card">
-            <div class="record-detail-card-visual">
-                <div class="record-detail-card-frame" style="
+        <div style="text-align: center; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 2px solid var(--primary-gold); max-width: 200px;">
+            <div style="position: relative; margin-bottom: 15px;">
+                <div style="
                     width: 120px; 
                     height: 200px; 
                     border: 2px solid var(--primary-gold);
@@ -3304,106 +3287,98 @@ function openRecordModal(recordId) {
                     ">${t('reversed')}</div>
                 ` : ''}
             </div>
-            <div class="record-detail-position">
+            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 8px; font-size: 0.9rem;">
                 ${escapeHtml(card.position || '')}
             </div>
-            <div class="record-detail-card-name">
+            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 5px;">
                 ${escapeHtml(card.name)}
             </div>
-            <div class="record-detail-orientation ${card.orientation}">
+            <div style="font-size: 0.8rem; color: ${card.orientation === 'upright' ? '#90ee90' : '#ffa500'};">
                 (${card.orientation === 'upright' ? t('upright') : t('reversed')})
             </div>
-        </article>
+        </div>
     `).join('');
 
     // 填充模態框內容
     content.innerHTML = `
-        <header class="record-detail-hero">
-            <span class="record-detail-kicker">${currentLanguage === 'zh' ? '占卜檔案' : 'Reading archive'}</span>
-            <h2>
+        <div style="text-align: center; margin-bottom: 30px; margin-top: 120px;">
+            <h2 style="color: var(--primary-gold); font-family: 'Philosopher', serif; margin-bottom: 10px;">
                 ${currentLanguage === 'zh' ? '占卜記錄詳情' : 'Divination Record Details'}
             </h2>
-            <p>${formattedDate}</p>
-            <span class="record-detail-mode">${escapeHtml(historyUI?.getModeDisplayName(record.mode) || record.mode)}</span>
-        </header>
-
-        <div class="record-detail-stats">
-            <div><span>${currentLanguage === 'zh' ? '查看次數' : 'Views'}</span><strong id="modalViewCount_${safeRecordId}">${record.readCount || 0}</strong></div>
-            <div><span>${currentLanguage === 'zh' ? '問題類型' : 'Question type'}</span><strong>${escapeHtml(historyUI?.getTypeDisplayName(record.questionType) || record.questionType || 'general')}</strong></div>
-            <div><span>${currentLanguage === 'zh' ? '個人評分' : 'Your rating'}</span><strong>${record.userRating ? `${record.userRating} / 5` : '—'}</strong></div>
+            <p style="color: rgba(212, 175, 55, 0.8); font-size: 0.9rem;">${formattedDate}</p>
         </div>
 
         <!-- 問題 -->
-        <section class="record-detail-section record-detail-question">
-            <h3>
+        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 15px; font-family: 'Philosopher', serif;">
                 ${t('question-label')}
             </h3>
-            <blockquote>
+            <p style="font-size: 1.2rem; line-height: 1.6; color: rgba(212, 175, 55, 0.9);">
                 "${escapeHtml(record.question)}"
-            </blockquote>
-        </section>
+            </p>
+        </div>
 
         <!-- 卡牌展示 -->
-        <section class="record-detail-cards-section">
-            <div class="record-detail-section-title"><span>✦</span><h3>
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; text-align: center; font-family: 'Philosopher', serif;">
                 ${currentLanguage === 'zh' ? '抽到的牌' : 'Cards Drawn'}
-            </h3><span>✦</span></div>
-            <div class="record-detail-cards-grid">
+            </h3>
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
                 ${cardsDisplay}
             </div>
-        </section>
+        </div>
 
         <!-- 解讀內容 -->
-        <section class="record-detail-section record-detail-reading">
-            <h3>
+        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
                 ${t('oracle-reading')}
             </h3>
-            <div class="record-detail-reading-body">
+            <div style="line-height: 1.8; color: rgba(212, 175, 55, 0.9); white-space: pre-line;">
                 ${formatReadingText(record.interpretation || '')}
             </div>
-        </section>
+        </div>
 
         <!-- 用戶筆記和評分 -->
-        <section class="record-detail-section record-detail-journal">
-            <h3>
+        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
                 ${currentLanguage === 'zh' ? '個人筆記與評價' : 'Personal Notes & Rating'}
             </h3>
             
             <!-- 評分 -->
-            <div class="record-detail-rating">
-                <label>
+            <div style="margin-bottom: 20px;">
+                <label style="color: var(--primary-gold); margin-bottom: 10px; display: block;">
                     ${currentLanguage === 'zh' ? '準確度評分：' : 'Accuracy Rating:'}
                 </label>
-                <div class="rating-stars">
+                <div class="rating-stars" style="display: flex; gap: 5px; margin-bottom: 15px;">
                     ${[1,2,3,4,5].map(star => `
-                        <button type="button" class="rating-star ${record.userRating >= star ? 'active' : ''}"
+                        <span class="rating-star ${record.userRating >= star ? 'active' : ''}" 
                               onclick="updateRating('${record.id}', ${star})"
-                              aria-label="${star} / 5"
-                              style="color: ${record.userRating >= star ? '#ffd700' : 'rgba(212, 175, 55, 0.3)'};">
-                            ★
-                        </button>
+                              style="cursor: pointer; font-size: 1.5rem; color: ${record.userRating >= star ? '#ffd700' : 'rgba(212, 175, 55, 0.3)'}; transition: all 0.3s ease;">
+                            ⭐
+                        </span>
                     `).join('')}
                 </div>
             </div>
 
             <!-- 筆記 -->
-            <div class="record-detail-notes">
-                <label>
+            <div>
+                <label style="color: var(--primary-gold); margin-bottom: 10px; display: block;">
                     ${currentLanguage === 'zh' ? '個人筆記：' : 'Personal Notes:'}
                 </label>
                 <textarea id="recordNotes_${record.id}" 
+                          style="width: 100%; height: 100px; background: var(--black-alpha-80); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 10px; padding: 15px; font-family: 'Cinzel', serif; font-size: 0.9rem; resize: vertical;"
                           placeholder="${currentLanguage === 'zh' ? '在此記錄你的想法、感受或後續發展...' : 'Record your thoughts, feelings, or follow-up developments...'}"
                           maxlength="2000"
                           onchange="updateNotes('${safeRecordId}', this.value)">${escapeHtml(record.userNotes || '')}</textarea>
             </div>
-        </section>
+        </div>
 
         <!-- 標籤管理 -->
-        <section class="record-detail-section record-detail-tags-section">
-            <h3>
+        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
                 ${currentLanguage === 'zh' ? '標籤管理' : 'Tag Management'}
             </h3>
-            <div class="record-detail-tags" id="currentTags_${record.id}">
+            <div id="currentTags_${record.id}" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
                 ${record.tags.map(tag => `
                     <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
                         ${escapeHtml(tag)}
@@ -3411,24 +3386,25 @@ function openRecordModal(recordId) {
                     </span>
                 `).join('')}
             </div>
-            <div class="record-detail-tag-form">
+            <div style="display: flex; gap: 10px;">
                 <input type="text" id="newTag_${record.id}" 
-                       maxlength="40"
+                       style="flex: 1; padding: 10px; background: var(--black-alpha-80); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 8px; font-family: 'Cinzel', serif;"
                        placeholder="${currentLanguage === 'zh' ? '新增標籤...' : 'Add tag...'}"
                        onkeypress="if(event.key==='Enter') addTag('${record.id}')">
-                <button onclick="addTag('${record.id}')">
+                <button onclick="addTag('${record.id}')" 
+                        style="background: var(--primary-gold); color: var(--dark-red); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cinzel', serif;">
                     ${currentLanguage === 'zh' ? '添加' : 'Add'}
                 </button>
             </div>
-        </section>
+        </div>
 
         <!-- 統計信息 -->
-        <div class="record-detail-legacy-stats" style="display: flex; justify-content: space-around; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-around; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
             <div style="text-align: center;">
                 <div style="color: var(--primary-gold); font-size: 1.2rem; font-weight: bold;">👁️</div>
                 <div style="color: rgba(212, 175, 55, 0.8); font-size: 0.8rem; margin-top: 5px;">
                     ${currentLanguage === 'zh' ? '查看次數' : 'View Count'}<br>
-                    <strong>${record.readCount}</strong>
+                    <strong id="modalViewCount_${record.id}">${record.readCount}</strong>
                 </div>
             </div>
             <div style="text-align: center;">
@@ -3448,17 +3424,17 @@ function openRecordModal(recordId) {
         </div>
 
         <!-- 操作按鈕 -->
-        <div class="record-detail-actions">
-            <button class="${record.isFavorite ? 'active' : ''}" onclick="toggleFavorite('${record.id}'); updateModalFavoriteButton('${record.id}')"
+        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <button onclick="toggleFavorite('${record.id}'); updateModalFavoriteButton('${record.id}')" 
                     id="modalFavoriteBtn_${record.id}"
                     style="background: ${record.isFavorite ? 'var(--primary-gold)' : 'transparent'}; color: ${record.isFavorite ? 'var(--dark-red)' : 'var(--primary-gold)'}; border: 2px solid var(--primary-gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
                 ${record.isFavorite ? '⭐ ' : '☆ '}${record.isFavorite ? (currentLanguage === 'zh' ? '已收藏' : 'Favorited') : (currentLanguage === 'zh' ? '加入收藏' : 'Add to Favorites')}
             </button>
-            <button class="record-detail-share" onclick="shareRecord('${record.id}')"
+            <button onclick="shareRecord('${record.id}')" 
                     style="background: transparent; color: var(--primary-gold); border: 2px solid var(--primary-gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
                 📤 ${currentLanguage === 'zh' ? '分享' : 'Share'}
             </button>
-            <button class="record-detail-delete" onclick="if(confirm('${currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?'}')) { deleteRecord('${record.id}', true); closeRecordModal(); }"
+            <button onclick="if(confirm('${currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?'}')) { deleteRecord('${record.id}', true); closeRecordModal(); }"
                     style="background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
                 🗑️ ${currentLanguage === 'zh' ? '刪除' : 'Delete'}
             </button>
@@ -3468,9 +3444,7 @@ function openRecordModal(recordId) {
     // 顯示模態框
     modal.style.zIndex = '10001';
     modal.style.display = 'block';
-    modal.scrollTop = 0;
-    document.documentElement.classList.add('record-modal-open');
-    document.body.classList.add('record-modal-open');
+    document.body.style.overflow = 'hidden';
     modal.querySelector('button')?.focus();
 
     // 即時更新查看次數顯示
@@ -3488,23 +3462,11 @@ function closeRecordModal() {
     const modal = document.getElementById('recordModal');
     if (modal) {
         modal.style.display = 'none';
+        document.body.style.overflow = ''; // 恢復背景滾動
+        modalTriggerElement?.focus();
+        modalTriggerElement = null;
     }
-    document.documentElement.classList.remove('record-modal-open');
-    document.body.classList.remove('record-modal-open');
-    document.body.style.overflow = '';
-    modalTriggerElement?.focus();
-    modalTriggerElement = null;
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('recordModal');
-    // A fixed dialog should live directly under body to avoid transformed
-    // ancestors interfering with scrolling on mobile browsers.
-    if (modal && modal.parentElement !== document.body) document.body.appendChild(modal);
-    document.documentElement.classList.remove('record-modal-open');
-    document.body.classList.remove('record-modal-open');
-    document.body.style.overflow = '';
-});
 
 /**
  * 更新所有位置的查看次數顯示
@@ -3696,7 +3658,6 @@ function updateModalFavoriteButton(recordId) {
         // 更新樣式
         btn.style.background = record.isFavorite ? 'var(--primary-gold)' : 'transparent';
         btn.style.color = record.isFavorite ? 'var(--dark-red)' : 'var(--primary-gold)';
-        btn.classList.toggle('active', record.isFavorite);
         btn.innerHTML = `${record.isFavorite ? '⭐ ' : '☆ '}${record.isFavorite ? (currentLanguage === 'zh' ? '已收藏' : 'Favorited') : (currentLanguage === 'zh' ? '加入收藏' : 'Add to Favorites')}`;
         
         // 短暫的視覺強調
