@@ -3247,9 +3247,9 @@ function openRecordModal(recordId) {
 
     // 生成卡牌展示
     const cardsDisplay = record.cards.map((card, index) => `
-        <div style="text-align: center; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 2px solid var(--primary-gold); max-width: 200px;">
-            <div style="position: relative; margin-bottom: 15px;">
-                <div style="
+        <article class="record-detail-card">
+            <div class="record-detail-card-visual">
+                <div class="record-detail-card-frame" style="
                     width: 120px; 
                     height: 200px; 
                     border: 2px solid var(--primary-gold);
@@ -3287,98 +3287,106 @@ function openRecordModal(recordId) {
                     ">${t('reversed')}</div>
                 ` : ''}
             </div>
-            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 8px; font-size: 0.9rem;">
+            <div class="record-detail-position">
                 ${escapeHtml(card.position || '')}
             </div>
-            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 5px;">
+            <div class="record-detail-card-name">
                 ${escapeHtml(card.name)}
             </div>
-            <div style="font-size: 0.8rem; color: ${card.orientation === 'upright' ? '#90ee90' : '#ffa500'};">
+            <div class="record-detail-orientation ${card.orientation}">
                 (${card.orientation === 'upright' ? t('upright') : t('reversed')})
             </div>
-        </div>
+        </article>
     `).join('');
 
     // 填充模態框內容
     content.innerHTML = `
-        <div style="text-align: center; margin-bottom: 30px; margin-top: 120px;">
-            <h2 style="color: var(--primary-gold); font-family: 'Philosopher', serif; margin-bottom: 10px;">
+        <header class="record-detail-hero">
+            <span class="record-detail-kicker">${currentLanguage === 'zh' ? '占卜檔案' : 'Reading archive'}</span>
+            <h2>
                 ${currentLanguage === 'zh' ? '占卜記錄詳情' : 'Divination Record Details'}
             </h2>
-            <p style="color: rgba(212, 175, 55, 0.8); font-size: 0.9rem;">${formattedDate}</p>
+            <p>${formattedDate}</p>
+            <span class="record-detail-mode">${escapeHtml(historyUI?.getModeDisplayName(record.mode) || record.mode)}</span>
+        </header>
+
+        <div class="record-detail-stats">
+            <div><span>${currentLanguage === 'zh' ? '查看次數' : 'Views'}</span><strong id="modalViewCount_${safeRecordId}">${record.readCount || 0}</strong></div>
+            <div><span>${currentLanguage === 'zh' ? '問題類型' : 'Question type'}</span><strong>${escapeHtml(historyUI?.getTypeDisplayName(record.questionType) || record.questionType || 'general')}</strong></div>
+            <div><span>${currentLanguage === 'zh' ? '個人評分' : 'Your rating'}</span><strong>${record.userRating ? `${record.userRating} / 5` : '—'}</strong></div>
         </div>
 
         <!-- 問題 -->
-        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
-            <h3 style="color: var(--primary-gold); margin-bottom: 15px; font-family: 'Philosopher', serif;">
+        <section class="record-detail-section record-detail-question">
+            <h3>
                 ${t('question-label')}
             </h3>
-            <p style="font-size: 1.2rem; line-height: 1.6; color: rgba(212, 175, 55, 0.9);">
+            <blockquote>
                 "${escapeHtml(record.question)}"
-            </p>
-        </div>
+            </blockquote>
+        </section>
 
         <!-- 卡牌展示 -->
-        <div style="margin-bottom: 30px;">
-            <h3 style="color: var(--primary-gold); margin-bottom: 20px; text-align: center; font-family: 'Philosopher', serif;">
+        <section class="record-detail-cards-section">
+            <div class="record-detail-section-title"><span>✦</span><h3>
                 ${currentLanguage === 'zh' ? '抽到的牌' : 'Cards Drawn'}
-            </h3>
-            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            </h3><span>✦</span></div>
+            <div class="record-detail-cards-grid">
                 ${cardsDisplay}
             </div>
-        </div>
+        </section>
 
         <!-- 解讀內容 -->
-        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
-            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
+        <section class="record-detail-section record-detail-reading">
+            <h3>
                 ${t('oracle-reading')}
             </h3>
-            <div style="line-height: 1.8; color: rgba(212, 175, 55, 0.9); white-space: pre-line;">
+            <div class="record-detail-reading-body">
                 ${formatReadingText(record.interpretation || '')}
             </div>
-        </div>
+        </section>
 
         <!-- 用戶筆記和評分 -->
-        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
-            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
+        <section class="record-detail-section record-detail-journal">
+            <h3>
                 ${currentLanguage === 'zh' ? '個人筆記與評價' : 'Personal Notes & Rating'}
             </h3>
             
             <!-- 評分 -->
-            <div style="margin-bottom: 20px;">
-                <label style="color: var(--primary-gold); margin-bottom: 10px; display: block;">
+            <div class="record-detail-rating">
+                <label>
                     ${currentLanguage === 'zh' ? '準確度評分：' : 'Accuracy Rating:'}
                 </label>
-                <div class="rating-stars" style="display: flex; gap: 5px; margin-bottom: 15px;">
+                <div class="rating-stars">
                     ${[1,2,3,4,5].map(star => `
-                        <span class="rating-star ${record.userRating >= star ? 'active' : ''}" 
+                        <button type="button" class="rating-star ${record.userRating >= star ? 'active' : ''}"
                               onclick="updateRating('${record.id}', ${star})"
-                              style="cursor: pointer; font-size: 1.5rem; color: ${record.userRating >= star ? '#ffd700' : 'rgba(212, 175, 55, 0.3)'}; transition: all 0.3s ease;">
-                            ⭐
-                        </span>
+                              aria-label="${star} / 5"
+                              style="color: ${record.userRating >= star ? '#ffd700' : 'rgba(212, 175, 55, 0.3)'};">
+                            ★
+                        </button>
                     `).join('')}
                 </div>
             </div>
 
             <!-- 筆記 -->
-            <div>
-                <label style="color: var(--primary-gold); margin-bottom: 10px; display: block;">
+            <div class="record-detail-notes">
+                <label>
                     ${currentLanguage === 'zh' ? '個人筆記：' : 'Personal Notes:'}
                 </label>
                 <textarea id="recordNotes_${record.id}" 
-                          style="width: 100%; height: 100px; background: var(--black-alpha-80); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 10px; padding: 15px; font-family: 'Cinzel', serif; font-size: 0.9rem; resize: vertical;"
                           placeholder="${currentLanguage === 'zh' ? '在此記錄你的想法、感受或後續發展...' : 'Record your thoughts, feelings, or follow-up developments...'}"
                           maxlength="2000"
                           onchange="updateNotes('${safeRecordId}', this.value)">${escapeHtml(record.userNotes || '')}</textarea>
             </div>
-        </div>
+        </section>
 
         <!-- 標籤管理 -->
-        <div style="background: var(--black-alpha-60); padding: 25px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
-            <h3 style="color: var(--primary-gold); margin-bottom: 20px; font-family: 'Philosopher', serif;">
+        <section class="record-detail-section record-detail-tags-section">
+            <h3>
                 ${currentLanguage === 'zh' ? '標籤管理' : 'Tag Management'}
             </h3>
-            <div id="currentTags_${record.id}" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+            <div class="record-detail-tags" id="currentTags_${record.id}">
                 ${record.tags.map(tag => `
                     <span class="tag" style="background: rgba(212, 175, 55, 0.2); color: var(--primary-gold); padding: 5px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px;">
                         ${escapeHtml(tag)}
@@ -3386,25 +3394,24 @@ function openRecordModal(recordId) {
                     </span>
                 `).join('')}
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div class="record-detail-tag-form">
                 <input type="text" id="newTag_${record.id}" 
-                       style="flex: 1; padding: 10px; background: var(--black-alpha-80); color: var(--primary-gold); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 8px; font-family: 'Cinzel', serif;"
+                       maxlength="40"
                        placeholder="${currentLanguage === 'zh' ? '新增標籤...' : 'Add tag...'}"
                        onkeypress="if(event.key==='Enter') addTag('${record.id}')">
-                <button onclick="addTag('${record.id}')" 
-                        style="background: var(--primary-gold); color: var(--dark-red); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Cinzel', serif;">
+                <button onclick="addTag('${record.id}')">
                     ${currentLanguage === 'zh' ? '添加' : 'Add'}
                 </button>
             </div>
-        </div>
+        </section>
 
         <!-- 統計信息 -->
-        <div style="display: flex; justify-content: space-around; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
+        <div class="record-detail-legacy-stats" style="display: flex; justify-content: space-around; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 1px solid var(--primary-gold); margin-bottom: 30px;">
             <div style="text-align: center;">
                 <div style="color: var(--primary-gold); font-size: 1.2rem; font-weight: bold;">👁️</div>
                 <div style="color: rgba(212, 175, 55, 0.8); font-size: 0.8rem; margin-top: 5px;">
                     ${currentLanguage === 'zh' ? '查看次數' : 'View Count'}<br>
-                    <strong id="modalViewCount_${record.id}">${record.readCount}</strong>
+                    <strong>${record.readCount}</strong>
                 </div>
             </div>
             <div style="text-align: center;">
@@ -3424,17 +3431,17 @@ function openRecordModal(recordId) {
         </div>
 
         <!-- 操作按鈕 -->
-        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-            <button onclick="toggleFavorite('${record.id}'); updateModalFavoriteButton('${record.id}')" 
+        <div class="record-detail-actions">
+            <button class="${record.isFavorite ? 'active' : ''}" onclick="toggleFavorite('${record.id}'); updateModalFavoriteButton('${record.id}')"
                     id="modalFavoriteBtn_${record.id}"
                     style="background: ${record.isFavorite ? 'var(--primary-gold)' : 'transparent'}; color: ${record.isFavorite ? 'var(--dark-red)' : 'var(--primary-gold)'}; border: 2px solid var(--primary-gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
                 ${record.isFavorite ? '⭐ ' : '☆ '}${record.isFavorite ? (currentLanguage === 'zh' ? '已收藏' : 'Favorited') : (currentLanguage === 'zh' ? '加入收藏' : 'Add to Favorites')}
             </button>
-            <button onclick="shareRecord('${record.id}')" 
+            <button class="record-detail-share" onclick="shareRecord('${record.id}')"
                     style="background: transparent; color: var(--primary-gold); border: 2px solid var(--primary-gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
                 📤 ${currentLanguage === 'zh' ? '分享' : 'Share'}
             </button>
-            <button onclick="if(confirm('${currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?'}')) { deleteRecord('${record.id}', true); closeRecordModal(); }"
+            <button class="record-detail-delete" onclick="if(confirm('${currentLanguage === 'zh' ? '確定要刪除這條記錄嗎？' : 'Are you sure you want to delete this record?'}')) { deleteRecord('${record.id}', true); closeRecordModal(); }"
                     style="background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cinzel', serif; font-weight: bold; transition: all 0.3s ease;">
                 🗑️ ${currentLanguage === 'zh' ? '刪除' : 'Delete'}
             </button>
@@ -3658,6 +3665,7 @@ function updateModalFavoriteButton(recordId) {
         // 更新樣式
         btn.style.background = record.isFavorite ? 'var(--primary-gold)' : 'transparent';
         btn.style.color = record.isFavorite ? 'var(--dark-red)' : 'var(--primary-gold)';
+        btn.classList.toggle('active', record.isFavorite);
         btn.innerHTML = `${record.isFavorite ? '⭐ ' : '☆ '}${record.isFavorite ? (currentLanguage === 'zh' ? '已收藏' : 'Favorited') : (currentLanguage === 'zh' ? '加入收藏' : 'Add to Favorites')}`;
         
         // 短暫的視覺強調
