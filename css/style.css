@@ -690,6 +690,15 @@ body {
     overflow: hidden;
 }
 
+.card-back.lenormand-card-back {
+    background: #e7ddcf url('../images/lenormand/card-back.jpg') center / cover no-repeat;
+}
+
+.card-back.lenormand-card-back::before,
+.card-back.lenormand-card-back::after {
+    display: none;
+}
+
 .card-back::before {
     content: '';
     position: absolute;
@@ -3857,6 +3866,7 @@ body {
 }
 
 .lenormand-foundation[hidden],
+.spread-options[hidden],
 .spread-card[hidden],
 #confirmSpreadBtn[hidden] { display: none !important; }
 .lenormand-foundation-symbol { color: #c9a55c; font-size: 3rem; }

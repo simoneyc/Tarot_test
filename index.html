@@ -8,7 +8,7 @@
     <!-- Favicon - 使用 SVG icon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23d4af37;stop-opacity:1' /><stop offset='100%' style='stop-color:%238b0000;stop-opacity:1' /></linearGradient></defs><rect width='60' height='85' x='20' y='7' rx='8' fill='url(%23grad)' stroke='%23d4af37' stroke-width='2'/><circle cx='50' cy='30' r='8' fill='none' stroke='%23ffffff' stroke-width='2'/><path d='M35 45 L50 60 L65 45' fill='none' stroke='%23ffffff' stroke-width='2'/><circle cx='50' cy='75' r='4' fill='%23ffffff'/></svg>">
     
-    <link rel="stylesheet" href="css/style.css?v=20261005-lenormand-foundation">
+    <link rel="stylesheet" href="css/style.css?v=20261005-lenormand-readings">
 </head>
 <body>
     <div class="network-status" id="networkStatus" role="status" aria-live="polite" hidden></div>
@@ -231,11 +231,25 @@
                     </div>
                 </div>
 
-                <div id="lenormandFoundation" class="lenormand-foundation" hidden>
-                    <div class="lenormand-foundation-symbol" aria-hidden="true">☘</div>
-                    <h3 data-zh="38 張雷諾曼牌組已準備好" data-en="The 38-card Lenormand deck is ready">38 張雷諾曼牌組已準備好</h3>
-                    <p data-zh="以傳統小雷諾曼為基礎，加入兩張男士與兩張女士人物牌，支援更多元的關係與人物脈絡。下一階段會加入單張、三張線性牌陣與九宮格解讀。" data-en="Built on Petit Lenormand with two Man and two Lady cards for more inclusive relationships and character dynamics. The next stage will add one-card, three-card line, and nine-card portrait readings.">以傳統小雷諾曼為基礎，加入兩張男士與兩張女士人物牌，支援更多元的關係與人物脈絡。下一階段會加入單張、三張線性牌陣與九宮格解讀。</p>
-                    <code>images/lenormand/01-rider.jpg … 36-cross.jpg</code>
+                <div id="lenormandSpreadOptions" class="spread-options" hidden>
+                    <div class="spread-card" data-mode="lenormand_single">
+                        <div class="spread-icon">☘</div>
+                        <h3 data-zh="單張訊息" data-en="One-Card Message">單張訊息</h3>
+                        <p data-zh="以一張雷諾曼牌聚焦當下最具體的訊息、人物或事件線索。" data-en="One Lenormand card highlights the most concrete message, person, or event to notice now.">以一張雷諾曼牌聚焦當下最具體的訊息、人物或事件線索。</p>
+                        <div class="spread-detail" data-zh="核心訊息" data-en="Core Message">核心訊息</div>
+                    </div>
+                    <div class="spread-card active" data-mode="lenormand_three">
+                        <div class="spread-icon">☘ ☘ ☘</div>
+                        <h3 data-zh="三張線性牌陣" data-en="Three-Card Line">三張線性牌陣</h3>
+                        <p data-zh="由左至右連讀三張牌，觀察情境、發展與可能結果之間的組合語句。" data-en="Read three cards from left to right as a combined sentence of situation, development, and likely outcome.">由左至右連讀三張牌，觀察情境、發展與可能結果之間的組合語句。</p>
+                        <div class="spread-detail" data-zh="情境 - 發展 - 可能結果" data-en="Situation - Development - Likely Outcome">情境 - 發展 - 可能結果</div>
+                    </div>
+                    <div class="spread-card" data-mode="lenormand_nine">
+                        <div class="spread-icon">▦</div>
+                        <h3 data-zh="九宮格牌陣" data-en="Nine-Card Portrait">九宮格牌陣</h3>
+                        <p data-zh="以 3×3 牌陣觀察核心牌、四周影響，以及橫列、直列與對角線的完整局勢。" data-en="A 3×3 portrait read through its center, surrounding influences, rows, columns, and diagonals.">以 3×3 牌陣觀察核心牌、四周影響，以及橫列、直列與對角線的完整局勢。</p>
+                        <div class="spread-detail" data-zh="3 × 3 整體局勢" data-en="3 × 3 Situation Portrait">3 × 3 整體局勢</div>
+                    </div>
                 </div>
                 
                 <div style="text-align: center; margin-top: 40px;">
@@ -513,6 +527,6 @@
         </div>
     </div>
 
-    <script src="js/script.js?v=20261005-lenormand-foundation"></script>
+    <script src="js/script.js?v=20261005-lenormand-readings"></script>
 </body>
 </html>
