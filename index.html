@@ -446,13 +446,29 @@
 
                     <!-- 過濾器區域 -->
                     <div class="filters-section">
+                        <select class="filter-dropdown" id="systemFilter">
+                            <option value="" data-zh="所有占卜系統" data-en="All Systems">所有占卜系統</option>
+                            <option value="tarot" data-zh="塔羅" data-en="Tarot">塔羅</option>
+                            <option value="lenormand" data-zh="雷諾曼" data-en="Lenormand">雷諾曼</option>
+                        </select>
+
                         <select class="filter-dropdown" id="modeFilter">
-                            <option value="" data-zh="所有模式" data-en="All Modes">所有模式</option>
-                            <option value="single" data-zh="單張指引" data-en="Single Guidance">單張指引</option>
-                            <option value="three" data-zh="三張牌占卜" data-en="Three Cards">三張牌占卜</option>
-                            <option value="core" data-zh="四張核心" data-en="Four Core">四張核心</option>
-                            <option value="choice" data-zh="二選一" data-en="Two Choice">二選一</option>
-                            <option value="love" data-zh="感情萬用" data-en="Love Universal">感情萬用</option>
+                            <option value="" data-zh="所有牌陣" data-en="All Spreads">所有牌陣</option>
+                            <option value="single" data-system="tarot" data-zh="塔羅・單張指引" data-en="Tarot · Single Guidance">塔羅・單張指引</option>
+                            <option value="three" data-system="tarot" data-zh="塔羅・三張牌" data-en="Tarot · Three Cards">塔羅・三張牌</option>
+                            <option value="core" data-system="tarot" data-zh="塔羅・四張核心" data-en="Tarot · Four Core">塔羅・四張核心</option>
+                            <option value="choice" data-system="tarot" data-zh="塔羅・二選一" data-en="Tarot · Two Choices">塔羅・二選一</option>
+                            <option value="love" data-system="tarot" data-zh="塔羅・感情萬用" data-en="Tarot · Love Universal">塔羅・感情萬用</option>
+                            <option value="insight" data-system="tarot" data-zh="塔羅・釐清現況" data-en="Tarot · Situation Clarity">塔羅・釐清現況</option>
+                            <option value="career" data-system="tarot" data-zh="塔羅・職涯發展" data-en="Tarot · Career Path">塔羅・職涯發展</option>
+                            <option value="growth" data-system="tarot" data-zh="塔羅・身心靈" data-en="Tarot · Mind Body Spirit">塔羅・身心靈</option>
+                            <option value="yesno" data-system="tarot" data-zh="塔羅・Yes or No" data-en="Tarot · Yes or No">塔羅・Yes or No</option>
+                            <option value="daily" data-system="tarot" data-zh="塔羅・每日之牌" data-en="Tarot · Daily Card">塔羅・每日之牌</option>
+                            <option value="horseshoe" data-system="tarot" data-zh="塔羅・馬蹄鐵" data-en="Tarot · Horseshoe">塔羅・馬蹄鐵</option>
+                            <option value="celtic" data-system="tarot" data-zh="塔羅・凱爾特十字" data-en="Tarot · Celtic Cross">塔羅・凱爾特十字</option>
+                            <option value="lenormand_single" data-system="lenormand" data-zh="雷諾曼・單張訊息" data-en="Lenormand · One Card">雷諾曼・單張訊息</option>
+                            <option value="lenormand_three" data-system="lenormand" data-zh="雷諾曼・三張線性" data-en="Lenormand · Three-Card Line">雷諾曼・三張線性</option>
+                            <option value="lenormand_nine" data-system="lenormand" data-zh="雷諾曼・九宮格" data-en="Lenormand · Nine-Card Portrait">雷諾曼・九宮格</option>
                         </select>
 
                         <select class="filter-dropdown" id="typeFilter">
@@ -527,6 +543,6 @@
         </div>
     </div>
 
-    <script src="js/script.js?v=20261005-lenormand-readings"></script>
+    <script src="js/script.js?v=20261005-lenormand-history-filters"></script>
 </body>
 </html>

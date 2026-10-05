@@ -823,8 +823,8 @@ const lenormandCards = Object.freeze([
     [23, '老鼠', 'Mice', 'mice'], [24, '心', 'Heart', 'heart'],
     [25, '戒指', 'Ring', 'ring'], [26, '書', 'Book', 'book'],
     [27, '信', 'Letter', 'letter'],
-    [28, '男士 A', 'Man A', 'man-a', 'a'], [28, '男士 B', 'Man B', 'man-b', 'b'],
-    [29, '女士 A', 'Lady A', 'lady-a', 'a'], [29, '女士 B', 'Lady B', 'lady-b', 'b'],
+    [28, '男士', 'Man', 'man-a', 'a'], [28, '男士', 'Man', 'man-b', 'b'],
+    [29, '女士', 'Lady', 'lady-a', 'a'], [29, '女士', 'Lady', 'lady-b', 'b'],
     [30, '百合', 'Lilies', 'lilies'],
     [31, '太陽', 'Sun', 'sun'], [32, '月亮', 'Moon', 'moon'],
     [33, '鑰匙', 'Key', 'key'], [34, '魚', 'Fish', 'fish'],
@@ -1428,6 +1428,7 @@ function generateCards() {
         cardElement.dataset.cardImage = cardData.image || '';
         cardElement.dataset.cardId = cardData.id || '';
         cardElement.dataset.cardNumber = cardData.number || '';
+        cardElement.dataset.cardVariant = cardData.variant || '';
         cardElement.tabIndex = 0;
         cardElement.setAttribute('role', 'button');
         cardElement.setAttribute('aria-pressed', 'false');
@@ -1574,18 +1575,22 @@ async function selectCard(cardElement) {
     cardElement.classList.add("flipped", "selected");
     cardElement.classList.remove('selecting');
     cardElement.setAttribute('aria-pressed', 'true');
-    cardElement.setAttribute('aria-label', `${cardName}，${orientation === 'upright' ? t('upright') : t('reversed')}，${currentLanguage === 'zh' ? '再按一次可取消' : 'press again to deselect'}`);
+    cardElement.setAttribute('aria-label', isLenormand
+        ? `${cardName}，${currentLanguage === 'zh' ? '再按一次可取消' : 'press again to deselect'}`
+        : `${cardName}，${orientation === 'upright' ? t('upright') : t('reversed')}，${currentLanguage === 'zh' ? '再按一次可取消' : 'press again to deselect'}`);
     
     selectedCards.push({
         element: cardElement,
         id: cardElement.dataset.cardId || null,
         number: cardElement.dataset.cardNumber ? Number(cardElement.dataset.cardNumber) : null,
+        variant: cardElement.dataset.cardVariant || null,
         name: cardName,
         orientation: orientation,
         symbol: cardSymbol,
         image: imagePath,
         system: currentDivinationSystem
     });
+    normalizeSelectedLenormandPersonNames();
     updateSelectedCardPositions();
     
     updateProgress();
@@ -2536,6 +2541,10 @@ class DivinationManager {
      */
     applyFilters(records, filters) {
         return records.filter(record => {
+            // 占卜系統過濾；舊記錄沒有 system 時，以牌陣名稱向下相容判斷
+            const recordSystem = record.system || (record.mode?.startsWith('lenormand_') ? 'lenormand' : 'tarot');
+            if (filters.system && recordSystem !== filters.system) return false;
+
             // 占卜模式過濾
             if (filters.mode && record.mode !== filters.mode) return false;
             
@@ -2773,15 +2782,33 @@ class HistoryUI {
         }
 
         // 過濾器事件
-        ['modeFilter', 'typeFilter', 'favFilter'].forEach(filterId => {
+        ['systemFilter', 'modeFilter', 'typeFilter', 'favFilter'].forEach(filterId => {
             const filterElement = document.getElementById(filterId);
             if (filterElement) {
                 filterElement.addEventListener('change', () => {
+                    if (filterId === 'systemFilter') this.syncModeFilterOptions();
                     this.updateFilters();
                     this.loadRecords();
                 });
             }
         });
+        this.syncModeFilterOptions();
+    }
+
+    syncModeFilterOptions() {
+        const selectedSystem = document.getElementById('systemFilter')?.value || '';
+        const modeFilter = document.getElementById('modeFilter');
+        if (!modeFilter) return;
+
+        Array.from(modeFilter.options).forEach(option => {
+            const optionSystem = option.dataset.system;
+            const shouldShow = !optionSystem || !selectedSystem || optionSystem === selectedSystem;
+            option.hidden = !shouldShow;
+            option.disabled = !shouldShow;
+        });
+
+        const selectedOption = modeFilter.selectedOptions[0];
+        if (selectedOption?.disabled) modeFilter.value = '';
     }
 
     /**
@@ -2789,6 +2816,7 @@ class HistoryUI {
      */
     updateFilters() {
         this.currentFilters = {
+            system: document.getElementById('systemFilter')?.value || '',
             mode: document.getElementById('modeFilter')?.value || '',
             questionType: document.getElementById('typeFilter')?.value || '',
             favoritesOnly: document.getElementById('favFilter')?.value === 'favorites'
@@ -4392,14 +4420,32 @@ function setButtonLoading(button, isLoading, originalText = '') {
     }
 }
 
+function normalizeSelectedLenormandPersonNames() {
+    if (currentDivinationSystem !== 'lenormand') return;
+
+    [28, 29].forEach(number => {
+        const matchingCards = selectedCards.filter(card => card.number === number);
+        const distinguishVariants = matchingCards.length > 1;
+        matchingCards.forEach(card => {
+            const zhName = number === 28 ? '男士' : '女士';
+            const enName = number === 28 ? 'Man' : 'Lady';
+            const variant = distinguishVariants && card.variant ? ` ${card.variant.toUpperCase()}` : '';
+            card.name = `${number}. ${zhName}${variant} ${enName}${variant}`;
+        });
+    });
+}
+
 function deselectCard(cardElement) {
     const selectedIndex = selectedCards.findIndex(card => card.element === cardElement);
     if (selectedIndex === -1) return;
 
     selectedCards.splice(selectedIndex, 1);
+    normalizeSelectedLenormandPersonNames();
     cardElement.classList.remove('selected', 'flipped', 'reversed', 'selecting');
     cardElement.setAttribute('aria-pressed', 'false');
-    cardElement.setAttribute('aria-label', currentLanguage === 'zh' ? '選擇一張覆蓋的塔羅牌' : 'Select a face-down tarot card');
+    cardElement.setAttribute('aria-label', currentLanguage === 'zh'
+        ? `選擇一張覆蓋的${currentDivinationSystem === 'lenormand' ? '雷諾曼' : '塔羅'}牌`
+        : `Select a face-down ${currentDivinationSystem === 'lenormand' ? 'Lenormand' : 'tarot'} card`);
     cardElement.querySelector('.card-front').innerHTML = `
         <div style="text-align: center;">
             <div style="font-size: 1.8rem; margin-bottom: 8px;">${cardElement.dataset.cardSymbol}</div>
