@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Nocturna 夜諭</title>
+  <desc id="desc">一彎金色月牙環抱著神諭之眼</desc>
+  <defs>
+    <linearGradient id="moonGold" x1="18" y1="20" x2="100" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f2dda5"/>
+      <stop offset="0.48" stop-color="#d0a85b"/>
+      <stop offset="1" stop-color="#8d6730"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="50%" cy="42%" r="62%">
+      <stop stop-color="#f8e8bb"/>
+      <stop offset="0.45" stop-color="#c9a25a"/>
+      <stop offset="1" stop-color="#6e4b23"/>
+    </radialGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3.2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <mask id="crescentMask">
+      <rect width="128" height="128" fill="black"/>
+      <circle cx="53" cy="64" r="43" fill="white"/>
+      <circle cx="70" cy="50" r="42" fill="black"/>
+    </mask>
+  </defs>
+
+  <circle cx="64" cy="64" r="55" fill="none" stroke="#c9a55c" stroke-opacity="0.2"/>
+  <circle cx="53" cy="64" r="43" fill="url(#moonGold)" mask="url(#crescentMask)" filter="url(#softGlow)"/>
+
+  <path d="M38 66C48 51 61 45 75 47c12 1 23 8 31 19-9 12-20 18-33 19-14 0-26-7-35-19Z"
+        fill="#111124" stroke="url(#moonGold)" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="72" cy="66" r="13" fill="url(#iris)" stroke="#edda9f" stroke-width="1.5"/>
+  <circle cx="72" cy="66" r="5.5" fill="#111124"/>
+  <path d="M72 55.5 74.4 63.6 82.5 66 74.4 68.4 72 76.5 69.6 68.4 61.5 66 69.6 63.6Z" fill="#fff1c4"/>
+
+  <path d="M96 31 98.2 37.8 105 40 98.2 42.2 96 49 93.8 42.2 87 40 93.8 37.8Z" fill="#d5b46d"/>
+  <circle cx="108" cy="57" r="2.2" fill="#e9cf91"/>
+  <circle cx="91" cy="95" r="2" fill="#b88c47"/>
+</svg>

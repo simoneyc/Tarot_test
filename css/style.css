@@ -1,5 +1,5 @@
 /* =================================
-   TarotVision - 重構版樣式表
+   Nocturna｜夜諭 - 網站樣式表
    版本: 2.1
    重構內容: 程式碼整理、選擇器優化、媒體查詢統一
    ================================= */
@@ -164,7 +164,7 @@ body {
     justify-content: center;
 }
 
-.navbar-logo svg {
+.navbar-logo :is(svg, img) {
     filter: drop-shadow(0 2px 8px var(--gold-alpha-60));
     transition: var(--transition-default);
 }
@@ -1947,7 +1947,7 @@ body {
         box-shadow: 0 8px 25px rgba(201, 169, 97, 0.3);
     }
     
-    [data-theme="light"] .navbar-brand:hover .navbar-logo svg {
+    [data-theme="light"] .navbar-brand:hover .navbar-logo :is(svg, img) {
         filter: drop-shadow(0 4px 12px rgba(201, 169, 97, 0.6));
     }
     
@@ -2159,7 +2159,7 @@ body {
         background: var(--black-alpha-60);
     }
     
-    .navbar-brand:hover .navbar-logo svg {
+    .navbar-brand:hover .navbar-logo :is(svg, img) {
         transform: scale(1.1) rotate(5deg);
         filter: drop-shadow(0 4px 12px rgba(212, 175, 55, 0.8));
     }
@@ -2311,7 +2311,7 @@ body {
         padding: 8px 12px;
     }
     
-    .navbar-logo svg {
+    .navbar-logo :is(svg, img) {
         width: 35px;
         height: 35px;
     }
@@ -2447,7 +2447,7 @@ body {
         padding: 6px var(--spacing-sm);
     }
     
-    .navbar-logo svg {
+    .navbar-logo :is(svg, img) {
         width: 30px;
         height: 30px;
     }
@@ -2677,7 +2677,7 @@ body {
     backdrop-filter: none;
 }
 
-.navbar-logo svg { width: 34px; height: 34px; filter: drop-shadow(0 3px 8px rgba(201, 165, 92, 0.28)); }
+.navbar-logo :is(svg, img) { width: 34px; height: 34px; filter: drop-shadow(0 3px 8px rgba(201, 165, 92, 0.28)); }
 .navbar-name {
     color: #e4ca8d;
     font-family: var(--font-title);
@@ -2854,7 +2854,7 @@ body {
 
 @media (max-width: 600px) {
     .navbar-brand { gap: 8px; padding: 4px; }
-    .navbar-logo svg { width: 30px; height: 30px; }
+    .navbar-logo :is(svg, img) { width: 30px; height: 30px; }
     .navbar-name { font-size: 0.95rem; }
     .navbar-subtitle { display: none; }
     .navbar-controls { gap: 3px; }
