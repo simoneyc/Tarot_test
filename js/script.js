@@ -1080,7 +1080,7 @@ function switchLanguage(lang) {
     });
     
     // 更新頁面標題
-    document.title = lang === 'zh' ? 'TarotVision - 塔羅視界' : 'TarotVision - Mystical Insights';
+    document.title = lang === 'zh' ? 'Nocturna｜夜諭' : 'Nocturna | Oracle of the Night';
     document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
     
     // 更新所有具有多語言屬性的元素
@@ -1122,7 +1122,7 @@ function updateLanguageElements() {
 
 // 替換原有的 DOMContentLoaded 事件監聽器
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 TarotVision 正在初始化...');
+    console.log('🚀 Nocturna 夜諭正在初始化...');
     
     // 初始化主題（新增這行）
     initializeTheme();
@@ -1157,7 +1157,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }, 1000);
     
-    console.log('✅ TarotVision 初始化完成');
+    console.log('✅ Nocturna 夜諭初始化完成');
 });
 
 // 修改現有函數，添加主題檢查
@@ -2115,7 +2115,7 @@ function restartDivination() {
     currentQuestion = "";
     currentDivinationSystem = "tarot";
     currentMode = "three";
-    document.title = currentLanguage === 'zh' ? 'TarotVision - 塔羅視界' : 'TarotVision - Mystical Insights';
+    document.title = currentLanguage === 'zh' ? 'Nocturna｜夜諭' : 'Nocturna | Oracle of the Night';
     
     // 清理表單
     document.getElementById('questionInput').value = '';
@@ -2190,7 +2190,7 @@ function toggleLanguage() {
     }, 150);
     
     // 更新頁面標題
-    document.title = newLang === 'zh' ? 'TarotVision - 塔羅視界' : 'TarotVision - Mystical Insights';
+    document.title = newLang === 'zh' ? 'Nocturna｜夜諭' : 'Nocturna | Oracle of the Night';
     document.documentElement.lang = newLang === 'zh' ? 'zh-TW' : 'en';
     
     // 更新所有具有多語言屬性的元素
@@ -2284,7 +2284,7 @@ class PerformanceMonitor {
     // 在控制台顯示性能報告
     showReport() {
         const report = this.getPerformanceReport();
-        console.group('📊 TarotVision 性能報告');
+        console.group('📊 Nocturna 性能報告');
         console.log(`頁面總載入時間: ${report.totalPageLoadTime.toFixed(2)}ms`);
         console.log(`平均圖片載入時間: ${report.averageImageLoadTime.toFixed(2)}ms`);
         console.log(`平均選卡響應時間: ${report.averageCardSelectionTime.toFixed(2)}ms`);
@@ -3424,7 +3424,7 @@ async function createRecordShareImage(record) {
     context.textAlign = 'center';
     context.fillStyle = '#e6cd91';
     context.font = '600 42px Philosopher, "Noto Sans TC", serif';
-    context.fillText('TAROTVISION', width / 2, 128);
+    context.fillText('NOCTURNA  ·  夜諭', width / 2, 128);
     context.fillStyle = '#92886f';
     context.font = '500 18px "Noto Sans TC", sans-serif';
     context.fillText(currentLanguage === 'zh' ? '一份來自牌卡的指引' : 'A message from the cards', width / 2, 164);
@@ -3546,7 +3546,7 @@ async function shareRecord(recordId) {
     try {
         const canvas = await createRecordShareImage(record);
         const date = new Date(record.timestamp).toISOString().slice(0, 10);
-        await downloadCanvasPng(canvas, `tarotvision-${date}-${record.id}.png`);
+        await downloadCanvasPng(canvas, `nocturna-${date}-${record.id}.png`);
         showNotification(currentLanguage === 'zh' ? '分享圖片已下載' : 'Share image downloaded', 'success');
     } catch (error) {
         console.error('Share image export failed:', error);
@@ -3596,12 +3596,12 @@ function exportHistoryRecords() {
         showNotification(currentLanguage === 'zh' ? '目前沒有可匯出的記錄' : 'There are no records to export', 'warning');
         return;
     }
-    const backup = { app: 'TarotVision', version: 1, exportedAt: new Date().toISOString(), records };
+    const backup = { app: 'Nocturna', version: 1, exportedAt: new Date().toISOString(), records };
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `tarotvision-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `nocturna-backup-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
     showNotification(currentLanguage === 'zh' ? `已匯出 ${records.length} 筆記錄` : `Exported ${records.length} records`, 'success');
@@ -3613,7 +3613,7 @@ async function importHistoryRecords(event) {
     if (!file) return;
     try {
         const data = JSON.parse(await file.text());
-        if (data.app !== 'TarotVision' || !Array.isArray(data.records)) throw new Error('INVALID_BACKUP');
+        if (!['Nocturna', 'TarotVision'].includes(data.app) || !Array.isArray(data.records)) throw new Error('INVALID_BACKUP');
         const validRecords = data.records
             .filter(record => record && typeof record.id === 'string' && typeof record.question === 'string' && Array.isArray(record.cards))
             .map(record => ({
@@ -3653,7 +3653,7 @@ async function importHistoryRecords(event) {
         updateRecordsBadge();
         showNotification(currentLanguage === 'zh' ? `已匯入備份，目前共有 ${records.length} 筆記錄` : `Backup imported. ${records.length} records available`, 'success');
     } catch (error) {
-        showNotification(currentLanguage === 'zh' ? '無法匯入：檔案不是有效的 TarotVision 備份' : 'Import failed: this is not a valid TarotVision backup', 'error');
+        showNotification(currentLanguage === 'zh' ? '無法匯入：檔案不是有效的 Nocturna 夜諭備份' : 'Import failed: this is not a valid Nocturna backup', 'error');
     } finally {
         input.value = '';
     }
@@ -4639,7 +4639,7 @@ async function displayFinalResults(interpretation) {
             <button class="btn" onclick="showHistoryPage()">${currentLanguage === 'zh' ? '查看占卜記錄' : 'View history'}</button>
         </div>`;
 
-    document.title = currentLanguage === 'zh' ? '解讀完成｜TarotVision' : 'Reading ready | TarotVision';
+    document.title = currentLanguage === 'zh' ? '解讀完成｜Nocturna 夜諭' : 'Reading ready | Nocturna';
 }
 
 async function copyTextToClipboard(text) {
