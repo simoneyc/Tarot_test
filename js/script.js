@@ -764,10 +764,46 @@ const tarotCards = [
     { name: "錢幣國王", symbol: "🏆" }
 ];
 
+// 雷諾曼使用獨立卡背，避免與塔羅牌組互相影響。
+const LENORMAND_CARD_BACK_IMAGE = './images/lenormand/card-back.jpg';
+
+// 38 張擴充小雷諾曼：保留兩張男士與兩張女士人物牌，以支援多元關係脈絡。
+// 雷諾曼以牌與牌之間的組合連讀，不使用正逆位。
+const lenormandCards = Object.freeze([
+    [1, '騎士', 'Rider', 'rider'], [2, '幸運草', 'Clover', 'clover'],
+    [3, '船', 'Ship', 'ship'], [4, '房屋', 'House', 'house'],
+    [5, '樹', 'Tree', 'tree'], [6, '雲', 'Clouds', 'clouds'],
+    [7, '蛇', 'Snake', 'snake'], [8, '棺材', 'Coffin', 'coffin'],
+    [9, '花束', 'Bouquet', 'bouquet'], [10, '鐮刀', 'Scythe', 'scythe'],
+    [11, '鞭子', 'Whip', 'whip'], [12, '鳥', 'Birds', 'birds'],
+    [13, '孩子', 'Child', 'child'], [14, '狐狸', 'Fox', 'fox'],
+    [15, '熊', 'Bear', 'bear'], [16, '星星', 'Stars', 'stars'],
+    [17, '鸛鳥', 'Stork', 'stork'], [18, '狗', 'Dog', 'dog'],
+    [19, '高塔', 'Tower', 'tower'], [20, '花園', 'Garden', 'garden'],
+    [21, '山', 'Mountain', 'mountain'], [22, '岔路', 'Crossroads', 'crossroads'],
+    [23, '老鼠', 'Mice', 'mice'], [24, '心', 'Heart', 'heart'],
+    [25, '戒指', 'Ring', 'ring'], [26, '書', 'Book', 'book'],
+    [27, '信', 'Letter', 'letter'],
+    [28, '男士 A', 'Man A', 'man-a', 'a'], [28, '男士 B', 'Man B', 'man-b', 'b'],
+    [29, '女士 A', 'Lady A', 'lady-a', 'a'], [29, '女士 B', 'Lady B', 'lady-b', 'b'],
+    [30, '百合', 'Lilies', 'lilies'],
+    [31, '太陽', 'Sun', 'sun'], [32, '月亮', 'Moon', 'moon'],
+    [33, '鑰匙', 'Key', 'key'], [34, '魚', 'Fish', 'fish'],
+    [35, '船錨', 'Anchor', 'anchor'], [36, '十字架', 'Cross', 'cross']
+].map(([number, zh, en, slug, variant = null]) => Object.freeze({
+    id: String(number).padStart(2, '0') + '-' + slug,
+    number,
+    name: { zh, en },
+    slug,
+    variant,
+    image: './images/lenormand/' + String(number).padStart(2, '0') + '-' + slug + '.jpg'
+})));
+
 // 全局變量
 let selectedCards = [];
 let currentQuestion = "";
 let currentMode = "three";
+let currentDivinationSystem = "tarot";
 let focusGuideTimer = null;
 let readingAbortController = null;
 let readingElapsedTimer = null;
@@ -1144,9 +1180,43 @@ function setupSpreadListeners() {
     });
 }
 
-// 開始神秘之旅
-function startDivination() {
+function selectDivinationSystem(system) {
+    if (!['tarot', 'lenormand'].includes(system)) return;
+    currentDivinationSystem = system;
+
+    const isLenormand = system === 'lenormand';
+    const title = document.getElementById('spreadSelectionTitle');
+    const intro = document.getElementById('spreadSelectionIntro');
+    const foundation = document.getElementById('lenormandFoundation');
+    const confirmButton = document.getElementById('confirmSpreadBtn');
+
+    document.querySelectorAll('.spread-card').forEach(card => {
+        card.hidden = isLenormand;
+    });
+    if (foundation) foundation.hidden = !isLenormand;
+    if (confirmButton) confirmButton.hidden = isLenormand;
+
+    if (title) {
+        title.dataset.zh = isLenormand ? '雷諾曼占卜' : '選擇你的命運牌陣';
+        title.dataset.en = isLenormand ? 'Lenormand Readings' : 'Choose Your Destiny Spread';
+        title.textContent = title.dataset[currentLanguage];
+    }
+    if (intro) {
+        intro.dataset.zh = isLenormand
+            ? '雷諾曼著重具體事件與牌卡之間的組合訊息'
+            : '每種牌陣都有其獨特的力量與智慧，請選擇最能觸動你內心的占卜方式';
+        intro.dataset.en = isLenormand
+            ? 'Lenormand focuses on concrete events and messages formed by card combinations'
+            : 'Each spread has its unique power and wisdom. Choose the method that resonates with you.';
+        intro.textContent = intro.dataset[currentLanguage];
+    }
+
     showStep(2);
+}
+
+// 保留既有入口相容性。
+function startDivination() {
+    selectDivinationSystem('tarot');
 }
 
 // 確認牌陣選擇
