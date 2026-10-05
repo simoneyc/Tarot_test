@@ -1,5 +1,7 @@
 // API 端點配置
-const API_BASE_URL = 'https://tarot-backend-n9oa.onrender.com';
+const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? 'http://localhost:3000'
+    : 'https://tarot-backend-n9oa.onrender.com';
 
 window.showPerformanceReport = () => performanceMonitor.showReport();
 
@@ -370,6 +372,48 @@ const spreadInfo = {
         cards: 10,
         positions: { zh: ["當下現況", "眼前挑戰", "過去影響", "近期未來", "目標與可能性", "潛意識根源", "你的立場與建議", "外在影響", "希望與恐懼", "可能結果"], en: ["Present", "Challenge", "Past", "Near Future", "Goal and Possibility", "Subconscious Foundation", "Your Position and Advice", "External Influences", "Hopes and Fears", "Likely Outcome"] },
         title: { zh: "請選擇十張凱爾特十字的牌", en: "Please choose ten cards for the Celtic Cross" }
+    },
+    lenormand_single: {
+        name: { zh: "雷諾曼單張訊息", en: "Lenormand One-Card Message" },
+        description: { zh: "以一張牌指出當下最具體的核心訊息、人物或事件線索。", en: "One card reveals the most concrete message, person, or event to notice now." },
+        cards: 1,
+        positions: { zh: ["核心訊息"], en: ["Core Message"] },
+        title: { zh: "請選擇一張雷諾曼牌", en: "Please choose one Lenormand card" }
+    },
+    lenormand_three: {
+        name: { zh: "雷諾曼三張線性牌陣", en: "Lenormand Three-Card Line" },
+        description: { zh: "由左至右把三張牌連成一句話，觀察情境、發展與可能結果。", en: "Read three cards from left to right as a sentence describing the situation, development, and likely outcome." },
+        cards: 3,
+        positions: { zh: ["情境", "發展", "可能結果"], en: ["Situation", "Development", "Likely Outcome"] },
+        title: { zh: "請選擇三張雷諾曼牌", en: "Please choose three Lenormand cards" }
+    },
+    lenormand_yesno: {
+        name: { zh: "雷諾曼 Yes or No", en: "Lenormand Yes or No" },
+        description: { zh: "綜合三張牌的支持、阻礙與答案傾向，提供清楚但不武斷的判斷。", en: "Combine support, obstacles, and answer tendency for a clear but non-deterministic response." },
+        cards: 3,
+        positions: { zh: ["支持因素", "阻礙因素", "答案傾向"], en: ["Supporting Factors", "Obstacles", "Answer Tendency"] },
+        title: { zh: "請選擇三張雷諾曼 Yes or No 牌", en: "Please choose three Lenormand Yes or No cards" }
+    },
+    lenormand_five: {
+        name: { zh: "雷諾曼五張線性牌陣", en: "Lenormand Five-Card Line" },
+        description: { zh: "以中央牌為焦點，由左至右連讀背景、形成中的影響、核心、發展與結果。", en: "Read left to right with the center card as the focus: background, emerging influence, focus, development, and outcome." },
+        cards: 5,
+        positions: { zh: ["背景", "形成中的影響", "核心焦點", "後續發展", "可能結果"], en: ["Background", "Emerging Influence", "Central Focus", "Development", "Likely Outcome"] },
+        title: { zh: "請選擇五張雷諾曼牌", en: "Please choose five Lenormand cards" }
+    },
+    lenormand_seven: {
+        name: { zh: "雷諾曼七張線性牌陣", en: "Lenormand Seven-Card Line" },
+        description: { zh: "以第四張為現在，從左至右追蹤較完整的事件時間線與發展脈絡。", en: "Use card four as the present and read left to right as an extended timeline of events." },
+        cards: 7,
+        positions: { zh: ["較早影響", "過去脈絡", "近期影響", "當下核心", "近期發展", "後續走向", "可能結果"], en: ["Earlier Influence", "Past Context", "Recent Influence", "Present Focus", "Near Development", "Later Direction", "Likely Outcome"] },
+        title: { zh: "請選擇七張雷諾曼牌", en: "Please choose seven Lenormand cards" }
+    },
+    lenormand_nine: {
+        name: { zh: "雷諾曼九宮格", en: "Lenormand Nine-Card Portrait" },
+        description: { zh: "以中央牌為核心，綜合周圍牌、橫列、直列與對角線解讀完整局勢。", en: "Read the center, surrounding cards, rows, columns, and diagonals as a complete situation portrait." },
+        cards: 9,
+        positions: { zh: ["左上", "正上", "右上", "左方", "核心", "右方", "左下", "正下", "右下"], en: ["Upper Left", "Above", "Upper Right", "Left", "Center", "Right", "Lower Left", "Below", "Lower Right"] },
+        title: { zh: "請選擇九張雷諾曼牌", en: "Please choose nine Lenormand cards" }
     }
 };
 
@@ -491,6 +535,30 @@ const questionExamples = {
     celtic: {
         zh: ['我該如何完整理解目前面對的複雜課題？', '這件事的表面情況與深層根源分別是什麼？', '哪些內在與外在力量正在影響我的處境？', '面對人生的這個轉折，我有哪些可能性與限制？', '這段重要關係目前的全貌與發展潛力是什麼？', '我要如何整合過去經驗，做出更成熟的下一步？'],
         en: ['How can I fully understand the complex issue I am facing?', 'What are the visible situation and deeper roots of this matter?', 'What internal and external forces are shaping my circumstances?', 'What possibilities and limitations surround this turning point?', 'What is the full picture and potential of this important relationship?', 'How can I integrate past experience into a wiser next step?']
+    },
+    lenormand_single: {
+        zh: ['今天最需要我留意的具體訊息是什麼？', '目前什麼人事物最值得我注意？', '這件事的核心線索是什麼？', '我現在需要看見哪個現實面向？', '今天可能出現什麼重要契機？', '對於目前狀況，牌卡要提醒我什麼？'],
+        en: ['What practical message should I notice today?', 'Who or what deserves my attention now?', 'What is the key clue in this matter?', 'What reality do I need to see clearly?', 'What important opportunity may appear today?', 'What should I notice about my current situation?']
+    },
+    lenormand_three: {
+        zh: ['這件事目前會如何發展？', '這段關係接下來可能出現什麼變化？', '這個工作機會的發展與結果可能是什麼？', '我採取這項行動後可能發生什麼？', '哪些因素正在共同影響這件事？', '關於這個問題，我需要掌握什麼具體訊息？'],
+        en: ['How is this situation likely to develop?', 'What changes may arise next in this relationship?', 'How might this work opportunity develop and conclude?', 'What may happen if I take this action?', 'Which factors are combining to shape this matter?', 'What practical information should I understand about this question?']
+    },
+    lenormand_yesno: {
+        zh: ['這件事目前是否傾向順利發展？', '現在採取這項行動是否合適？', '這個機會是否值得我繼續投入？', '目前的條件是否支持這項決定？', '這段關係是否有進一步發展的可能？', '這個計畫近期是否容易實現？'],
+        en: ['Is this situation currently likely to develop smoothly?', 'Is now a suitable time to take this action?', 'Is this opportunity worth pursuing?', 'Do current conditions support this decision?', 'Is this relationship likely to develop further?', 'Is this plan likely to materialize soon?']
+    },
+    lenormand_five: {
+        zh: ['這件事的背景、核心與後續結果是什麼？', '這段關係目前正如何形成與發展？', '這個工作機會的核心條件與結果傾向是什麼？', '我需要如何理解這件事的完整脈絡？', '哪些因素正把情勢推向目前的結果？', '這項計畫從現在到結果會如何演變？'],
+        en: ['What are the background, focus, and likely outcome of this matter?', 'How is this relationship taking shape and developing?', 'What are the central conditions and likely outcome of this work opportunity?', 'How should I understand the full context of this matter?', 'What factors are moving the situation toward its outcome?', 'How may this plan evolve from now to its result?']
+    },
+    lenormand_seven: {
+        zh: ['請呈現這件事從過去到未來的發展時間線。', '這段關係如何走到現在，接下來又會如何發展？', '我的職涯局勢在未來一段時間會如何演變？', '這個計畫的前因、現況與後續走向是什麼？', '哪些事件會依序影響這個問題的結果？', '這件事較完整的發展脈絡與結果傾向是什麼？'],
+        en: ['Show the timeline of this matter from past to future.', 'How did this relationship reach the present, and how may it develop next?', 'How may my career situation evolve over the coming period?', 'What are the causes, present state, and later direction of this plan?', 'Which events may influence the outcome in sequence?', 'What is the broader development and likely outcome of this matter?']
+    },
+    lenormand_nine: {
+        zh: ['請完整呈現這件事目前的局勢與發展脈絡。', '這段關係的核心、周圍影響與後續趨勢是什麼？', '我的職涯現況周圍有哪些機會與阻礙？', '這個計畫有哪些明顯與隱藏的影響？', '未來一段時間最需要留意哪些人事物？', '這個複雜局面中的各項因素如何互相影響？'],
+        en: ['Show me the full situation and how it is developing.', 'What are the core, surrounding influences, and direction of this relationship?', 'What opportunities and obstacles surround my career?', 'What visible and hidden influences surround this plan?', 'What people or events should I notice in the near future?', 'How are the factors in this complex situation affecting one another?']
     }
 };
 
@@ -595,6 +663,10 @@ function getTarotImagePath(cardName) {
         return './images/tarot/card-back.jpg';
     }
     return imagePath;
+}
+
+function getCardImagePath(card) {
+    return card?.image || getTarotImagePath(card?.name || '');
 }
 
 // 替換原有的 checkImageExists 函數
@@ -764,10 +836,46 @@ const tarotCards = [
     { name: "錢幣國王", symbol: "🏆" }
 ];
 
+// 雷諾曼使用獨立卡背，避免與塔羅牌組互相影響。
+const LENORMAND_CARD_BACK_IMAGE = './images/lenormand/card-back.jpg';
+
+// 38 張擴充小雷諾曼：保留兩張男士與兩張女士人物牌，以支援多元關係脈絡。
+// 雷諾曼以牌與牌之間的組合連讀，不使用正逆位。
+const lenormandCards = Object.freeze([
+    [1, '騎士', 'Rider', 'rider'], [2, '幸運草', 'Clover', 'clover'],
+    [3, '船', 'Ship', 'ship'], [4, '房屋', 'House', 'house'],
+    [5, '樹', 'Tree', 'tree'], [6, '雲', 'Clouds', 'clouds'],
+    [7, '蛇', 'Snake', 'snake'], [8, '棺材', 'Coffin', 'coffin'],
+    [9, '花束', 'Bouquet', 'bouquet'], [10, '鐮刀', 'Scythe', 'scythe'],
+    [11, '鞭子', 'Whip', 'whip'], [12, '鳥', 'Birds', 'birds'],
+    [13, '孩子', 'Child', 'child'], [14, '狐狸', 'Fox', 'fox'],
+    [15, '熊', 'Bear', 'bear'], [16, '星星', 'Stars', 'stars'],
+    [17, '鸛鳥', 'Stork', 'stork'], [18, '狗', 'Dog', 'dog'],
+    [19, '高塔', 'Tower', 'tower'], [20, '花園', 'Garden', 'garden'],
+    [21, '山', 'Mountain', 'mountain'], [22, '岔路', 'Crossroads', 'crossroads'],
+    [23, '老鼠', 'Mice', 'mice'], [24, '心', 'Heart', 'heart'],
+    [25, '戒指', 'Ring', 'ring'], [26, '書', 'Book', 'book'],
+    [27, '信', 'Letter', 'letter'],
+    [28, '男士', 'Man', 'man-a', 'a'], [28, '男士', 'Man', 'man-b', 'b'],
+    [29, '女士', 'Lady', 'lady-a', 'a'], [29, '女士', 'Lady', 'lady-b', 'b'],
+    [30, '百合', 'Lilies', 'lilies'],
+    [31, '太陽', 'Sun', 'sun'], [32, '月亮', 'Moon', 'moon'],
+    [33, '鑰匙', 'Key', 'key'], [34, '魚', 'Fish', 'fish'],
+    [35, '船錨', 'Anchor', 'anchor'], [36, '十字架', 'Cross', 'cross']
+].map(([number, zh, en, slug, variant = null]) => Object.freeze({
+    id: String(number).padStart(2, '0') + '-' + slug,
+    number,
+    name: { zh, en },
+    slug,
+    variant,
+    image: './images/lenormand/' + String(number).padStart(2, '0') + '-' + slug + '.jpg'
+})));
+
 // 全局變量
 let selectedCards = [];
 let currentQuestion = "";
 let currentMode = "three";
+let currentDivinationSystem = "tarot";
 let focusGuideTimer = null;
 let readingAbortController = null;
 let readingElapsedTimer = null;
@@ -1144,9 +1252,53 @@ function setupSpreadListeners() {
     });
 }
 
-// 開始神秘之旅
-function startDivination() {
+function selectDivinationSystem(system) {
+    if (!['tarot', 'lenormand'].includes(system)) return;
+    currentDivinationSystem = system;
+
+    const isLenormand = system === 'lenormand';
+    const title = document.getElementById('spreadSelectionTitle');
+    const intro = document.getElementById('spreadSelectionIntro');
+    const lenormandOptions = document.getElementById('lenormandSpreadOptions');
+    const confirmButton = document.getElementById('confirmSpreadBtn');
+
+    document.querySelectorAll('.spread-card').forEach(card => {
+        const isLenormandCard = card.dataset.mode.startsWith('lenormand_');
+        card.hidden = isLenormand !== isLenormandCard;
+        card.classList.remove('active');
+        card.setAttribute('aria-checked', 'false');
+    });
+    if (lenormandOptions) lenormandOptions.hidden = !isLenormand;
+    if (confirmButton) confirmButton.hidden = false;
+
+    currentMode = isLenormand ? 'lenormand_three' : 'three';
+    const defaultCard = document.querySelector('.spread-card[data-mode="' + currentMode + '"]');
+    if (defaultCard) {
+        defaultCard.classList.add('active');
+        defaultCard.setAttribute('aria-checked', 'true');
+    }
+
+    if (title) {
+        title.dataset.zh = isLenormand ? '雷諾曼占卜' : '選擇你的命運牌陣';
+        title.dataset.en = isLenormand ? 'Lenormand Readings' : 'Choose Your Destiny Spread';
+        title.textContent = title.dataset[currentLanguage];
+    }
+    if (intro) {
+        intro.dataset.zh = isLenormand
+            ? '雷諾曼著重具體事件與牌卡之間的組合訊息'
+            : '每種牌陣都有其獨特的力量與智慧，請選擇最能觸動你內心的占卜方式';
+        intro.dataset.en = isLenormand
+            ? 'Lenormand focuses on concrete events and messages formed by card combinations'
+            : 'Each spread has its unique power and wisdom. Choose the method that resonates with you.';
+        intro.textContent = intro.dataset[currentLanguage];
+    }
+
     showStep(2);
+}
+
+// 保留既有入口相容性。
+function startDivination() {
+    selectDivinationSystem('tarot');
 }
 
 // 確認牌陣選擇
@@ -1291,26 +1443,40 @@ function generateCards() {
     updateProgress();
     const cardsFan = document.getElementById('cardsFan');
     cardsFan.innerHTML = '';
-    const shuffledCards = [...tarotCards].sort(() => Math.random() - 0.5);
+    const isLenormand = currentDivinationSystem === 'lenormand';
+    const deck = isLenormand
+        ? lenormandCards.map(card => ({
+            ...card,
+            displayName: card.number + '. ' + card.name.zh + ' ' + card.name.en,
+            symbol: '☘'
+        }))
+        : tarotCards.map(card => ({ ...card, displayName: card.name }));
+    const shuffledCards = [...deck].sort(() => Math.random() - 0.5);
     
     shuffledCards.forEach((cardData, index) => {
         const cardElement = document.createElement('div');
         cardElement.className = 'tarot-card';
-        cardElement.dataset.cardName = cardData.name;
+        cardElement.dataset.cardName = cardData.displayName;
         cardElement.dataset.cardSymbol = cardData.symbol;
+        cardElement.dataset.cardImage = cardData.image || '';
+        cardElement.dataset.cardId = cardData.id || '';
+        cardElement.dataset.cardNumber = cardData.number || '';
+        cardElement.dataset.cardVariant = cardData.variant || '';
         cardElement.tabIndex = 0;
         cardElement.setAttribute('role', 'button');
         cardElement.setAttribute('aria-pressed', 'false');
-        cardElement.setAttribute('aria-label', currentLanguage === 'zh' ? '選擇一張覆蓋的塔羅牌' : 'Select a face-down tarot card');
+        cardElement.setAttribute('aria-label', currentLanguage === 'zh'
+            ? '選擇一張覆蓋的' + (isLenormand ? '雷諾曼' : '塔羅') + '牌'
+            : 'Select a face-down ' + (isLenormand ? 'Lenormand' : 'tarot') + ' card');
         
         cardElement.style.zIndex = index;
         cardElement.innerHTML = `
         <div class="card-inner">
-            <div class="card-face card-back"></div>
+            <div class="card-face card-back${isLenormand ? ' lenormand-card-back' : ''}"></div>
             <div class="card-face card-front">
                 <div style="text-align: center;">
                     <div style="font-size: 1.8rem; margin-bottom: 8px;">${cardData.symbol}</div>
-                    <div style="font-size: 0.75rem; line-height: 1.3;">${cardData.name}</div>
+                    <div style="font-size: 0.75rem; line-height: 1.3;">${cardData.displayName}</div>
                 </div>
             </div>
         </div>`;
@@ -1359,13 +1525,14 @@ async function selectCard(cardElement) {
     cardElement.classList.add('selecting');
     
     createSelectEffect(cardElement);
-    const orientation = Math.random() < 0.5 ? "upright" : "reversed";
+    const isLenormand = currentDivinationSystem === 'lenormand';
+    const orientation = isLenormand ? 'upright' : (Math.random() < 0.5 ? 'upright' : 'reversed');
     
     const cardName = cardElement.dataset.cardName;
     const cardSymbol = cardElement.dataset.cardSymbol;
     
     // 🆕 使用改進的圖片加載
-    const imagePath = getTarotImagePath(cardName);
+    const imagePath = cardElement.dataset.cardImage || getTarotImagePath(cardName);
     console.log(`🃏 選擇卡牌: ${cardName} (${orientation})`);
     
     // 預加載圖片（如果還沒預加載的話）
@@ -1441,20 +1608,28 @@ async function selectCard(cardElement) {
     cardElement.classList.add("flipped", "selected");
     cardElement.classList.remove('selecting');
     cardElement.setAttribute('aria-pressed', 'true');
-    cardElement.setAttribute('aria-label', `${cardName}，${orientation === 'upright' ? t('upright') : t('reversed')}，${currentLanguage === 'zh' ? '再按一次可取消' : 'press again to deselect'}`);
+    cardElement.setAttribute('aria-label', isLenormand
+        ? `${cardName}，${currentLanguage === 'zh' ? '再按一次可取消' : 'press again to deselect'}`
+        : `${cardName}，${orientation === 'upright' ? t('upright') : t('reversed')}，${currentLanguage === 'zh' ? '再按一次可取消' : 'press again to deselect'}`);
     
     selectedCards.push({
         element: cardElement,
+        id: cardElement.dataset.cardId || null,
+        number: cardElement.dataset.cardNumber ? Number(cardElement.dataset.cardNumber) : null,
+        variant: cardElement.dataset.cardVariant || null,
         name: cardName,
         orientation: orientation,
-        symbol: cardSymbol
+        symbol: cardSymbol,
+        image: imagePath,
+        system: currentDivinationSystem
     });
+    normalizeSelectedLenormandPersonNames();
     updateSelectedCardPositions();
     
     updateProgress();
     
     // 🆕 選卡後智能預加載其他可能需要的圖片
-    if (selectedCards.length < maxCards) {
+    if (!isLenormand && selectedCards.length < maxCards) {
         // 預加載剩餘未選中的卡牌中的一些熱門牌
         const remainingCards = document.querySelectorAll('.tarot-card:not(.selected)');
         const randomCards = Array.from(remainingCards)
@@ -1478,7 +1653,7 @@ function showEnhancedLoading() {
     const positions = spreadInfo[currentMode].positions[currentLanguage];
     const cardsPreview = selectedCards.map((card, index) => `
         <div class="waiting-card">
-            <img src="${getTarotImagePath(card.name)}" alt="${card.name}" class="${card.orientation === 'reversed' ? 'is-reversed' : ''}">
+            <img src="${getCardImagePath(card)}" alt="${card.name}" class="${card.orientation === 'reversed' ? 'is-reversed' : ''}">
             <span>${positions[index]}</span>
         </div>
     `).join('');
@@ -1500,8 +1675,8 @@ function showEnhancedLoading() {
             </div>
 
             <div class="reading-tip">
-                <span class="reading-tip-label">${currentLanguage === 'zh' ? '牌卡小知識' : 'Tarot note'}</span>
-                <p id="readingTip">${currentLanguage === 'zh' ? '正逆位不代表單純的好壞，而是能量展現方式的不同。' : 'Upright and reversed cards are different expressions of energy, not simply good or bad.'}</p>
+                <span class="reading-tip-label">${currentLanguage === 'zh' ? (currentDivinationSystem === 'lenormand' ? '雷諾曼小知識' : '牌卡小知識') : (currentDivinationSystem === 'lenormand' ? 'Lenormand note' : 'Tarot note')}</span>
+                <p id="readingTip">${currentLanguage === 'zh' ? (currentDivinationSystem === 'lenormand' ? '雷諾曼不使用正逆位，重點是牌與牌相鄰後形成的具體訊息。' : '正逆位不代表單純的好壞，而是能量展現方式的不同。') : (currentDivinationSystem === 'lenormand' ? 'Lenormand uses card combinations and proximity rather than reversals.' : 'Upright and reversed cards are different expressions of energy, not simply good or bad.')}</p>
             </div>
             <button class="cancel-reading-btn" type="button" onclick="cancelReadingRequest()">${currentLanguage === 'zh' ? '取消等待' : 'Cancel request'}</button>
         </div>
@@ -1592,7 +1767,8 @@ async function fetchReadingWithRetry(requestBody, maxAttempts = 1) {
                     : `The service is busy. Retry ${attempt - 1} is in progress…`;
                 await new Promise(resolve => setTimeout(resolve, 1500 * (attempt - 1)));
             }
-            const response = await fetchWithTimeout(`${API_BASE_URL}/api/tarot-reading`, {
+            const endpoint = currentDivinationSystem === 'lenormand' ? 'lenormand-reading' : 'tarot-reading';
+            const response = await fetchWithTimeout(`${API_BASE_URL}/api/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody),
@@ -1618,6 +1794,8 @@ async function showLoadingAndGetResults() {
         updateReadingStatus('waking');
 
         const cardsData = selectedCards.map(card => ({
+            id: card.id,
+            number: card.number,
             name: card.name,
             orientation: card.orientation,
             symbol: card.symbol
@@ -1628,6 +1806,7 @@ async function showLoadingAndGetResults() {
             question: currentQuestion,
             cards: cardsData,
             mode: currentMode,
+            system: currentDivinationSystem,
             language: currentLanguage // 新增語言參數
         };
 
@@ -1736,7 +1915,7 @@ async function displayFinalResultsLegacy(interpretation) {
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         `;
         
-        const imagePath = getTarotImagePath(card.name);
+        const imagePath = getCardImagePath(card);
         
         // 🆕 優先使用預加載的圖片
         let imageExists = imagePreloader.isImageCached(imagePath);
@@ -1934,6 +2113,7 @@ function showNotification(message, type = 'info') {
 function restartDivination() {
     selectedCards = [];
     currentQuestion = "";
+    currentDivinationSystem = "tarot";
     currentMode = "three";
     document.title = currentLanguage === 'zh' ? 'TarotVision - 塔羅視界' : 'TarotVision - Mystical Insights';
     
@@ -2156,12 +2336,15 @@ class DivinationManager {
                 question: divinationData.question,
                 questionType: this.classifyQuestion(divinationData.question),
                 mode: divinationData.mode,
+                system: divinationData.mode.startsWith('lenormand_') ? 'lenormand' : 'tarot',
                 cards: divinationData.cards.map(card => ({
+                    id: card.id || null,
+                    number: card.number || null,
                     name: card.name,
                     orientation: card.orientation,
                     position: this.getCardPosition(card, divinationData.mode),
                     symbol: card.symbol,
-                    imagePath: getTarotImagePath(card.name)
+                    imagePath: getCardImagePath(card)
                 })),
                 interpretation: divinationData.interpretation,
                 interpretationSummary: this.generateSummary(divinationData.interpretation),
@@ -2391,6 +2574,10 @@ class DivinationManager {
      */
     applyFilters(records, filters) {
         return records.filter(record => {
+            // 占卜系統過濾；舊記錄沒有 system 時，以牌陣名稱向下相容判斷
+            const recordSystem = record.system || (record.mode?.startsWith('lenormand_') ? 'lenormand' : 'tarot');
+            if (filters.system && recordSystem !== filters.system) return false;
+
             // 占卜模式過濾
             if (filters.mode && record.mode !== filters.mode) return false;
             
@@ -2628,15 +2815,33 @@ class HistoryUI {
         }
 
         // 過濾器事件
-        ['modeFilter', 'typeFilter', 'favFilter'].forEach(filterId => {
+        ['systemFilter', 'modeFilter', 'typeFilter', 'favFilter'].forEach(filterId => {
             const filterElement = document.getElementById(filterId);
             if (filterElement) {
                 filterElement.addEventListener('change', () => {
+                    if (filterId === 'systemFilter') this.syncModeFilterOptions();
                     this.updateFilters();
                     this.loadRecords();
                 });
             }
         });
+        this.syncModeFilterOptions();
+    }
+
+    syncModeFilterOptions() {
+        const selectedSystem = document.getElementById('systemFilter')?.value || '';
+        const modeFilter = document.getElementById('modeFilter');
+        if (!modeFilter) return;
+
+        Array.from(modeFilter.options).forEach(option => {
+            const optionSystem = option.dataset.system;
+            const shouldShow = !optionSystem || !selectedSystem || optionSystem === selectedSystem;
+            option.hidden = !shouldShow;
+            option.disabled = !shouldShow;
+        });
+
+        const selectedOption = modeFilter.selectedOptions[0];
+        if (selectedOption?.disabled) modeFilter.value = '';
     }
 
     /**
@@ -2644,6 +2849,7 @@ class HistoryUI {
      */
     updateFilters() {
         this.currentFilters = {
+            system: document.getElementById('systemFilter')?.value || '',
             mode: document.getElementById('modeFilter')?.value || '',
             questionType: document.getElementById('typeFilter')?.value || '',
             favoritesOnly: document.getElementById('favFilter')?.value === 'favorites'
@@ -2765,9 +2971,9 @@ class HistoryUI {
 
                 <div class="record-cards-preview">
                     ${record.cards.slice(0, 5).map(card => `
-                        <div class="card-mini ${card.orientation === 'reversed' ? 'reversed' : ''}" 
-                            title="${escapeHtml(card.name)} (${card.orientation})">
-                            <img src="${getTarotImagePath(card.name)}" 
+                        <div class="card-mini ${card.orientation === 'reversed' ? 'reversed' : ''}"
+                            title="${escapeHtml(card.name)}${record.mode?.startsWith('lenormand_') ? '' : ` (${card.orientation})`}">
+                            <img src="${card.imagePath || getTarotImagePath(card.name)}"
                                 alt="${escapeHtml(card.name)}"
                                 class="${card.orientation === 'reversed' ? 'is-reversed' : ''}"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -2961,7 +3167,13 @@ class HistoryUI {
             yesno: 'Yes or No',
             daily: currentLanguage === 'zh' ? '每日' : 'Daily',
             horseshoe: currentLanguage === 'zh' ? '馬蹄鐵' : 'Horseshoe',
-            celtic: currentLanguage === 'zh' ? '凱爾特十字' : 'Celtic Cross'
+            celtic: currentLanguage === 'zh' ? '凱爾特十字' : 'Celtic Cross',
+            lenormand_single: currentLanguage === 'zh' ? '雷諾曼單張' : 'Lenormand One Card',
+            lenormand_three: currentLanguage === 'zh' ? '雷諾曼三張' : 'Lenormand Three Card',
+            lenormand_yesno: currentLanguage === 'zh' ? '雷諾曼 Yes or No' : 'Lenormand Yes or No',
+            lenormand_five: currentLanguage === 'zh' ? '雷諾曼五張線性' : 'Lenormand Five-Card Line',
+            lenormand_seven: currentLanguage === 'zh' ? '雷諾曼七張線性' : 'Lenormand Seven-Card Line',
+            lenormand_nine: currentLanguage === 'zh' ? '雷諾曼九宮格' : 'Lenormand Nine Card'
         };
         return modeNames[mode] || mode;
     }
@@ -3167,6 +3379,7 @@ function drawRoundedRect(context, x, y, width, height, radius) {
 }
 
 async function createRecordShareImage(record) {
+    const isLenormandRecord = record.mode?.startsWith('lenormand_');
     await document.fonts?.ready;
     const width = 1200;
     const margin = 90;
@@ -3243,7 +3456,7 @@ async function createRecordShareImage(record) {
     context.font = '500 25px "Noto Sans TC", sans-serif';
     context.fillText(currentLanguage === 'zh' ? '✦  本次抽到的牌  ✦' : '✦  CARDS DRAWN  ✦', width / 2, cardsTop - 45);
 
-    const images = await Promise.all(record.cards.map(card => loadShareImage(getTarotImagePath(card.name))));
+    const images = await Promise.all(record.cards.map(card => loadShareImage(card.imagePath || getTarotImagePath(card.name))));
     record.cards.forEach((card, index) => {
         const row = Math.floor(index / columns);
         const itemsInRow = Math.min(columns, record.cards.length - row * columns);
@@ -3265,7 +3478,7 @@ async function createRecordShareImage(record) {
         const imageHeight = 208;
         if (images[index]) {
             context.save();
-            if (card.orientation === 'reversed') {
+            if (!isLenormandRecord && card.orientation === 'reversed') {
                 context.translate(imageX + imageWidth / 2, imageY + imageHeight / 2);
                 context.rotate(Math.PI);
                 context.drawImage(images[index], -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
@@ -3290,9 +3503,11 @@ async function createRecordShareImage(record) {
         context.font = '600 16px "Noto Sans TC", sans-serif';
         const nameLines = getWrappedCanvasLines(context, card.name, cardWidth - 22, 2);
         nameLines.forEach((line, lineIndex) => context.fillText(line, x + cardWidth / 2, y + 276 + lineIndex * 20));
-        context.fillStyle = card.orientation === 'upright' ? '#9fc0a5' : '#d6a468';
-        context.font = '500 14px "Noto Sans TC", sans-serif';
-        context.fillText(card.orientation === 'upright' ? t('upright') : t('reversed'), x + cardWidth / 2, y + 326);
+        if (!isLenormandRecord) {
+            context.fillStyle = card.orientation === 'upright' ? '#9fc0a5' : '#d6a468';
+            context.font = '500 14px "Noto Sans TC", sans-serif';
+            context.fillText(card.orientation === 'upright' ? t('upright') : t('reversed'), x + cardWidth / 2, y + 326);
+        }
     });
 
     context.fillStyle = '#766f63';
@@ -3415,9 +3630,15 @@ async function importHistoryRecords(event) {
                         name: card.name.slice(0, 100),
                         orientation: card.orientation,
                         position: String(card.position || '').slice(0, 100),
-                        symbol: String(card.symbol || '').slice(0, 10)
+                        symbol: String(card.symbol || '').slice(0, 10),
+                        id: String(card.id || '').slice(0, 40),
+                        number: Number.isInteger(card.number) ? card.number : undefined,
+                        system: card.system === 'lenormand' ? 'lenormand' : 'tarot',
+                        imagePath: typeof card.imagePath === 'string' && /^(\.\/)?images\/(tarot|lenormand)\/[a-zA-Z0-9._/-]+$/.test(card.imagePath)
+                            ? card.imagePath.slice(0, 200)
+                            : undefined
                     }))
-                    .slice(0, 5)
+                    .slice(0, 10)
             }))
             .filter(record => record.id && record.cards.length);
         if (!validRecords.length) throw new Error('EMPTY_BACKUP');
@@ -3506,57 +3727,18 @@ function openRecordModal(recordId) {
     });
 
     // 生成卡牌展示
+    const isLenormandRecord = record.mode?.startsWith('lenormand_');
     const cardsDisplay = record.cards.map((card, index) => `
-        <div style="text-align: center; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 2px solid var(--primary-gold); max-width: 200px;">
-            <div style="position: relative; margin-bottom: 15px;">
-                <div style="
-                    width: 120px; 
-                    height: 200px; 
-                    border: 2px solid var(--primary-gold);
-                    border-radius: 10px;
-                    margin: 0 auto;
-                    overflow: hidden;
-                    ${card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
-                ">
-                    <img src="${getTarotImagePath(card.name)}" 
-                        alt="${escapeHtml(card.name)}"
-                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"
-                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div style="
-                        width: 100%; 
-                        height: 100%; 
-                        background: linear-gradient(135deg, var(--dark-red), #4a0000);
-                        display: none;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 3rem;
-                        color: var(--primary-gold);
-                    ">${escapeHtml(card.symbol || '')}</div>
-                </div>
-                ${card.orientation === 'reversed' ? `
-                    <div style="
-                        position: absolute; 
-                        top: -8px; 
-                        right: 10px; 
-                        background: linear-gradient(45deg, #ffa500, #ff8c00); 
-                        color: white; 
-                        padding: 4px 8px; 
-                        border-radius: 8px; 
-                        font-size: 0.7rem; 
-                        font-weight: bold;
-                    ">${t('reversed')}</div>
-                ` : ''}
+        <article class="result-card-item" data-spread-slot="${index + 1}">
+            <div class="result-card-image ${!isLenormandRecord && card.orientation === 'reversed' ? 'is-reversed' : ''}">
+                <img src="${card.imagePath || getTarotImagePath(card.name)}"
+                    alt="${escapeHtml(card.name)}"
+                    onerror="this.style.display='none';">
             </div>
-            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 8px; font-size: 0.9rem;">
-                ${escapeHtml(card.position || '')}
-            </div>
-            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 5px;">
-                ${escapeHtml(card.name)}
-            </div>
-            <div style="font-size: 0.8rem; color: ${card.orientation === 'upright' ? '#90ee90' : '#ffa500'};">
-                (${card.orientation === 'upright' ? t('upright') : t('reversed')})
-            </div>
-        </div>
+            <div class="result-card-position">${escapeHtml(card.position || '')}</div>
+            <h3>${escapeHtml(card.name)}</h3>
+            ${isLenormandRecord ? '' : `<span class="result-orientation ${card.orientation}">${card.orientation === 'upright' ? t('upright') : t('reversed')}</span>`}
+        </article>
     `).join('');
 
     // 填充模態框內容
@@ -3583,7 +3765,7 @@ function openRecordModal(recordId) {
             <h3 style="color: var(--primary-gold); margin-bottom: 20px; text-align: center; font-family: 'Philosopher', serif;">
                 ${currentLanguage === 'zh' ? '抽到的牌' : 'Cards Drawn'}
             </h3>
-            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <div class="record-spread-layout result-cards-grid result-layout-${record.mode}">
                 ${cardsDisplay}
             </div>
         </div>
@@ -4234,14 +4416,32 @@ function setButtonLoading(button, isLoading, originalText = '') {
     }
 }
 
+function normalizeSelectedLenormandPersonNames() {
+    if (currentDivinationSystem !== 'lenormand') return;
+
+    [28, 29].forEach(number => {
+        const matchingCards = selectedCards.filter(card => card.number === number);
+        const distinguishVariants = matchingCards.length > 1;
+        matchingCards.forEach(card => {
+            const zhName = number === 28 ? '男士' : '女士';
+            const enName = number === 28 ? 'Man' : 'Lady';
+            const variant = distinguishVariants && card.variant ? ` ${card.variant.toUpperCase()}` : '';
+            card.name = `${number}. ${zhName}${variant} ${enName}${variant}`;
+        });
+    });
+}
+
 function deselectCard(cardElement) {
     const selectedIndex = selectedCards.findIndex(card => card.element === cardElement);
     if (selectedIndex === -1) return;
 
     selectedCards.splice(selectedIndex, 1);
+    normalizeSelectedLenormandPersonNames();
     cardElement.classList.remove('selected', 'flipped', 'reversed', 'selecting');
     cardElement.setAttribute('aria-pressed', 'false');
-    cardElement.setAttribute('aria-label', currentLanguage === 'zh' ? '選擇一張覆蓋的塔羅牌' : 'Select a face-down tarot card');
+    cardElement.setAttribute('aria-label', currentLanguage === 'zh'
+        ? `選擇一張覆蓋的${currentDivinationSystem === 'lenormand' ? '雷諾曼' : '塔羅'}牌`
+        : `Select a face-down ${currentDivinationSystem === 'lenormand' ? 'Lenormand' : 'tarot'} card`);
     cardElement.querySelector('.card-front').innerHTML = `
         <div style="text-align: center;">
             <div style="font-size: 1.8rem; margin-bottom: 8px;">${cardElement.dataset.cardSymbol}</div>
@@ -4401,13 +4601,13 @@ async function displayFinalResults(interpretation) {
     const plainParagraphs = interpretation.split(/\n{2,}/).map(item => item.trim()).filter(Boolean);
     const summary = (plainParagraphs[0] || interpretation).replace(/[#*_]/g, '').slice(0, 220);
     const cardsMarkup = selectedCards.map((card, index) => `
-        <article class="result-card-item">
+        <article class="result-card-item" data-spread-slot="${index + 1}">
             <div class="result-card-image ${card.orientation === 'reversed' ? 'is-reversed' : ''}">
-                <img src="${getTarotImagePath(card.name)}" alt="${escapeHtml(card.name)}">
+                <img src="${getCardImagePath(card)}" alt="${escapeHtml(card.name)}">
             </div>
             <div class="result-card-position">${escapeHtml(positions[index])}</div>
             <h3>${escapeHtml(card.name)}</h3>
-            <span class="result-orientation ${card.orientation}">${card.orientation === 'upright' ? t('upright') : t('reversed')}</span>
+            ${currentDivinationSystem === 'lenormand' ? '' : `<span class="result-orientation ${card.orientation}">${card.orientation === 'upright' ? t('upright') : t('reversed')}</span>`}
         </article>
     `).join('');
 
@@ -4422,7 +4622,7 @@ async function displayFinalResults(interpretation) {
                 <span class="result-section-kicker">${currentLanguage === 'zh' ? '你的牌陣' : 'Your spread'}</span>
                 <h2 id="drawnCardsTitle">${currentLanguage === 'zh' ? '本次抽到的牌' : 'Cards drawn'}</h2>
             </div>
-            <div class="result-cards-grid">${cardsMarkup}</div>
+            <div class="result-cards-grid result-layout-${currentMode}">${cardsMarkup}</div>
         </section>
 
         <section class="result-section result-reading" aria-labelledby="fullReadingTitle">
@@ -4460,7 +4660,7 @@ async function copyTextToClipboard(text) {
 
 async function copyCurrentReading() {
     const positions = spreadInfo[currentMode].positions[currentLanguage];
-    const cardsText = selectedCards.map((card, index) => `${positions[index]}：${card.name}（${card.orientation === 'upright' ? t('upright') : t('reversed')}）`).join('\n');
+    const cardsText = selectedCards.map((card, index) => `${positions[index]}：${card.name}${currentDivinationSystem === 'lenormand' ? '' : `（${card.orientation === 'upright' ? t('upright') : t('reversed')}）`}`).join('\n');
     const text = `${currentQuestion}\n\n${cardsText}\n\n${lastInterpretation}`;
     try {
         await copyTextToClipboard(text);

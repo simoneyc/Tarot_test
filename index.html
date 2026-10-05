@@ -8,7 +8,7 @@
     <!-- Favicon - 使用 SVG icon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23d4af37;stop-opacity:1' /><stop offset='100%' style='stop-color:%238b0000;stop-opacity:1' /></linearGradient></defs><rect width='60' height='85' x='20' y='7' rx='8' fill='url(%23grad)' stroke='%23d4af37' stroke-width='2'/><circle cx='50' cy='30' r='8' fill='none' stroke='%23ffffff' stroke-width='2'/><path d='M35 45 L50 60 L65 45' fill='none' stroke='%23ffffff' stroke-width='2'/><circle cx='50' cy='75' r='4' fill='%23ffffff'/></svg>">
     
-    <link rel="stylesheet" href="css/style.css?v=20261005-waiting-cards">
+    <link rel="stylesheet" href="css/style.css?v=20261005-fit-spread-layouts">
 </head>
 <body>
     <div class="network-status" id="networkStatus" role="status" aria-live="polite" hidden></div>
@@ -85,17 +85,27 @@
         <div id="step1" class="step active">
             <div style="text-align: center;">
                 <div class="ornament">☽ ✦ ☾</div>
-                <h2 style="margin: 40px 0; font-size: 2.2rem; font-family: 'Philosopher', serif;" 
-                    data-zh="歡迎來到神秘的塔羅世界" 
-                    data-en="Welcome to the Mystical World of Tarot">歡迎來到神秘的塔羅世界</h2>
+                <h2 style="margin: 30px 0 14px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
+                    data-zh="選擇你的占卜方式"
+                    data-en="Choose Your Divination">選擇你的占卜方式</h2>
                 <p style="margin: 30px 0; font-size: 1.3rem; opacity: 0.9; line-height: 1.6;"
                    data-zh="在這裡，時間的界限模糊不清<br>讓古老的智慧為你指引方向"
                    data-en="Here, the boundaries of time blur<br>Let ancient wisdom guide your path">
                     在這裡，時間的界限模糊不清<br>
                     讓古老的智慧為你指引方向
                 </p>
-                <div class="ornament">◊ ✧ ◊</div>
-                <br><br>
+                <div class="divination-options" role="list">
+                    <button class="divination-option" type="button" onclick="selectDivinationSystem('tarot')" role="listitem">
+                        <span class="divination-option-icon" aria-hidden="true">✦</span>
+                        <strong data-zh="塔羅占卜" data-en="Tarot">塔羅占卜</strong>
+                        <small data-zh="78 張牌・探索內在與可能性" data-en="78 cards · Insight and possibilities">78 張牌・探索內在與可能性</small>
+                    </button>
+                    <button class="divination-option" type="button" onclick="selectDivinationSystem('lenormand')" role="listitem">
+                        <span class="divination-option-icon" aria-hidden="true">☘</span>
+                        <strong data-zh="雷諾曼占卜" data-en="Lenormand">雷諾曼占卜</strong>
+                        <small data-zh="38 張牌・多元人物與牌組連讀" data-en="38 cards · Inclusive people and combinations">38 張牌・多元人物與牌組連讀</small>
+                    </button>
+                </div>
 
                 <!-- 預加載進度指示器 -->
                 <div id="preloadIndicator" style="display: none; text-align: center; margin: 20px 0;">
@@ -109,19 +119,16 @@
                         <span data-zh="這將提升您的占卜體驗" data-en="This will enhance your divination experience">這將提升您的占卜體驗</span>
                     </div>
                 </div>
-                <button class="btn" onclick="startDivination()" 
-                        data-zh="開始神秘之旅" 
-                        data-en="Begin Mystical Journey">開始神秘之旅</button>
             </div>
         </div>
 
         <!-- 步驟2: 牌陣選擇頁 -->
         <div id="step2" class="step">
             <div class="spread-selection">
-                <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
+                <h2 id="spreadSelectionTitle" style="text-align: center; margin-bottom: 40px; font-size: 2.2rem; font-family: 'Philosopher', serif;"
                     data-zh="選擇你的命運牌陣" 
                     data-en="Choose Your Destiny Spread">選擇你的命運牌陣</h2>
-                <p style="text-align: center; margin-bottom: 50px; font-size: 1.2rem; opacity: 0.9; line-height: 1.6;"
+                <p id="spreadSelectionIntro" style="text-align: center; margin-bottom: 50px; font-size: 1.2rem; opacity: 0.9; line-height: 1.6;"
                    data-zh="每種牌陣都有其獨特的力量與智慧<br>請選擇最能觸動你內心的占卜方式"
                    data-en="Each spread has its unique power and wisdom<br>Choose the divination method that resonates with your heart">
                     每種牌陣都有其獨特的力量與智慧<br>
@@ -223,12 +230,51 @@
                         <div class="spread-detail" data-zh="現況 - 挑戰 - 過去 - 未來 - 目標 - 根源 - 建議 - 外在 - 希望恐懼 - 結果" data-en="Present - Challenge - Past - Future - Goal - Foundation - Advice - External - Hopes/Fears - Outcome">現況 - 挑戰 - 過去 - 未來 - 目標 - 根源 - 建議 - 外在 - 希望恐懼 - 結果</div>
                     </div>
                 </div>
+
+                <div id="lenormandSpreadOptions" class="spread-options" hidden>
+                    <div class="spread-card" data-mode="lenormand_single">
+                        <div class="spread-icon">☘</div>
+                        <h3 data-zh="單張訊息" data-en="One-Card Message">單張訊息</h3>
+                        <p data-zh="以一張雷諾曼牌聚焦當下最具體的訊息、人物或事件線索。" data-en="One Lenormand card highlights the most concrete message, person, or event to notice now.">以一張雷諾曼牌聚焦當下最具體的訊息、人物或事件線索。</p>
+                        <div class="spread-detail" data-zh="核心訊息" data-en="Core Message">核心訊息</div>
+                    </div>
+                    <div class="spread-card active" data-mode="lenormand_three">
+                        <div class="spread-icon">☘ ☘ ☘</div>
+                        <h3 data-zh="三張線性牌陣" data-en="Three-Card Line">三張線性牌陣</h3>
+                        <p data-zh="由左至右連讀三張牌，觀察情境、發展與可能結果之間的組合語句。" data-en="Read three cards from left to right as a combined sentence of situation, development, and likely outcome.">由左至右連讀三張牌，觀察情境、發展與可能結果之間的組合語句。</p>
+                        <div class="spread-detail" data-zh="情境 - 發展 - 可能結果" data-en="Situation - Development - Likely Outcome">情境 - 發展 - 可能結果</div>
+                    </div>
+                    <div class="spread-card" data-mode="lenormand_yesno">
+                        <div class="spread-icon">✓ ? ✕</div>
+                        <h3 data-zh="Yes or No" data-en="Yes or No">Yes or No</h3>
+                        <p data-zh="以三張牌的整體組合判斷支持、阻礙與答案傾向，不把單張牌機械式判定好壞。" data-en="Use the full three-card combination to weigh support, obstacles, and the likely answer rather than mechanically scoring single cards.">以三張牌的整體組合判斷支持、阻礙與答案傾向，不把單張牌機械式判定好壞。</p>
+                        <div class="spread-detail" data-zh="支持 - 阻礙 - 答案傾向" data-en="Support - Obstacle - Answer Tendency">支持 - 阻礙 - 答案傾向</div>
+                    </div>
+                    <div class="spread-card" data-mode="lenormand_five">
+                        <div class="spread-icon">☘ ☘ ☘ ☘ ☘</div>
+                        <h3 data-zh="五張線性牌陣" data-en="Five-Card Line">五張線性牌陣</h3>
+                        <p data-zh="以中央牌為焦點，左右兩側呈現背景、正在形成的影響、發展與結果。" data-en="A focused line with the center card as the theme and cards on either side showing background, emerging influences, development, and outcome.">以中央牌為焦點，左右兩側呈現背景、正在形成的影響、發展與結果。</p>
+                        <div class="spread-detail" data-zh="背景 - 形成 - 核心 - 發展 - 結果" data-en="Background - Emerging - Focus - Development - Outcome">背景 - 形成 - 核心 - 發展 - 結果</div>
+                    </div>
+                    <div class="spread-card" data-mode="lenormand_seven">
+                        <div class="spread-icon">☘ ☘ ☘ ☘ ☘ ☘ ☘</div>
+                        <h3 data-zh="七張線性牌陣" data-en="Seven-Card Line">七張線性牌陣</h3>
+                        <p data-zh="用較長的時間線連讀事件脈絡，中央牌代表現在，兩側逐步延伸前因與後續。" data-en="A longer timeline with the present at the center and both sides extending through earlier influences and later developments.">用較長的時間線連讀事件脈絡，中央牌代表現在，兩側逐步延伸前因與後續。</p>
+                        <div class="spread-detail" data-zh="過去脈絡 - 現在 - 後續發展" data-en="Past Context - Present - Later Development">過去脈絡 - 現在 - 後續發展</div>
+                    </div>
+                    <div class="spread-card" data-mode="lenormand_nine">
+                        <div class="spread-icon">▦</div>
+                        <h3 data-zh="九宮格牌陣" data-en="Nine-Card Portrait">九宮格牌陣</h3>
+                        <p data-zh="以 3×3 牌陣觀察核心牌、四周影響，以及橫列、直列與對角線的完整局勢。" data-en="A 3×3 portrait read through its center, surrounding influences, rows, columns, and diagonals.">以 3×3 牌陣觀察核心牌、四周影響，以及橫列、直列與對角線的完整局勢。</p>
+                        <div class="spread-detail" data-zh="3 × 3 整體局勢" data-en="3 × 3 Situation Portrait">3 × 3 整體局勢</div>
+                    </div>
+                </div>
                 
                 <div style="text-align: center; margin-top: 40px;">
                     <div class="ornament">✧</div>
                     <div class="flow-actions">
                     <button class="btn btn-secondary" onclick="showStep(1)" data-zh="返回首頁" data-en="Back Home">返回首頁</button>
-                    <button class="btn" onclick="confirmSpreadSelection()" 
+                    <button class="btn" id="confirmSpreadBtn" onclick="confirmSpreadSelection()"
                             data-zh="確認選擇" 
                             data-en="Confirm Selection">確認選擇</button>
                     </div>
@@ -418,13 +464,32 @@
 
                     <!-- 過濾器區域 -->
                     <div class="filters-section">
+                        <select class="filter-dropdown" id="systemFilter">
+                            <option value="" data-zh="所有占卜系統" data-en="All Systems">所有占卜系統</option>
+                            <option value="tarot" data-zh="塔羅" data-en="Tarot">塔羅</option>
+                            <option value="lenormand" data-zh="雷諾曼" data-en="Lenormand">雷諾曼</option>
+                        </select>
+
                         <select class="filter-dropdown" id="modeFilter">
-                            <option value="" data-zh="所有模式" data-en="All Modes">所有模式</option>
-                            <option value="single" data-zh="單張指引" data-en="Single Guidance">單張指引</option>
-                            <option value="three" data-zh="三張牌占卜" data-en="Three Cards">三張牌占卜</option>
-                            <option value="core" data-zh="四張核心" data-en="Four Core">四張核心</option>
-                            <option value="choice" data-zh="二選一" data-en="Two Choice">二選一</option>
-                            <option value="love" data-zh="感情萬用" data-en="Love Universal">感情萬用</option>
+                            <option value="" data-zh="所有牌陣" data-en="All Spreads">所有牌陣</option>
+                            <option value="single" data-system="tarot" data-zh="塔羅・單張指引" data-en="Tarot · Single Guidance">塔羅・單張指引</option>
+                            <option value="three" data-system="tarot" data-zh="塔羅・三張牌" data-en="Tarot · Three Cards">塔羅・三張牌</option>
+                            <option value="core" data-system="tarot" data-zh="塔羅・四張核心" data-en="Tarot · Four Core">塔羅・四張核心</option>
+                            <option value="choice" data-system="tarot" data-zh="塔羅・二選一" data-en="Tarot · Two Choices">塔羅・二選一</option>
+                            <option value="love" data-system="tarot" data-zh="塔羅・感情萬用" data-en="Tarot · Love Universal">塔羅・感情萬用</option>
+                            <option value="insight" data-system="tarot" data-zh="塔羅・釐清現況" data-en="Tarot · Situation Clarity">塔羅・釐清現況</option>
+                            <option value="career" data-system="tarot" data-zh="塔羅・職涯發展" data-en="Tarot · Career Path">塔羅・職涯發展</option>
+                            <option value="growth" data-system="tarot" data-zh="塔羅・身心靈" data-en="Tarot · Mind Body Spirit">塔羅・身心靈</option>
+                            <option value="yesno" data-system="tarot" data-zh="塔羅・Yes or No" data-en="Tarot · Yes or No">塔羅・Yes or No</option>
+                            <option value="daily" data-system="tarot" data-zh="塔羅・每日之牌" data-en="Tarot · Daily Card">塔羅・每日之牌</option>
+                            <option value="horseshoe" data-system="tarot" data-zh="塔羅・馬蹄鐵" data-en="Tarot · Horseshoe">塔羅・馬蹄鐵</option>
+                            <option value="celtic" data-system="tarot" data-zh="塔羅・凱爾特十字" data-en="Tarot · Celtic Cross">塔羅・凱爾特十字</option>
+                            <option value="lenormand_single" data-system="lenormand" data-zh="雷諾曼・單張訊息" data-en="Lenormand · One Card">雷諾曼・單張訊息</option>
+                            <option value="lenormand_three" data-system="lenormand" data-zh="雷諾曼・三張線性" data-en="Lenormand · Three-Card Line">雷諾曼・三張線性</option>
+                            <option value="lenormand_yesno" data-system="lenormand" data-zh="雷諾曼・Yes or No" data-en="Lenormand · Yes or No">雷諾曼・Yes or No</option>
+                            <option value="lenormand_five" data-system="lenormand" data-zh="雷諾曼・五張線性" data-en="Lenormand · Five-Card Line">雷諾曼・五張線性</option>
+                            <option value="lenormand_seven" data-system="lenormand" data-zh="雷諾曼・七張線性" data-en="Lenormand · Seven-Card Line">雷諾曼・七張線性</option>
+                            <option value="lenormand_nine" data-system="lenormand" data-zh="雷諾曼・九宮格" data-en="Lenormand · Nine-Card Portrait">雷諾曼・九宮格</option>
                         </select>
 
                         <select class="filter-dropdown" id="typeFilter">
@@ -499,6 +564,6 @@
         </div>
     </div>
 
-    <script src="js/script.js?v=20261005-reading-lists"></script>
+    <script src="js/script.js?v=20261005-record-spread-layouts"></script>
 </body>
 </html>
