@@ -3729,56 +3729,16 @@ function openRecordModal(recordId) {
     // 生成卡牌展示
     const isLenormandRecord = record.mode?.startsWith('lenormand_');
     const cardsDisplay = record.cards.map((card, index) => `
-        <div style="text-align: center; background: var(--black-alpha-60); padding: 20px; border-radius: 15px; border: 2px solid var(--primary-gold); max-width: 200px;">
-            <div style="position: relative; margin-bottom: 15px;">
-                <div style="
-                    width: 120px; 
-                    height: 200px; 
-                    border: 2px solid var(--primary-gold);
-                    border-radius: 10px;
-                    margin: 0 auto;
-                    overflow: hidden;
-                    ${!isLenormandRecord && card.orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
-                ">
-                    <img src="${card.imagePath || getTarotImagePath(card.name)}"
-                        alt="${escapeHtml(card.name)}"
-                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"
-                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div style="
-                        width: 100%; 
-                        height: 100%; 
-                        background: linear-gradient(135deg, var(--dark-red), #4a0000);
-                        display: none;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 3rem;
-                        color: var(--primary-gold);
-                    ">${escapeHtml(card.symbol || '')}</div>
-                </div>
-                ${!isLenormandRecord && card.orientation === 'reversed' ? `
-                    <div style="
-                        position: absolute; 
-                        top: -8px; 
-                        right: 10px; 
-                        background: linear-gradient(45deg, #ffa500, #ff8c00); 
-                        color: white; 
-                        padding: 4px 8px; 
-                        border-radius: 8px; 
-                        font-size: 0.7rem; 
-                        font-weight: bold;
-                    ">${t('reversed')}</div>
-                ` : ''}
+        <article class="result-card-item" data-spread-slot="${index + 1}">
+            <div class="result-card-image ${!isLenormandRecord && card.orientation === 'reversed' ? 'is-reversed' : ''}">
+                <img src="${card.imagePath || getTarotImagePath(card.name)}"
+                    alt="${escapeHtml(card.name)}"
+                    onerror="this.style.display='none';">
             </div>
-            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 8px; font-size: 0.9rem;">
-                ${escapeHtml(card.position || '')}
-            </div>
-            <div style="font-weight: 600; color: var(--primary-gold); margin-bottom: 5px;">
-                ${escapeHtml(card.name)}
-            </div>
-            ${isLenormandRecord ? '' : `<div style="font-size: 0.8rem; color: ${card.orientation === 'upright' ? '#90ee90' : '#ffa500'};">
-                (${card.orientation === 'upright' ? t('upright') : t('reversed')})
-            </div>`}
-        </div>
+            <div class="result-card-position">${escapeHtml(card.position || '')}</div>
+            <h3>${escapeHtml(card.name)}</h3>
+            ${isLenormandRecord ? '' : `<span class="result-orientation ${card.orientation}">${card.orientation === 'upright' ? t('upright') : t('reversed')}</span>`}
+        </article>
     `).join('');
 
     // 填充模態框內容
@@ -3805,7 +3765,7 @@ function openRecordModal(recordId) {
             <h3 style="color: var(--primary-gold); margin-bottom: 20px; text-align: center; font-family: 'Philosopher', serif;">
                 ${currentLanguage === 'zh' ? '抽到的牌' : 'Cards Drawn'}
             </h3>
-            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <div class="record-spread-layout result-cards-grid result-layout-${record.mode}">
                 ${cardsDisplay}
             </div>
         </div>
