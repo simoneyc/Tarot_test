@@ -387,6 +387,27 @@ const spreadInfo = {
         positions: { zh: ["情境", "發展", "可能結果"], en: ["Situation", "Development", "Likely Outcome"] },
         title: { zh: "請選擇三張雷諾曼牌", en: "Please choose three Lenormand cards" }
     },
+    lenormand_yesno: {
+        name: { zh: "雷諾曼 Yes or No", en: "Lenormand Yes or No" },
+        description: { zh: "綜合三張牌的支持、阻礙與答案傾向，提供清楚但不武斷的判斷。", en: "Combine support, obstacles, and answer tendency for a clear but non-deterministic response." },
+        cards: 3,
+        positions: { zh: ["支持因素", "阻礙因素", "答案傾向"], en: ["Supporting Factors", "Obstacles", "Answer Tendency"] },
+        title: { zh: "請選擇三張雷諾曼 Yes or No 牌", en: "Please choose three Lenormand Yes or No cards" }
+    },
+    lenormand_five: {
+        name: { zh: "雷諾曼五張線性牌陣", en: "Lenormand Five-Card Line" },
+        description: { zh: "以中央牌為焦點，由左至右連讀背景、形成中的影響、核心、發展與結果。", en: "Read left to right with the center card as the focus: background, emerging influence, focus, development, and outcome." },
+        cards: 5,
+        positions: { zh: ["背景", "形成中的影響", "核心焦點", "後續發展", "可能結果"], en: ["Background", "Emerging Influence", "Central Focus", "Development", "Likely Outcome"] },
+        title: { zh: "請選擇五張雷諾曼牌", en: "Please choose five Lenormand cards" }
+    },
+    lenormand_seven: {
+        name: { zh: "雷諾曼七張線性牌陣", en: "Lenormand Seven-Card Line" },
+        description: { zh: "以第四張為現在，從左至右追蹤較完整的事件時間線與發展脈絡。", en: "Use card four as the present and read left to right as an extended timeline of events." },
+        cards: 7,
+        positions: { zh: ["較早影響", "過去脈絡", "近期影響", "當下核心", "近期發展", "後續走向", "可能結果"], en: ["Earlier Influence", "Past Context", "Recent Influence", "Present Focus", "Near Development", "Later Direction", "Likely Outcome"] },
+        title: { zh: "請選擇七張雷諾曼牌", en: "Please choose seven Lenormand cards" }
+    },
     lenormand_nine: {
         name: { zh: "雷諾曼九宮格", en: "Lenormand Nine-Card Portrait" },
         description: { zh: "以中央牌為核心，綜合周圍牌、橫列、直列與對角線解讀完整局勢。", en: "Read the center, surrounding cards, rows, columns, and diagonals as a complete situation portrait." },
@@ -522,6 +543,18 @@ const questionExamples = {
     lenormand_three: {
         zh: ['這件事目前會如何發展？', '這段關係接下來可能出現什麼變化？', '這個工作機會的發展與結果可能是什麼？', '我採取這項行動後可能發生什麼？', '哪些因素正在共同影響這件事？', '關於這個問題，我需要掌握什麼具體訊息？'],
         en: ['How is this situation likely to develop?', 'What changes may arise next in this relationship?', 'How might this work opportunity develop and conclude?', 'What may happen if I take this action?', 'Which factors are combining to shape this matter?', 'What practical information should I understand about this question?']
+    },
+    lenormand_yesno: {
+        zh: ['這件事目前是否傾向順利發展？', '現在採取這項行動是否合適？', '這個機會是否值得我繼續投入？', '目前的條件是否支持這項決定？', '這段關係是否有進一步發展的可能？', '這個計畫近期是否容易實現？'],
+        en: ['Is this situation currently likely to develop smoothly?', 'Is now a suitable time to take this action?', 'Is this opportunity worth pursuing?', 'Do current conditions support this decision?', 'Is this relationship likely to develop further?', 'Is this plan likely to materialize soon?']
+    },
+    lenormand_five: {
+        zh: ['這件事的背景、核心與後續結果是什麼？', '這段關係目前正如何形成與發展？', '這個工作機會的核心條件與結果傾向是什麼？', '我需要如何理解這件事的完整脈絡？', '哪些因素正把情勢推向目前的結果？', '這項計畫從現在到結果會如何演變？'],
+        en: ['What are the background, focus, and likely outcome of this matter?', 'How is this relationship taking shape and developing?', 'What are the central conditions and likely outcome of this work opportunity?', 'How should I understand the full context of this matter?', 'What factors are moving the situation toward its outcome?', 'How may this plan evolve from now to its result?']
+    },
+    lenormand_seven: {
+        zh: ['請呈現這件事從過去到未來的發展時間線。', '這段關係如何走到現在，接下來又會如何發展？', '我的職涯局勢在未來一段時間會如何演變？', '這個計畫的前因、現況與後續走向是什麼？', '哪些事件會依序影響這個問題的結果？', '這件事較完整的發展脈絡與結果傾向是什麼？'],
+        en: ['Show the timeline of this matter from past to future.', 'How did this relationship reach the present, and how may it develop next?', 'How may my career situation evolve over the coming period?', 'What are the causes, present state, and later direction of this plan?', 'Which events may influence the outcome in sequence?', 'What is the broader development and likely outcome of this matter?']
     },
     lenormand_nine: {
         zh: ['請完整呈現這件事目前的局勢與發展脈絡。', '這段關係的核心、周圍影響與後續趨勢是什麼？', '我的職涯現況周圍有哪些機會與阻礙？', '這個計畫有哪些明顯與隱藏的影響？', '未來一段時間最需要留意哪些人事物？', '這個複雜局面中的各項因素如何互相影響？'],
@@ -3137,6 +3170,9 @@ class HistoryUI {
             celtic: currentLanguage === 'zh' ? '凱爾特十字' : 'Celtic Cross',
             lenormand_single: currentLanguage === 'zh' ? '雷諾曼單張' : 'Lenormand One Card',
             lenormand_three: currentLanguage === 'zh' ? '雷諾曼三張' : 'Lenormand Three Card',
+            lenormand_yesno: currentLanguage === 'zh' ? '雷諾曼 Yes or No' : 'Lenormand Yes or No',
+            lenormand_five: currentLanguage === 'zh' ? '雷諾曼五張線性' : 'Lenormand Five-Card Line',
+            lenormand_seven: currentLanguage === 'zh' ? '雷諾曼七張線性' : 'Lenormand Seven-Card Line',
             lenormand_nine: currentLanguage === 'zh' ? '雷諾曼九宮格' : 'Lenormand Nine Card'
         };
         return modeNames[mode] || mode;
@@ -4605,7 +4641,7 @@ async function displayFinalResults(interpretation) {
     const plainParagraphs = interpretation.split(/\n{2,}/).map(item => item.trim()).filter(Boolean);
     const summary = (plainParagraphs[0] || interpretation).replace(/[#*_]/g, '').slice(0, 220);
     const cardsMarkup = selectedCards.map((card, index) => `
-        <article class="result-card-item">
+        <article class="result-card-item" data-spread-slot="${index + 1}">
             <div class="result-card-image ${card.orientation === 'reversed' ? 'is-reversed' : ''}">
                 <img src="${getCardImagePath(card)}" alt="${escapeHtml(card.name)}">
             </div>
@@ -4626,7 +4662,7 @@ async function displayFinalResults(interpretation) {
                 <span class="result-section-kicker">${currentLanguage === 'zh' ? '你的牌陣' : 'Your spread'}</span>
                 <h2 id="drawnCardsTitle">${currentLanguage === 'zh' ? '本次抽到的牌' : 'Cards drawn'}</h2>
             </div>
-            <div class="result-cards-grid">${cardsMarkup}</div>
+            <div class="result-cards-grid result-layout-${currentMode}">${cardsMarkup}</div>
         </section>
 
         <section class="result-section result-reading" aria-labelledby="fullReadingTitle">
