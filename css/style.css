@@ -3563,8 +3563,9 @@ body {
 
 .waiting-cards {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
+    gap: 10px 7px;
     min-height: 112px;
     margin-bottom: 28px;
 }
@@ -3727,9 +3728,15 @@ body {
 
 @media (max-width: 600px) {
     .honest-loading { padding: 24px 14px 30px; }
-    .waiting-cards { gap: 3px; min-height: 96px; }
-    .waiting-card { width: 55px; }
-    .waiting-card img { width: 45px; height: 73px; }
+    .waiting-cards {
+        width: min(100%, 260px);
+        min-height: 96px;
+        margin-right: auto;
+        margin-left: auto;
+        gap: 10px 5px;
+    }
+    .waiting-card { width: 48px; flex: 0 0 48px; }
+    .waiting-card img { width: 40px; height: 65px; }
     .waiting-card span { font-size: .58rem; }
     .honest-loading .mystic-symbols { margin-top: -5px; transform: scale(.7); }
     .reading-wait-copy .progress-text { font-size: 1.08rem; }
