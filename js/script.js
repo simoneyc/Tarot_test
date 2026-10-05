@@ -4362,7 +4362,7 @@ function formatReadingText(text) {
 
     lines.forEach(line => {
         const unordered = line.match(/^\s*[-*+]\s+(.+)$/);
-        const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        const ordered = line.match(/^\s*(\d+)[.)]\s+(.+)$/);
         const item = unordered || ordered;
 
         if (item) {
@@ -4370,10 +4370,12 @@ function formatReadingText(text) {
             const nextType = ordered ? 'ol' : 'ul';
             if (listType !== nextType) {
                 closeList();
-                output.push(`<${nextType}>`);
+                const startAttribute = ordered ? ` start="${Number.parseInt(ordered[1], 10)}"` : '';
+                output.push(`<${nextType}${startAttribute}>`);
                 listType = nextType;
             }
-            output.push(`<li>${formatInline(item[1])}</li>`);
+            const itemContent = ordered ? ordered[2] : unordered[1];
+            output.push(`<li>${formatInline(itemContent)}</li>`);
             return;
         }
 
