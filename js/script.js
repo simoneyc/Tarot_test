@@ -155,8 +155,9 @@ class ImagePreloader {
 
         // Respect data-saving mode; the card back still loads before selection.
         const queue = saveData ? uniquePaths.slice(0, 1) : [...uniquePaths];
-        // Lenormand originals are high resolution; two workers avoid decode spikes while typing.
-        const concurrency = isLenormand || /(^|-)2g$/.test(effectiveType) ? 2 : 4;
+        // Optimized Lenormand assets are small enough for four parallel workers.
+        // Keep concurrency conservative only on an explicitly detected 2G link.
+        const concurrency = /(^|-)2g$/.test(effectiveType) ? 2 : 4;
         let nextIndex = 0;
         let completed = 0;
         updateDeckPreloadStatus(system, completed, queue.length, saveData);
