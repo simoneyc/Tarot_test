@@ -8,9 +8,10 @@ window.showPerformanceReport = () => performanceMonitor.showReport();
 // ===== 圖片預加載管理器 =====
 class ImagePreloader {
     constructor() {
-        this.imageCache = new Map(); // 緩存已加載的圖片
+        this.imageCache = new Map(); // 記錄已成功載入的 URL，不長期保留大型解碼圖片
         this.loadingPromises = new Map(); // 避免重複加載同一張圖片
         this.preloadStarted = false;
+        this.deckPreloadRun = 0;
     }
 
     // 預加載核心圖片（大牌前10張，最常被抽到）
@@ -85,7 +86,7 @@ class ImagePreloader {
     preloadImage(imagePath) {
         // 如果已經緩存，直接返回
         if (this.imageCache.has(imagePath)) {
-            return Promise.resolve(this.imageCache.get(imagePath));
+            return Promise.resolve(true);
         }
 
         // 如果正在加載，返回現有的 Promise
@@ -95,33 +96,36 @@ class ImagePreloader {
 
         const promise = new Promise((resolve, reject) => {
             const img = new Image();
+            img.decoding = 'async';
             
-            // 設置超時機制（10秒）
+            // 高解析度雷諾曼牌在行動網路上需要較長時間，避免過早中止。
             const timeout = setTimeout(() => {
                 img.src = ''; // 取消加載
                 reject(new Error(`圖片加載超時: ${imagePath}`));
-            }, 10000);
+            }, 20000);
             
             img.onload = () => {
                 clearTimeout(timeout);
-                this.imageCache.set(imagePath, img);
+                this.imageCache.set(imagePath, true);
                 console.log(`✅ 圖片加載成功: ${imagePath.split('/').pop()}`);
-                resolve(img);
+                resolve(true);
             };
             
             img.onerror = () => {
                 clearTimeout(timeout);
                 console.warn(`❌ 圖片加載失敗: ${imagePath}`);
                 
-                // 如果是塔羅牌圖片失敗，嘗試加載備用圖片
-                if (imagePath !== './images/tarot/card-back.jpg') {
+                const fallbackPath = imagePath.includes('/lenormand/')
+                    ? './images/lenormand/card-back.jpg'
+                    : './images/tarot/card-back.jpg';
+                if (imagePath !== fallbackPath) {
                     const fallbackImg = new Image();
                     fallbackImg.onload = () => {
                         console.log(`🔄 使用備用圖片: ${imagePath.split('/').pop()}`);
-                        resolve(fallbackImg);
+                        resolve(true);
                     };
                     fallbackImg.onerror = () => reject(new Error(`備用圖片也無法加載`));
-                    fallbackImg.src = './images/tarot/card-back.jpg';
+                    fallbackImg.src = fallbackPath;
                 } else {
                     reject(new Error(`無法加載圖片: ${imagePath}`));
                 }
@@ -130,8 +134,48 @@ class ImagePreloader {
             img.src = imagePath;
         });
 
-        this.loadingPromises.set(imagePath, promise);
-        return promise;
+        const trackedPromise = promise.finally(() => {
+            this.loadingPromises.delete(imagePath);
+        });
+        this.loadingPromises.set(imagePath, trackedPromise);
+        return trackedPromise;
+    }
+
+    async preloadDeck(system) {
+        const runId = ++this.deckPreloadRun;
+        const isLenormand = system === 'lenormand';
+        const paths = isLenormand
+            ? [LENORMAND_CARD_BACK_IMAGE, ...lenormandCards.map(card => card.image)]
+            : ['./images/tarot/card-back.jpg', ...tarotCards.map(card => getTarotImagePath(card.name))];
+        const uniquePaths = [...new Set(paths)];
+        const saveData = navigator.connection?.saveData;
+        const effectiveType = navigator.connection?.effectiveType || '';
+
+        // Respect data-saving mode; the card back still loads before selection.
+        const queue = saveData ? uniquePaths.slice(0, 1) : [...uniquePaths];
+        // Lenormand originals are high resolution; two workers avoid decode spikes while typing.
+        const concurrency = isLenormand || /(^|-)2g$/.test(effectiveType) ? 2 : 4;
+        let nextIndex = 0;
+        let completed = 0;
+        updateDeckPreloadStatus(system, completed, queue.length, saveData);
+
+        const worker = async () => {
+            while (nextIndex < queue.length && runId === this.deckPreloadRun) {
+                const imagePath = queue[nextIndex++];
+                try {
+                    await this.preloadImage(imagePath);
+                } catch (error) {
+                    console.warn(`牌組圖片預載失敗: ${imagePath}`, error);
+                } finally {
+                    completed++;
+                    if (runId === this.deckPreloadRun) {
+                        updateDeckPreloadStatus(system, completed, queue.length, saveData);
+                    }
+                }
+            }
+        };
+
+        await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, worker));
     }
 
     // 智能預加載：根據用戶選中的牌預加載
@@ -1321,6 +1365,9 @@ function confirmSpreadSelection() {
     currentMode = selectedMode;
     updateSpreadDescription();
     showStep(3);
+    imagePreloader.preloadDeck(currentDivinationSystem).catch(error => {
+        console.warn('牌組背景預載未完成，將在翻牌時繼續載入。', error);
+    });
 }
 
 // 更新牌陣描述
@@ -1513,7 +1560,7 @@ function showScrollHint() {
 }
 
 // 替換原有的 selectCard 函數
-async function selectCard(cardElement) {
+function selectCard(cardElement) {
 
     const selectionStartTime = performance.now();
     const maxCards = parseInt(document.getElementById('totalCards').textContent);
@@ -1531,20 +1578,8 @@ async function selectCard(cardElement) {
     const cardName = cardElement.dataset.cardName;
     const cardSymbol = cardElement.dataset.cardSymbol;
     
-    // 🆕 使用改進的圖片加載
     const imagePath = cardElement.dataset.cardImage || getTarotImagePath(cardName);
     console.log(`🃏 選擇卡牌: ${cardName} (${orientation})`);
-    
-    // 預加載圖片（如果還沒預加載的話）
-    let imageExists = false;
-    try {
-        await imagePreloader.preloadImage(imagePath);
-        imageExists = true;
-        console.log(`✅ 圖片已就緒: ${cardName}`);
-    } catch (error) {
-        console.warn(`⚠️ 圖片加載失敗，使用備用顯示: ${cardName}`, error);
-        imageExists = false;
-    }
     
     if (orientation === "reversed") {
         cardElement.classList.add("reversed");
@@ -1552,58 +1587,41 @@ async function selectCard(cardElement) {
     
     const cardFront = cardElement.querySelector('.card-front');
     
-    if (imageExists) {
-        // 使用預加載的圖片
-        const preloadedImg = imagePreloader.imageCache.get(imagePath);
-        cardFront.innerHTML = `
-            <img src="${imagePath}" 
-                 alt="${cardName}" 
-                 style="
-                    width: 100%; 
-                    height: 100%; 
-                    object-fit: cover; 
-                    border-radius: 10px;
-                    ${orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
-                 "
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div style="
-                width: 100%; 
-                height: 100%; 
-                background: linear-gradient(135deg, var(--primary-gold), #b8860b);
-                color: var(--dark-red);
-                display: none;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                font-size: 0.75rem;
-                line-height: 1.3;
-                padding: 8px;
-                ${orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
-            ">
-                <div>
-                    <div style="font-size: 1.5rem; margin-bottom: 5px;">${cardSymbol}</div>
-                    <div>${cardName}</div>
-                </div>
-            </div>
-        `;
-    } else {
-        // 使用符號顯示
-        cardFront.innerHTML = `
-            <div style="
-                text-align: center;
+    // 立即完成選牌，不等待大圖下載；載入期間先顯示可辨識的牌名。
+    cardFront.innerHTML = `
+        <div class="card-reveal-placeholder" style="
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: linear-gradient(135deg, var(--primary-gold), #b8860b);
+            color: var(--dark-red);
+            padding: 8px;
+            ${orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
+        ">
+            <div style="font-size: 1.8rem; margin-bottom: 8px;">${cardSymbol}</div>
+            <div style="font-size: 0.75rem; line-height: 1.3;">${cardName}</div>
+        </div>
+        <img src="${imagePath}"
+             alt="${cardName}"
+             decoding="async"
+             style="
+                position: absolute;
+                inset: 0;
                 width: 100%;
                 height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
+                object-fit: cover;
+                border-radius: 10px;
+                opacity: 0;
+                transition: opacity 0.2s ease;
                 ${orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
-            ">
-                <div style="font-size: 1.8rem; margin-bottom: 8px;">${cardSymbol}</div>
-                <div style="font-size: 0.75rem; line-height: 1.3;">${cardName}</div>
-            </div>
-        `;
-    }
+             "
+             onload="this.style.opacity='1'"
+             onerror="this.remove();">
+    `;
     
     cardElement.classList.add("flipped", "selected");
     cardElement.classList.remove('selecting');
@@ -1627,20 +1645,6 @@ async function selectCard(cardElement) {
     updateSelectedCardPositions();
     
     updateProgress();
-    
-    // 🆕 選卡後智能預加載其他可能需要的圖片
-    if (!isLenormand && selectedCards.length < maxCards) {
-        // 預加載剩餘未選中的卡牌中的一些熱門牌
-        const remainingCards = document.querySelectorAll('.tarot-card:not(.selected)');
-        const randomCards = Array.from(remainingCards)
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 5) // 隨機預加載5張
-            .map(card => ({ name: card.dataset.cardName }));
-        
-        if (randomCards.length > 0) {
-            imagePreloader.smartPreload(randomCards);
-        }
-    }
     
     const selectionEndTime = performance.now();
     performanceMonitor.recordCardSelection(cardName, selectionEndTime - selectionStartTime);
@@ -2071,17 +2075,22 @@ function createSelectEffect(cardElement) {
 
 function updateProgress() {
     const maxCards = parseInt(document.getElementById('totalCards').textContent);
-    const progress = (selectedCards.length / maxCards) * 100;
-    document.getElementById('selectedCount').textContent = selectedCards.length;
+    const selectedCount = Math.min(selectedCards.length, maxCards);
+    const progress = Math.min(100, (selectedCount / maxCards) * 100);
+    document.getElementById('selectedCount').textContent = selectedCount;
     document.getElementById('progressFill').style.width = progress + '%';
     const confirmButton = document.getElementById('confirmCardsBtn');
     const status = document.getElementById('selectionStatus');
-    const ready = selectedCards.length === maxCards;
+    const ready = selectedCount === maxCards;
     if (confirmButton) confirmButton.disabled = !ready;
+    document.querySelectorAll('#cardsFan .tarot-card:not(.selected)').forEach(card => {
+        card.classList.toggle('selection-disabled', ready);
+        card.setAttribute('aria-disabled', ready ? 'true' : 'false');
+    });
     if (status) {
         status.textContent = ready
             ? (currentLanguage === 'zh' ? '牌已選齊，可以確認' : 'Your cards are ready')
-            : (currentLanguage === 'zh' ? `還需選擇 ${maxCards - selectedCards.length} 張` : `${maxCards - selectedCards.length} card(s) remaining`);
+            : (currentLanguage === 'zh' ? `還需選擇 ${Math.max(0, maxCards - selectedCount)} 張` : `${Math.max(0, maxCards - selectedCount)} card(s) remaining`);
     }
 }
 
@@ -2228,6 +2237,18 @@ function updatePreloadProgress(current, total) {
     if (progressBar) {
         const percentage = (current / total) * 100;
         progressBar.style.width = percentage + '%';
+    }
+}
+
+function updateDeckPreloadStatus(system, completed, total, saveData = false) {
+    const deckName = system === 'lenormand' ? '雷諾曼' : '塔羅';
+    const ready = total > 0 && completed >= total;
+    if (saveData) {
+        if (completed === 0) console.info(`🪶 已啟用節省數據模式，僅預載${deckName}卡背。`);
+    } else if (ready) {
+        console.info(`✅ ${deckName}牌圖片背景預載完成：${completed}/${total}`);
+    } else if (completed === 0 || completed % 10 === 0) {
+        console.info(`🖼️ ${deckName}牌圖片背景預載：${completed}/${total}`);
     }
 }
 

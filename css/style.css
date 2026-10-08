@@ -2809,6 +2809,12 @@ body {
 .spread-detail { color: #d4bc7f; background: rgba(201, 165, 92, 0.07); border-color: rgba(201, 165, 92, 0.2); }
 
 .question-form { padding: clamp(34px, 6vw, 68px); }
+
+.tarot-card.selection-disabled:not(.selected) {
+    pointer-events: none;
+    opacity: .48;
+    filter: saturate(.55);
+}
 .question-input,
 .search-input,
 .filter-dropdown {
