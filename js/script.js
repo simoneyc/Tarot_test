@@ -118,7 +118,7 @@ class ImagePreloader {
                 console.warn(`❌ 圖片加載失敗: ${imageLabel}`);
                 
                 const fallbackPath = imagePath.includes('/lenormand/')
-                    ? './images/lenormand/card-back.jpg'
+                    ? './images/lenormand/card-back.webp'
                     : TAROT_CARD_BACK_IMAGE;
                 if (imagePath !== fallbackPath) {
                     const fallbackImg = new Image();
@@ -711,8 +711,14 @@ function getTarotImagePath(cardName) {
     return imagePath;
 }
 
+function normalizeCardImagePath(imagePath) {
+    if (typeof imagePath !== 'string') return imagePath;
+    return imagePath.replace(/(images\/lenormand\/[^?#]+)\.jpg(?=([?#]|$))/i, '$1.webp');
+}
+
 function getCardImagePath(card) {
-    return card?.image || getTarotImagePath(card?.name || '');
+    return normalizeCardImagePath(card?.image || card?.imagePath)
+        || getTarotImagePath(card?.name || '');
 }
 
 // 替換原有的 checkImageExists 函數
@@ -883,7 +889,7 @@ const tarotCards = [
 ];
 
 // 雷諾曼使用獨立卡背，避免與塔羅牌組互相影響。
-const LENORMAND_CARD_BACK_IMAGE = './images/lenormand/card-back.jpg';
+const LENORMAND_CARD_BACK_IMAGE = './images/lenormand/card-back.webp';
 
 // 38 張擴充小雷諾曼：保留兩張男士與兩張女士人物牌，以支援多元關係脈絡。
 // 雷諾曼以牌與牌之間的組合連讀，不使用正逆位。
@@ -914,7 +920,7 @@ const lenormandCards = Object.freeze([
     name: { zh, en },
     slug,
     variant,
-    image: './images/lenormand/' + String(number).padStart(2, '0') + '-' + slug + '.jpg'
+    image: './images/lenormand/' + String(number).padStart(2, '0') + '-' + slug + '.webp'
 })));
 
 // 全局變量
@@ -1589,44 +1595,43 @@ function selectCard(cardElement) {
     
     const cardFront = cardElement.querySelector('.card-front');
     
-    // 立即完成選牌，不等待大圖下載；載入期間先顯示可辨識的牌名。
-    cardFront.innerHTML = `
-        <div class="card-reveal-placeholder" style="
-            text-align: center;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            background: linear-gradient(135deg, var(--primary-gold), #b8860b);
-            color: var(--dark-red);
-            padding: 8px;
-            ${orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
-        ">
-            <div style="font-size: 1.8rem; margin-bottom: 8px;">${cardSymbol}</div>
-            <div style="font-size: 0.75rem; line-height: 1.3;">${cardName}</div>
-        </div>
-        <img src="${imagePath}"
-             alt="${cardName}"
-             decoding="async"
-             style="
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                border-radius: 10px;
-                opacity: 0;
-                transition: opacity 0.2s ease;
-                ${orientation === 'reversed' ? 'transform: rotate(180deg);' : ''}
-             "
-             onload="this.style.opacity='1'"
-             onerror="this.remove();">
-    `;
-    
-    cardElement.classList.add("flipped", "selected");
-    cardElement.classList.remove('selecting');
+    // 立即計入選牌，但維持卡背直到真實圖片完成載入與解碼，避免大型
+    // 雷諾曼圖片載入時短暫閃出文字備援畫面。
+    cardFront.replaceChildren();
+    const cardImage = new Image();
+    cardImage.alt = cardName;
+    cardImage.decoding = 'async';
+    cardImage.className = 'revealed-card-image';
+    if (orientation === 'reversed') cardImage.classList.add('is-reversed');
+    cardFront.appendChild(cardImage);
+
+    const finishReveal = () => {
+        if (!cardElement.isConnected || !cardElement.classList.contains('selected')) return;
+        cardImage.classList.add('is-ready');
+        cardElement.classList.add('flipped');
+        cardElement.classList.remove('selecting', 'image-loading');
+    };
+
+    cardImage.addEventListener('load', async () => {
+        try {
+            if (typeof cardImage.decode === 'function') await cardImage.decode();
+        } catch (error) {
+            // The load event is sufficient if decode() is unavailable or rejects.
+        }
+        finishReveal();
+    }, { once: true });
+
+    cardImage.addEventListener('error', () => {
+        cardFront.innerHTML = `
+            <div class="card-reveal-placeholder">
+                <div class="card-reveal-symbol">${cardSymbol}</div>
+                <div>${cardName}</div>
+            </div>`;
+        finishReveal();
+    }, { once: true });
+
+    cardElement.classList.add('selected', 'image-loading');
+    cardImage.src = imagePath;
     cardElement.setAttribute('aria-pressed', 'true');
     cardElement.setAttribute('aria-label', isLenormand
         ? `${cardName}，${currentLanguage === 'zh' ? '再按一次可取消' : 'press again to deselect'}`
@@ -2996,7 +3001,7 @@ class HistoryUI {
                     ${record.cards.slice(0, 5).map(card => `
                         <div class="card-mini ${card.orientation === 'reversed' ? 'reversed' : ''}"
                             title="${escapeHtml(card.name)}${record.mode?.startsWith('lenormand_') ? '' : ` (${card.orientation})`}">
-                            <img src="${card.imagePath || getTarotImagePath(card.name)}"
+                            <img src="${getCardImagePath(card)}"
                                 alt="${escapeHtml(card.name)}"
                                 class="${card.orientation === 'reversed' ? 'is-reversed' : ''}"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -3479,7 +3484,7 @@ async function createRecordShareImage(record) {
     context.font = '500 25px "Noto Sans TC", sans-serif';
     context.fillText(currentLanguage === 'zh' ? '✦  本次抽到的牌  ✦' : '✦  CARDS DRAWN  ✦', width / 2, cardsTop - 45);
 
-    const images = await Promise.all(record.cards.map(card => loadShareImage(card.imagePath || getTarotImagePath(card.name))));
+    const images = await Promise.all(record.cards.map(card => loadShareImage(getCardImagePath(card))));
     record.cards.forEach((card, index) => {
         const row = Math.floor(index / columns);
         const itemsInRow = Math.min(columns, record.cards.length - row * columns);
@@ -3754,7 +3759,7 @@ function openRecordModal(recordId) {
     const cardsDisplay = record.cards.map((card, index) => `
         <article class="result-card-item" data-spread-slot="${index + 1}">
             <div class="result-card-image ${!isLenormandRecord && card.orientation === 'reversed' ? 'is-reversed' : ''}">
-                <img src="${card.imagePath || getTarotImagePath(card.name)}"
+                <img src="${getCardImagePath(card)}"
                     alt="${escapeHtml(card.name)}"
                     onerror="this.style.display='none';">
             </div>

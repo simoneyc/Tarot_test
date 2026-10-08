@@ -691,7 +691,7 @@ body {
 }
 
 .card-back.lenormand-card-back {
-    background: #e7ddcf url('../images/lenormand/card-back.jpg') center / cover no-repeat;
+    background: #e7ddcf url('../images/lenormand/card-back.webp') center / cover no-repeat;
 }
 
 .card-back.lenormand-card-back::before,
@@ -3656,6 +3656,54 @@ body {
 
 .tarot-card.selecting { pointer-events: none; opacity: 0.82; }
 .tarot-card.selected { cursor: pointer; }
+
+.tarot-card.image-loading .card-back::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    width: 18px;
+    height: 18px;
+    margin-left: -9px;
+    border: 2px solid rgba(201, 165, 92, 0.28);
+    border-top-color: var(--primary-gold);
+    border-radius: 50%;
+    animation: card-image-loading-spin 0.8s linear infinite;
+}
+
+.revealed-card-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+}
+
+.revealed-card-image.is-ready { opacity: 1; }
+.revealed-card-image.is-reversed { transform: rotate(180deg); }
+
+.card-reveal-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    text-align: center;
+    color: var(--dark-red);
+    background: linear-gradient(135deg, var(--primary-gold), #b8860b);
+}
+
+.card-reveal-symbol { font-size: 1.8rem; }
+
+@keyframes card-image-loading-spin {
+    to { transform: rotate(360deg); }
+}
 .card-position-badge {
     position: absolute;
     z-index: 12;
