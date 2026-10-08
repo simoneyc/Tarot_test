@@ -4,7 +4,7 @@ Place the 38 expanded Petit Lenormand card images in this directory as JPG files
 
 Place the custom card-back image here as:
 
-card-back.jpg
+card-back.webp
 
 Use these exact filenames:
 
