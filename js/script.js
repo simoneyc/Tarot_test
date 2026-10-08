@@ -2,6 +2,7 @@
 const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
     ? 'http://localhost:3000'
     : 'https://tarot-backend-n9oa.onrender.com';
+const TAROT_CARD_BACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 200"%3E%3Crect width="120" height="200" rx="10" fill="%23131325"/%3E%3Cpath d="M60 55 72 88 105 100 72 112 60 145 48 112 15 100 48 88Z" fill="none" stroke="%23c9a55c" stroke-width="3"/%3E%3Ccircle cx="60" cy="100" r="25" fill="none" stroke="%23c9a55c" stroke-width="2"/%3E%3C/svg%3E';
 
 window.showPerformanceReport = () => performanceMonitor.showReport();
 
@@ -42,7 +43,7 @@ class ImagePreloader {
             
             // 預加載卡背圖片（最重要）
             try {
-                await this.preloadImage('./images/tarot/card-back.jpg');
+                await this.preloadImage(TAROT_CARD_BACK_IMAGE);
                 updatePreloadProgress(1, essentialCards.length + 1);
             } catch (error) {
                 console.warn('卡背圖片預加載失敗:', error);
@@ -84,6 +85,7 @@ class ImagePreloader {
 
     // 預加載單張圖片
     preloadImage(imagePath) {
+        const imageLabel = imagePath.startsWith('data:image/') ? 'tarot-card-back.svg' : imagePath.split('/').pop();
         // 如果已經緩存，直接返回
         if (this.imageCache.has(imagePath)) {
             return Promise.resolve(true);
@@ -107,21 +109,21 @@ class ImagePreloader {
             img.onload = () => {
                 clearTimeout(timeout);
                 this.imageCache.set(imagePath, true);
-                console.log(`✅ 圖片加載成功: ${imagePath.split('/').pop()}`);
+                console.log(`✅ 圖片加載成功: ${imageLabel}`);
                 resolve(true);
             };
             
             img.onerror = () => {
                 clearTimeout(timeout);
-                console.warn(`❌ 圖片加載失敗: ${imagePath}`);
+                console.warn(`❌ 圖片加載失敗: ${imageLabel}`);
                 
                 const fallbackPath = imagePath.includes('/lenormand/')
                     ? './images/lenormand/card-back.jpg'
-                    : './images/tarot/card-back.jpg';
+                    : TAROT_CARD_BACK_IMAGE;
                 if (imagePath !== fallbackPath) {
                     const fallbackImg = new Image();
                     fallbackImg.onload = () => {
-                        console.log(`🔄 使用備用圖片: ${imagePath.split('/').pop()}`);
+                        console.log(`🔄 使用備用圖片: ${imageLabel}`);
                         resolve(true);
                     };
                     fallbackImg.onerror = () => reject(new Error(`備用圖片也無法加載`));
@@ -146,7 +148,7 @@ class ImagePreloader {
         const isLenormand = system === 'lenormand';
         const paths = isLenormand
             ? [LENORMAND_CARD_BACK_IMAGE, ...lenormandCards.map(card => card.image)]
-            : ['./images/tarot/card-back.jpg', ...tarotCards.map(card => getTarotImagePath(card.name))];
+            : [TAROT_CARD_BACK_IMAGE, ...tarotCards.map(card => getTarotImagePath(card.name))];
         const uniquePaths = [...new Set(paths)];
         const saveData = navigator.connection?.saveData;
         const effectiveType = navigator.connection?.effectiveType || '';
@@ -704,7 +706,7 @@ function getTarotImagePath(cardName) {
     const imagePath = tarotImageMap[cardName];
     if (!imagePath) {
         console.warn(`找不到牌卡圖片映射: ${cardName}`);
-        return './images/tarot/card-back.jpg';
+        return TAROT_CARD_BACK_IMAGE;
     }
     return imagePath;
 }
@@ -736,7 +738,7 @@ function getPreloadedImage(imagePath) {
 }
 
 // 新增：安全的圖片加載函數
-async function loadImageSafely(imagePath, fallbackPath = './images/tarot/card-back.jpg') {
+async function loadImageSafely(imagePath, fallbackPath = TAROT_CARD_BACK_IMAGE) {
     try {
         await imagePreloader.preloadImage(imagePath);
         return imagePath;
@@ -4620,7 +4622,12 @@ async function displayFinalResults(interpretation) {
     const container = document.getElementById('resultsContainer');
     const positions = spreadInfo[currentMode].positions[currentLanguage];
     const plainParagraphs = interpretation.split(/\n{2,}/).map(item => item.trim()).filter(Boolean);
-    const summary = (plainParagraphs[0] || interpretation).replace(/[#*_]/g, '').slice(0, 220);
+    const summarySource = plainParagraphs.find(paragraph => {
+        const cleaned = paragraph.replace(/[#*_]/g, '').trim();
+        return cleaned.length > 12 && !/^(整體解讀|整體訊息|Overall Reading|Overall Message)$/i.test(cleaned);
+    }) || interpretation;
+    const summaryLimit = currentLanguage === 'zh' ? 70 : 120;
+    const summary = summarySource.replace(/[#*_]/g, '').replace(/\s+/g, ' ').trim().slice(0, summaryLimit);
     const cardsMarkup = selectedCards.map((card, index) => `
         <article class="result-card-item" data-spread-slot="${index + 1}">
             <div class="result-card-image ${card.orientation === 'reversed' ? 'is-reversed' : ''}">
@@ -4635,7 +4642,7 @@ async function displayFinalResults(interpretation) {
     container.innerHTML = `
         <section class="result-summary" aria-labelledby="resultSummaryTitle">
             <span class="result-section-kicker">${currentLanguage === 'zh' ? '核心訊息' : 'Core message'}</span>
-            <h3 id="resultSummaryTitle">${escapeHtml(summary)}${summary.length >= 220 ? '…' : ''}</h3>
+                <h3 id="resultSummaryTitle">${escapeHtml(summary)}${summarySource.replace(/[#*_]/g, '').length > summaryLimit ? '…' : ''}</h3>
         </section>
 
         <section class="result-section" aria-labelledby="drawnCardsTitle">
